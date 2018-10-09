@@ -11,8 +11,9 @@ import os
 from time import strftime
 from kivy.uix.scrollview import ScrollView
 from kivy.uix.gridlayout import GridLayout
+from kivy.uix.floatlayout import FloatLayout
 
-from kivy.properties import StringProperty, NumericProperty
+from kivy.properties import StringProperty, NumericProperty, BooleanProperty
 from kivy.uix.popup import Popup
 from kivy.uix.button import Button
 
@@ -146,6 +147,7 @@ Builder.load_string("""
 			height: 0
 <Information>:
 	FloatLayout:
+		id: canvas
 		canvas:
 			Rectangle:
 				size: self.size
@@ -164,6 +166,12 @@ Builder.load_string("""
 			text: ""
 			font_size: sp(30)
 			pos_hint:{"center_x":.5,"center_y":.80}
+		Label:
+			id: ghost4
+			size: self.texture_size
+			text: ""
+			font_size: sp(30)
+			pos_hint:{"center_x":.5,"center_y":.75}
 
 		Label:
 			canvas.before:
@@ -183,13 +191,23 @@ Builder.load_string("""
 
 		Button:
 			text: "Обновить"
-			font_size: sp(35)
-			pos_hint: {'center_x': .5, 'center_y': .2}
-			size_hint: (.4, .12)
+			font_size: sp(22)
+			pos_hint: {'center_x': .25, 'center_y': .2}
+			size_hint: (.5, .12)
 			background_normal: "but.png"
 			background_down: "butp.png"
 			on_release:
 				root.start_one()
+
+		Button:
+			text: "Редактировать"
+			font_size: sp(22)
+			pos_hint: {'center_x': .75, 'center_y': .2}
+			size_hint: (.5, .12)
+			background_normal: "but.png"
+			background_down: "butp.png"
+			on_release:
+				root.init_edit()
 
 		Button:
 			text: "Назад"
@@ -199,7 +217,95 @@ Builder.load_string("""
 			background_normal: "but.png"
 			background_down: "butp.png"
 			on_release:
+				root.clearer()
 				root.manager.current = "database"
+
+<Editions>:
+	FloatLayout:
+		id: canvas
+		canvas:
+			Rectangle:
+				size: self.size
+				pos: self.pos
+				source: "clean.png"
+		Label:
+			size: self.texture_size
+			text: "Редактирование"
+			font_size: sp(40)
+			pos_hint:{"center_x":.5,"center_y":.9}
+
+		TextInput:
+			id: name
+			disabled: root.blocked
+			text: "Обновите информацию"
+			multiline: False
+			size_hint: (.5, .05)
+			pos_hint:{"center_x":.3,"center_y":.8}
+
+		TextInput:
+			id: article
+			disabled: root.blocked
+			text: "Обновите информацию"
+			multiline: False
+			size_hint: (.5, .05)
+			pos_hint:{"center_x":.3,"center_y":.7}
+
+		TextInput:
+			id: standartdate
+			disabled: root.blocked
+			text: "Обновите информацию"
+			multiline: False
+			size_hint: (.5, .05)
+			pos_hint:{"center_x":.3,"center_y":.6}
+
+		Button:
+			text: "Сохранить"
+			disabled: root.blocked
+			font_size: sp(22)
+			pos_hint: {'center_x': .75, 'center_y': .6}
+			size_hint: (.4, .10)
+			background_normal: "but.png"
+			background_down: "butp.png"
+			on_release:
+				root.change_popup_name()
+
+		ScrollView:
+			size_hint_x: .8
+			size_hint_y: .8
+			pos_hint: {'center_x': .5, 'center_y': .1}
+			GridLayout:
+				id: griddy
+				canvas:
+					Rectangle:
+						pos: self.pos
+						size: self.size
+						source: "cleanbl.png"
+				spacing: 2
+				cols: 1
+				size_hint_y: None
+				height: 0
+
+		Button:
+			text: "Назад"
+			font_size: sp(22)
+			pos_hint: {'center_x': .75, 'center_y': .1}
+			size_hint: (.5, .12)
+			background_normal: "but.png"
+			background_down: "butp.png"
+			on_release:
+				root.blocked = True
+				root.clean()
+				root.manager.current = "information"
+		Button:
+			text: "Обновить"
+			font_size: sp(22)
+			pos_hint: {'center_x': .25, 'center_y': .1}
+			size_hint: (.5, .12)
+			background_normal: "but.png"
+			background_down: "butp.png"
+			on_release:
+				root.blocked = False
+				root.letedit()
 
 	""")
 
@@ -242,7 +348,7 @@ class WorkScreen(Screen):
 		else:
 			self.cuart = article
 			self.ids.inputer.text = ""
-			self.worktext = "Введите дату производства ДДММ"
+			self.worktext = "Введите дату производства или окончания срока ДДММ"
 
 	def work2(self):
 		global cudate
@@ -262,7 +368,7 @@ class WorkScreen(Screen):
 								self.go()
 							else:
 								self.ids.inputer.text = ""
-								self.worktext = "Введите срок годности в днях или месяцах"
+								self.worktext = "Введите срок годности в днях или месяцах \n"+"Или введите 0 чтобы указать дату окончания срока"
 								self.press = 99
 
 						else:
@@ -290,7 +396,7 @@ class WorkScreen(Screen):
 		for each in self.standartdate:
 			if each.isdigit() == False and (each.upper() != "M"):
 				self.ids.inputer.text = ""
-				self.worktext = "Введите срок годности в днях или месяцах" 
+				self.worktext = "Введите срок годности в днях или месяцах \n"+"Или укажите 0 для указания даты ДО" 
 				self.press = 99
 				self.popup("Внимание!", "Срок годности должен быть числом дней или месяцев с буквой 'M' в конце")
 				return
@@ -339,7 +445,7 @@ class WorkScreen(Screen):
 			self.ids.inputer.text = ""
 			self.press = 0
 
-		elif str(ex).isdigit() == True and int(ex) > 0:
+		elif str(ex).isdigit() == True and int(ex) >= 0:
 			ex = int(ex)
 			ex = self.newcycle(ex)
 			summing = exactday + ex
@@ -581,6 +687,8 @@ class WorkScreen(Screen):
 			f.close()
 			sync()
 
+		self.short = False
+
 	def newcycle(self, ov):
 		switch = True
 		while switch:
@@ -596,19 +704,25 @@ class DataBase(Screen):
 		grid = self.ids.griddy
 		grid.bind(minimum_height=grid.setter("height"))
 		grid.clear_widgets()
-		for each in art_names:
-			top = "{} {}".format(each, art_names[each])
-			if search.lower() in top.lower():
-				self.info = "{} {}".format(each, art_names[each])
-				self.btn = Button(id=each, text=self.info, size_hint_y=None, height=0.09*self.height, font_size=0.035*self.height)
-				grid.add_widget(self.btn)
-				self.btn.bind(on_release=self.infor)
+		if len(art_names) == 0:
+			self.popup("Внимание", "В базе данных нет записей")
+		else:
+			for each in art_names:
+				top = "{} {}".format(each, art_names[each])
+				if search.lower() in top.lower():
+					self.info = "{} {}".format(each, art_names[each])
+					self.btn = Button(id=each, text=self.info, size_hint_y=None, height=0.09*self.height, font_size=0.035*self.height)
+					grid.add_widget(self.btn)
+					self.btn.bind(on_release=self.infor)
+
+	def popup(self, title, text):
+		popup = Popup(title=title,
+		content=Label(text=text),
+		size_hint=(None, None), size=(200, 100))
+		popup.open()
 
 	def infor(self, button):
 		global inf_art
-		global inf_name
-
-		print(button.text)
 
 		self.manager.current = "information"
 
@@ -624,13 +738,14 @@ class DataBase(Screen):
 				words.append(each)
 
 		inf_art = "".join(numbers)
-		inf_name = "".join(words)
-
+		art_names[inf_art] = "".join(words)
 
 class Information(Screen):
 	def start_one(self):
-		self.ids.ghost.text = inf_name
+		self.ids.ghost.text = art_names[inf_art]
 		self.ids.ghost2.text = inf_art
+		self.ids.ghost4.text = "Срок годности: {}".format(days_of_life[inf_art])
+
 
 		hound = [i for i,x in enumerate(entries) if x==inf_art]
 		temper = [i-1 for i in hound]
@@ -641,20 +756,201 @@ class Information(Screen):
 		newfag = " \n".join(hound)
 		self.ids.ghost3.text = newfag
 
+	def init_edit(self):
+		if self.ids.ghost2.text == "":
+			pass
+		else:
+			self.manager.current = "edition"
 
+	def clearer(self):
+		self.ids.ghost.text = "Нажмите обновить"
+		self.ids.ghost2.text = ""
+		self.ids.ghost4.text = ""
+		self.ids.ghost3.text = ""
+
+class Editions(Screen):
+
+	blocked = BooleanProperty(True)
+
+	def letedit(self):
+		self.ids.name.text = art_names[inf_art]
+		self.ids.article.text = inf_art
+		self.ids.standartdate.text = days_of_life[inf_art]
+
+		self.grid = self.ids.griddy
+		self.grid.bind(minimum_height=self.grid.setter("height"))
+		self.grid.clear_widgets()
+		
+		hound = [i for i,x in enumerate(entries) if x==inf_art]
+		leisu = []
+		for each in hound:
+			leisu.append(each-1)
+		hound = []
+		for each in leisu:
+			hound.append(entries[each])
+
+		for each in hound:
+			self.texter = "  До\n"+str(each)
+			self.btn = Button(id=each, text=self.texter, size_hint_y=None, height=0.09*self.height, font_size=0.035*self.height)
+			self.grid.add_widget(self.btn)
+
+	def clean(self):
+		self.ids.name.text = ""
+		self.ids.article.text = ""
+		self.ids.standartdate.text = ""
+		self.ids.griddy.clear_widgets()
+
+	def change_popup_name(self):
+		name = art_names[inf_art]
+		ask = self.ids.name.text
+		sentence = "Вы уверены что хотите внести изменения\n в артикул {}?".format(name)
+
+
+		layout = FloatLayout(size=(self.width, self.height))
+		btn1 = Button(id="one", text="Изменить", size_hint_y=None, size_hint_x=None, height=0.06*self.height, width=0.6*self.width, font_size=0.035*self.height, pos_hint={"center_x":.5,"center_y":.45}, on_release=lambda x:self.close_n_save_name())
+		lbl = Label(text=sentence, font_size=0.025*self.height, pos_hint={"center_x":.5,"center_y":.82})
+
+		layout.add_widget(lbl)
+		layout.add_widget(btn1)
+
+
+		if closer == False:
+			self.popup = Popup(title="Внимание!",
+			content=layout,
+			size_hint=(.8, .3))
+			self.popup.open()
+		else:
+			self.popup.dismiss()
+			ch_closer()
+			popup("Выполнено", "Изменения сохранены")
+
+	def close_n_save_name(self):
+		global inf_art
+
+		name = art_names[inf_art]
+		new_name = self.ids.name.text
+		new_art = self.ids.article.text
+		new_standartdate = self.ids.standartdate.text
+
+		if new_name[0] == " ":
+			new_name = new_name[1:]
+
+		#Lets update name... And article in one place
+
+		if new_name != art_names[inf_art]:
+			f = open("artname.txt", "r+")
+			dawread = f.read()
+			f.close()
+			dawread = dawread.split("$")
+			del dawread[-1]
+			worker = dawread.index(inf_art)
+			worker += 1
+			dawread[worker] = new_name
+
+			with open("artname.txt", "w") as f:
+				for each in dawread:
+					f.write(str(each + "$"))
+
+			f = open("artname.txt", "r+")
+			dawread = f.read()
+			f.close()
+			dawread = dawread.split("$")
+			del dawread[-1]
+			worker = dawread.index(inf_art)
+			dawread[worker] = new_art
+
+			with open("artname.txt", "w") as f:
+				for each in dawread:
+					f.write(str(each + "$"))
+
+		# Now lets try to update DAYS of Life and art in one place ;)
+
+		if new_standartdate != days_of_life[inf_art]:
+			f = open("daysoflife.txt", "r+")
+			dawread = f.read()
+			f.close()
+			dawread = dawread.split("$")
+			del dawread[-1]
+			worker = dawread.index(inf_art)
+			worker += 1
+			dawread[worker] = new_standartdate
+
+			with open("daysoflife.txt", "w") as f:
+				for each in dawread:
+					f.write(str(each + "$"))
+
+		if inf_art in days_of_life:
+			f = open("daysoflife.txt", "r+")
+			dawread = f.read()
+			f.close()
+			dawread = dawread.split("$")
+			del dawread[-1]
+			worker = dawread.index(inf_art)
+			dawread[worker] = new_art
+
+			with open("daysoflife.txt", "w") as f:
+				for each in dawread:
+					f.write(str(each + "$"))
+
+		#Lets Update entries also...
+
+		if inf_art in entries:
+			f = open("saver.txt", "r+")
+			dawread = f.read()
+			f.close()
+			dawread = dawread.split("$")
+			del dawread[-1]
+			worker = [i for i,x in enumerate(dawread) if x==inf_art]
+			for each in worker:
+				dawread[each] = new_art
+
+			with open("saver.txt", "w") as f:
+				for each in dawread:
+					f.write(str(each + "$"))
+
+		sync()
+
+		inf_art = new_art
+
+		ch_closer()
+		self.change_popup_name()
+
+	def change_popup_art(self):
+		pass
+
+	def change_popup_date(self):
+		pass
+
+inf_art = StringProperty("z")
 
 sm = ScreenManager(transition=FadeTransition())
 sm.add_widget(MenuScreen(name="menu"))
 sm.add_widget(WorkScreen(name="work"))
 sm.add_widget(DataBase(name="database"))
 sm.add_widget(Information(name="information"))
+sm.add_widget(Editions(name="edition"))
 
-inf_art = "z"
-inf_name = "z"
+
 
 entries = []
 art_names = {}
 days_of_life = {}
+
+def popup(title, text):
+	popup = Popup(title=title,
+	content=Label(text=text),
+	size_hint=(None, None), size=(200, 100))
+	popup.open()
+
+closer = False
+
+def ch_closer():
+	global closer
+
+	if closer == True:
+		closer = False
+	elif closer == False:
+		closer = True
 
 def sync():
 	try:

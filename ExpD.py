@@ -1250,10 +1250,6 @@ start()
 """Add more fixes and functions:
 for v1.0
 
-1. Learn and Create a GUI
-
-
-
 
 AFTER GUI!!! For v2.0
 2. Create SHOULD BE IN TRASH menu - where user can see which should be already in trash
