@@ -705,7 +705,7 @@ class DataBase(Screen):
 			grid = self.ids.griddy
 			grid.bind(minimum_height=grid.setter("height"))
 			grid.clear_widgets()
-			if len(art_names) == 0:
+			if len(art_names) == 0 and code == 0:
 				self.popup("Внимание", "В базе данных нет записей")
 			else:
 				if code == 0:
