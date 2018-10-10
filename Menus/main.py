@@ -67,7 +67,7 @@ Builder.load_string("""
 	Label:
 		size: self.texture_size
 		text: root.worktext
-		font_size: sp(40)
+		font_size: sp(25)
 		pos_hint:{"center_x":.5,"center_y":.88}
 
 	TextInput:
@@ -113,6 +113,7 @@ Builder.load_string("""
 		background_normal: "but.png"
 		background_down: "butp.png"
 		on_release:
+			root.get_them(1)
 			root.manager.current = "menu"
 	Button:
 		text: "Поиск"
@@ -122,7 +123,7 @@ Builder.load_string("""
 		background_normal: "but.png"
 		background_down: "butp.png"
 		on_release:
-			root.get_them()
+			root.get_them(0)
 
 	TextInput:
 		id: searcher
@@ -348,7 +349,7 @@ class WorkScreen(Screen):
 		else:
 			self.cuart = article
 			self.ids.inputer.text = ""
-			self.worktext = "Введите дату производства или окончания срока ДДММ"
+			self.worktext = "Введите дату производства\n или окончания срока ДДММ"
 
 	def work2(self):
 		global cudate
@@ -699,21 +700,22 @@ class WorkScreen(Screen):
 
 class DataBase(Screen):
 
-	def get_them(self):
-		search = self.ids.searcher.text
-		grid = self.ids.griddy
-		grid.bind(minimum_height=grid.setter("height"))
-		grid.clear_widgets()
-		if len(art_names) == 0:
-			self.popup("Внимание", "В базе данных нет записей")
-		else:
-			for each in art_names:
-				top = "{} {}".format(each, art_names[each])
-				if search.lower() in top.lower():
-					self.info = "{} {}".format(each, art_names[each])
-					self.btn = Button(id=each, text=self.info, size_hint_y=None, height=0.09*self.height, font_size=0.035*self.height)
-					grid.add_widget(self.btn)
-					self.btn.bind(on_release=self.infor)
+	def get_them(self, code):
+			search = self.ids.searcher.text
+			grid = self.ids.griddy
+			grid.bind(minimum_height=grid.setter("height"))
+			grid.clear_widgets()
+			if len(art_names) == 0:
+				self.popup("Внимание", "В базе данных нет записей")
+			else:
+				if code == 0:
+					for each in art_names:
+						top = "{} {}".format(each, art_names[each])
+						if search.lower() in top.lower():
+							self.info = "{} {}".format(each, art_names[each])
+							self.btn = Button(id=each, text=self.info, size_hint_y=None, height=0.09*self.height, font_size=0.035*self.height)
+							grid.add_widget(self.btn)
+							self.btn.bind(on_release=self.infor)
 
 	def popup(self, title, text):
 		popup = Popup(title=title,
@@ -739,6 +741,8 @@ class DataBase(Screen):
 
 		inf_art = "".join(numbers)
 		art_names[inf_art] = "".join(words)
+		if art_names[inf_art][0] == " ":
+			art_names[inf_art] = art_names[inf_art][1:]
 
 class Information(Screen):
 	def start_one(self):
@@ -837,47 +841,45 @@ class Editions(Screen):
 
 		#Lets update name... And article in one place
 
-		if new_name != art_names[inf_art]:
-			f = open("artname.txt", "r+")
-			dawread = f.read()
-			f.close()
-			dawread = dawread.split("$")
-			del dawread[-1]
-			worker = dawread.index(inf_art)
-			worker += 1
-			dawread[worker] = new_name
+		f = open("artname.txt", "r+")
+		dawread = f.read()
+		f.close()
+		dawread = dawread.split("$")
+		del dawread[-1]
+		worker = dawread.index(inf_art)
+		worker += 1
+		dawread[worker] = new_name
 
-			with open("artname.txt", "w") as f:
-				for each in dawread:
-					f.write(str(each + "$"))
+		with open("artname.txt", "w") as f:
+			for each in dawread:
+				f.write(str(each + "$"))
 
-			f = open("artname.txt", "r+")
-			dawread = f.read()
-			f.close()
-			dawread = dawread.split("$")
-			del dawread[-1]
-			worker = dawread.index(inf_art)
-			dawread[worker] = new_art
+		f = open("artname.txt", "r+")
+		dawread = f.read()
+		f.close()
+		dawread = dawread.split("$")
+		del dawread[-1]
+		worker = dawread.index(inf_art)
+		dawread[worker] = new_art
 
-			with open("artname.txt", "w") as f:
-				for each in dawread:
-					f.write(str(each + "$"))
+		with open("artname.txt", "w") as f:
+			for each in dawread:
+				f.write(str(each + "$"))
 
 		# Now lets try to update DAYS of Life and art in one place ;)
 
-		if new_standartdate != days_of_life[inf_art]:
-			f = open("daysoflife.txt", "r+")
-			dawread = f.read()
-			f.close()
-			dawread = dawread.split("$")
-			del dawread[-1]
-			worker = dawread.index(inf_art)
-			worker += 1
-			dawread[worker] = new_standartdate
+		f = open("daysoflife.txt", "r+")
+		dawread = f.read()
+		f.close()
+		dawread = dawread.split("$")
+		del dawread[-1]
+		worker = dawread.index(inf_art)
+		worker += 1
+		dawread[worker] = new_standartdate
 
-			with open("daysoflife.txt", "w") as f:
-				for each in dawread:
-					f.write(str(each + "$"))
+		with open("daysoflife.txt", "w") as f:
+			for each in dawread:
+				f.write(str(each + "$"))
 
 		if inf_art in days_of_life:
 			f = open("daysoflife.txt", "r+")
@@ -911,6 +913,7 @@ class Editions(Screen):
 		sync()
 
 		inf_art = new_art
+		print(inf_art)
 
 		ch_closer()
 		self.change_popup_name()
