@@ -910,10 +910,43 @@ class Editions(Screen):
 				for each in dawread:
 					f.write(str(each + "$"))
 
+		#Lets kill copies in NAMES if they are here
+		f = open("artname.txt", "r+")
+		dawread = f.read()
+		f.close()
+		dawread = dawread.split("$")
+		del dawread[-1]
+		worker = [i for i,x in enumerate(dawread) if x==new_art]
+
+		if len(worker) > 1:
+			del dawread[worker[0]]
+			del dawread[worker[0]]
+
+		with open("artname.txt", "w") as f:
+			for each in dawread:
+				f.write(str(each + "$"))
+
+		#Lets kill copies in STANDARTDATES
+
+		f = open("daysoflife.txt", "r+")
+		dawread = f.read()
+		f.close()
+		dawread = dawread.split("$")
+		del dawread[-1]
+		worker = [i for i,x in enumerate(dawread) if x==new_art]
+		if len(worker) > 1:
+			del dawread[worker[0]]
+			del dawread[worker[0]]
+
+		with open("daysoflife.txt", "w") as f:
+			for each in dawread:
+				f.write(str(each + "$"))
+
+
+
 		sync()
 
 		inf_art = new_art
-		print(inf_art)
 
 		ch_closer()
 		self.change_popup_name()
@@ -932,8 +965,6 @@ sm.add_widget(WorkScreen(name="work"))
 sm.add_widget(DataBase(name="database"))
 sm.add_widget(Information(name="information"))
 sm.add_widget(Editions(name="edition"))
-
-
 
 entries = []
 art_names = {}
