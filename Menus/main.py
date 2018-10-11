@@ -12,6 +12,8 @@ from time import strftime
 from kivy.uix.scrollview import ScrollView
 from kivy.uix.gridlayout import GridLayout
 from kivy.uix.floatlayout import FloatLayout
+from kivy.uix.textinput import TextInput
+from kivy.factory import Factory
 
 from kivy.properties import StringProperty, NumericProperty, BooleanProperty
 from kivy.uix.popup import Popup
@@ -113,6 +115,7 @@ Builder.load_string("""
 		background_normal: "but.png"
 		background_down: "butp.png"
 		on_release:
+			root.ids.searcher.text = ""
 			root.get_them(1)
 			root.manager.current = "menu"
 	Button:
@@ -263,17 +266,27 @@ Builder.load_string("""
 			text: "Сохранить"
 			disabled: root.blocked
 			font_size: sp(22)
-			pos_hint: {'center_x': .75, 'center_y': .6}
+			pos_hint: {'center_x': .75, 'center_y': .7}
 			size_hint: (.4, .10)
 			background_normal: "but.png"
 			background_down: "butp.png"
 			on_release:
 				root.change_popup_name()
+		Button:
+			text: "Добавить дату"
+			disabled: root.blocked
+			font_size: sp(16)
+			pos_hint: {'center_x': .75, 'center_y': .6}
+			size_hint: (.4, .10)
+			background_normal: "but.png"
+			background_down: "butp.png"
+			on_release:
+				root.add_entry()
 
 		ScrollView:
 			size_hint_x: .8
-			size_hint_y: .8
-			pos_hint: {'center_x': .5, 'center_y': .1}
+			size_hint_y: .4
+			pos_hint: {'center_x': .5, 'center_y': .35}
 			GridLayout:
 				id: griddy
 				canvas:
@@ -282,7 +295,7 @@ Builder.load_string("""
 						size: self.size
 						source: "cleanbl.png"
 				spacing: 2
-				cols: 1
+				cols: 3
 				size_hint_y: None
 				height: 0
 
@@ -775,6 +788,54 @@ class Information(Screen):
 class Editions(Screen):
 
 	blocked = BooleanProperty(True)
+	def add_entry(self):
+		sentence = "Добавьте дату артикулу\n{} вручную".format(inf_art)
+
+		
+		self.layout = FloatLayout(size=(self.width, self.height))
+		self.inputi = TextInput(multiline=False, size_hint_x=.5, size_hint_y=0.2, pos_hint={"center_x":.5,"center_y":.61})
+		self.btn1 = Button(text="Добавить", size_hint_y=None, size_hint_x=None, height=0.06*self.height, width=0.6*self.width, font_size=0.035*self.height, pos_hint={"center_x":.5,"center_y":.34}, on_release=lambda x:self.add_entry2())
+		self.lbl = Label(text=sentence, font_size=0.025*self.height, pos_hint={"center_x":.5,"center_y":.86})
+
+		self.inputi.bind(text=self.save_entry1)
+
+		self.layout.add_widget(self.lbl)
+		self.layout.add_widget(self.inputi)
+		self.layout.add_widget(self.btn1)
+
+		self.popup = Popup(title="Добавление",
+		content=self.layout,
+		size_hint=(.8, .3))
+		self.popup.open()
+
+	def add_entry2(self):
+		global new_date
+
+		change = True
+		boomb = "some"
+		try:
+			if new_date.isdigit():
+				boomb = new_date
+		except:
+			change = False
+
+		if change:
+			if self.datetest(boomb):
+				hound = [i for i,x in enumerate(entries) if x==inf_art]
+				for each in hound:
+					if entries[each-1] == boomb:
+						popup("Внимание!", "Введенная дата уже записана")
+						return
+
+				f = open("saver.txt", "a")
+				f.write(str((boomb + "$" + inf_art + "$")))
+				f.close()
+				sync()
+				self.letedit()
+				self.popup.dismiss()
+		else:
+			popup("Внимание!", "Вы ничего не ввели")
+
 
 	def letedit(self):
 		self.ids.name.text = art_names[inf_art]
@@ -795,8 +856,9 @@ class Editions(Screen):
 
 		for each in hound:
 			self.texter = "  До\n"+str(each)
-			self.btn = Button(id=each, text=self.texter, size_hint_y=None, height=0.09*self.height, font_size=0.035*self.height)
+			self.btn = Button(text=self.texter, size_hint_y=None, height=0.09*self.height, font_size=0.035*self.height)
 			self.grid.add_widget(self.btn)
+			self.btn.bind(on_release=self.entry_change)
 
 	def clean(self):
 		self.ids.name.text = ""
@@ -942,8 +1004,6 @@ class Editions(Screen):
 			for each in dawread:
 				f.write(str(each + "$"))
 
-
-
 		sync()
 
 		inf_art = new_art
@@ -951,11 +1011,146 @@ class Editions(Screen):
 		ch_closer()
 		self.change_popup_name()
 
-	def change_popup_art(self):
-		pass
+	def entry_change(self, button):
+		cont = []
+		for each in button.text:
+			if each.isdigit():
+				cont.append(each)
 
-	def change_popup_date(self):
-		pass
+		self.date = "".join(cont)
+
+		sentence = "Вы можете изменить дату"
+		
+		self.layout = FloatLayout(size=(self.width, self.height))
+		self.inputi = TextInput(id="newent", text=self.date, multiline=False, size_hint_x=.5, size_hint_y=0.15, pos_hint={"center_x":.5,"center_y":.7})
+		self.btn1 = Button(text="Изменить", size_hint_y=None, size_hint_x=None, height=0.06*self.height, width=0.6*self.width, font_size=0.035*self.height, pos_hint={"center_x":.5,"center_y":.45}, on_release=lambda x:self.save_entry())
+		self.btn2 = Button(text="Удалить", size_hint_y=None, size_hint_x=None, height=0.06*self.height, width=0.6*self.width, font_size=0.035*self.height, pos_hint={"center_x":.5,"center_y":.25}, on_release=lambda x:self.delete_entry())
+		self.lbl = Label(text=sentence, font_size=0.025*self.height, pos_hint={"center_x":.5,"center_y":.85})
+
+		self.inputi.bind(text=self.save_entry1)
+
+		self.layout.add_widget(self.lbl)
+		self.layout.add_widget(self.inputi)
+		self.layout.add_widget(self.btn1)
+		self.layout.add_widget(self.btn2)
+
+		self.popup = Popup(title="Редактирование",
+		content=self.layout,
+		size_hint=(.8, .4))
+		self.popup.open()
+
+	def delete_entry(self):
+		self.popup.dismiss()
+
+		f = open("saver.txt", "r+")
+		dawread = f.read()
+		f.close()
+		dawread = dawread.split("$")
+		del dawread[-1]
+		worker = [i for i,x in enumerate(dawread) if x==self.date]
+
+		count = 0
+
+		for each in worker:
+			count+=1
+			if dawread[each-1] == inf_art:
+				break
+
+		del dawread[worker[count-1]]
+		del dawread[worker[count-1]]
+
+
+		with open("saver.txt", "w") as f:
+			for each in dawread:
+				f.write(str(each + "$"))
+
+		sync()
+
+		self.letedit()
+
+	def save_entry1(self, *args):
+		global new_date
+
+		new_date = args[-1]
+
+	def save_entry(self):
+		global new_date
+
+		change = True
+		boomb = "some"
+		try:
+			if new_date.isdigit():
+				boomb = new_date
+		except:
+			change = False
+
+
+		if boomb != self.date and change == True:
+			if self.datetest(boomb):
+				hound = [i for i,x in enumerate(entries) if x==boomb]
+				for each in hound:
+					if entries[each+1] == inf_art:
+						popup("Внимание!", "Эта дата уже записана")
+						return
+
+				self.popup.dismiss()
+
+				f = open("saver.txt", "r+")
+				dawread = f.read()
+				f.close()
+				dawread = dawread.split("$")
+				del dawread[-1]
+				worker = [i for i,x in enumerate(dawread) if x==inf_art]
+
+				for each in worker:
+					if dawread[each-1] == self.date:
+						dawread[each-1] = boomb
+
+				with open("saver.txt", "w") as f:
+					for each in dawread:
+						f.write(str(each + "$"))
+
+				sync()
+
+				self.letedit()
+		else:
+			popup("Внимание!", "Вы не изменили дату")
+
+	def datetest(self, date):
+		ask = date
+		if ask.isalnum(): 
+			if len(ask) == 4:
+				if ask[0].isalpha() == False and ask[1].isalpha() == False and ask[2].isalpha() == False and ask[3].isalpha() == False:
+					if int(ask[2:]) <= 12 and int(ask[2:]) >= 1 and int(ask[:2]) <= 31 and int(ask[:2]) >= 1:
+						if self.check666(ask):
+							return True
+						else:
+							popup("Внимание!", "В этом месяце нет столько дней")
+					else:
+						popup("Внимание!", "Вы вне диапазона!")
+				else:
+					popup("Внимание!", "Вы ввели буквы")
+			else:
+				popup("Внимание!", "Необходимый формат - ДДММ")
+		else:
+			popup("Внимание!", "Вы ввели символы!")
+
+	def check666(self, ask):
+		dayz = ask[:2]
+		month = ask[2:]       
+		digidayz = int(dayz)
+		digimonth = int(month)
+		newmonth = "0%d" % (digimonth + 1)  
+		realdayz = allmonth[month]
+		if len(newmonth) == 2:
+			result = allmonth[newmonth] - realdayz
+		else:
+			newmonthD = newmonth[1:]
+			result = allmonth[newmonthD] - realdayz
+		if digidayz <= result:
+			return True
+		else:
+			return False
 
 inf_art = StringProperty("z")
 
@@ -977,6 +1172,7 @@ def popup(title, text):
 	popup.open()
 
 closer = False
+new_date = StringProperty("")
 
 def ch_closer():
 	global closer
