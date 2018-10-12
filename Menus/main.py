@@ -5,7 +5,7 @@ Config.set('graphics', 'height', '736')
 
 from kivy.app import App
 from kivy.lang import Builder
-from kivy.uix.screenmanager import ScreenManager, Screen, FadeTransition
+from kivy.uix.screenmanager import ScreenManager, Screen, NoTransition
 from kivy.uix.label import Label
 import os
 from time import strftime
@@ -47,7 +47,7 @@ Builder.load_string("""
 		pos_hint: {'center_x': .5, 'center_y': .35}
 		background_normal: "but.png"
 		background_down: "butp.png"
-		on_press:
+		on_release:
 			root.manager.current = "work"
 
 	Button:
@@ -110,13 +110,24 @@ Builder.load_string("""
 		text: "В меню"
 		font_size: sp(35)
 		pos_hint: {'center_x': .5, 'center_y': .1}
-		size_hint: (.8, .15)
+		size_hint: (.5, .14)
 		background_normal: "but.png"
 		background_down: "butp.png"
 		on_release:
 			root.ids.searcher.text = ""
 			root.get_them(1)
 			root.manager.current = "menu"
+
+	Button:
+		text: "Создать новый артикул"
+		font_size: sp(22)
+		pos_hint: {'center_x': .5, 'center_y': .22}
+		size_hint: (.8, .12)
+		background_normal: "but.png"
+		background_down: "butp.png"
+		on_release:
+			root.create_new()
+
 	Button:
 		text: "Поиск"
 		font_size: sp(35)
@@ -135,8 +146,8 @@ Builder.load_string("""
 
 	ScrollView:
 		size_hint_x: .8
-		size_hint_y: .6
-		pos_hint: {'center_x': .5, 'center_y': .5}
+		size_hint_y: .5
+		pos_hint: {'center_x': .5, 'center_y': .55}
 		GridLayout:
 			id: griddy
 			canvas:
@@ -265,10 +276,20 @@ Builder.load_string("""
 			on_release:
 				root.add_entry()
 
+		Button:
+			text: "Удалить артикул"
+			font_size: sp(18)
+			pos_hint: {'center_x': .5, 'center_y': .2}
+			size_hint: (.5, .12)
+			background_normal: "but.png"
+			background_down: "butp.png"
+			on_release:
+				root.del_ask()
+
 		ScrollView:
 			size_hint_x: .8
-			size_hint_y: .4
-			pos_hint: {'center_x': .5, 'center_y': .35}
+			size_hint_y: .25
+			pos_hint: {'center_x': .5, 'center_y': .4}
 			GridLayout:
 				id: griddy
 				canvas:
@@ -685,13 +706,81 @@ class WorkScreen(Screen):
 
 class DataBase(Screen):
 
+	def create_new(self):
+		sentence = "Заполните необходимые поля\n чтобы создать артикул"
+		self.layout = FloatLayout(size=(self.width, self.height))
+		self.inputi = TextInput(hint_text="Артикул", multiline=False, size_hint_x=.5, size_hint_y=0.1, pos_hint={"center_x":.5,"center_y":.6})
+		self.inputi2 = TextInput(hint_text="Название", multiline=False, size_hint_x=.5, size_hint_y=0.1, pos_hint={"center_x":.5,"center_y":.45})
+		self.inputi3 = TextInput(hint_text="Стандартный срок", multiline=False, size_hint_x=.5, size_hint_y=0.1, pos_hint={"center_x":.5,"center_y":.35})
+		self.btn1 = Button(text="Создать", size_hint_y=None, size_hint_x=None, height=0.06*self.height, width=0.6*self.width, font_size=0.035*self.height, pos_hint={"center_x":.5,"center_y":.2}, on_release=lambda x:self.art_create())
+		self.lbl = Label(text=sentence, font_size=0.025*self.height, pos_hint={"center_x":.5,"center_y":.86})
+
+		self.layout.add_widget(self.lbl)
+		self.layout.add_widget(self.inputi)
+		self.layout.add_widget(self.inputi2)
+		self.layout.add_widget(self.inputi3)
+		self.layout.add_widget(self.btn1)
+
+		self.popup = Popup(title="Создание",
+		content=self.layout,
+		size_hint=(.8, .6))
+		self.popup.open()
+
+	def art_create(self):
+		correct = False
+		if self.inputi.text != "" and self.inputi.text.isdigit() and self.inputi2.text != "" and self.inputi3.text != "":
+			if self.inputi3.text.isdigit():
+				correct = True
+			elif self.inputi3.text.lower()[-1] == "m":
+				print('WE DEFINE M In there')
+				tester = []
+				for each in self.inputi3.text:
+					tester.append(each.lower())
+				print(tester)
+				tester.remove("m")
+				new = "".join(tester)
+				if not new.isdigit():
+					popup("Внимание!", "Срок годности должен быть числом\n дней или месяцев с буквой 'M' в конце")
+					return
+				else:
+					correct = True
+			else:
+				popup("Внимание!", "Срок годности должен быть числом\n дней или месяцев с буквой 'M' в конце")
+				return
+
+			if correct == False:
+				popup("Внимание!", "Срок годности должен быть числом\n дней или месяцев с буквой 'M' в конце")
+				return
+			else:
+				if self.inputi.text in art_names:
+					popup("Внимание!", "Этот артикул уже есть в базе данных")
+					return
+				else:
+					f = open("artname.txt", "a")
+					f.write(str((self.inputi.text + "$" + self.inputi2.text + "$")))
+					f.close()
+
+					f = open("daysoflife.txt", "a")
+					f.write(str((self.inputi.text + "$" + self.inputi3.text + "$")))
+					f.close()
+
+					sync()
+
+					self.popup.dismiss()
+					self.get_them(0)
+
+
+		else:
+			popup("Внимание!", "Введите данные корректно")
+			return
+
 	def get_them(self, code):
 			search = self.ids.searcher.text
 			grid = self.ids.griddy
 			grid.bind(minimum_height=grid.setter("height"))
 			grid.clear_widgets()
 			if len(art_names) == 0 and code == 0:
-				self.popup("Внимание", "В базе данных нет записей")
+				popup("Внимание", "В базе данных нет записей")
 			else:
 				if code == 0:
 					for each in art_names:
@@ -764,6 +853,83 @@ class Information(Screen):
 		self.ids.ghost3.text = ""
 
 class Editions(Screen):
+
+	def del_ask(self):
+		sentence = "Вы уверены что хотите безвозвратно\n удалить артикул {} ?".format(inf_art)
+
+		self.layout = FloatLayout(size=(self.width, self.height))
+		self.btn1 = Button(text="Удалить", size_hint_y=None, size_hint_x=None, height=0.06*self.height, width=0.6*self.width, font_size=0.035*self.height, pos_hint={"center_x":.5,"center_y":.34}, on_release=lambda x:self.art_delete())
+		self.lbl = Label(text=sentence, font_size=0.025*self.height, pos_hint={"center_x":.5,"center_y":.86})
+
+		self.layout.add_widget(self.lbl)
+		self.layout.add_widget(self.btn1)
+
+		self.popup = Popup(title="Удаление",
+		content=self.layout,
+		size_hint=(.8, .3))
+		self.popup.open()
+
+	def art_delete(self):
+		self.popup.dismiss()
+
+		# Lets delete from names
+
+		f = open("artname.txt", "r+")
+		dawread = f.read()
+		f.close()
+		dawread = dawread.split("$")
+		del dawread[-1]
+		worker = dawread.index(inf_art)
+		del dawread[worker]
+		del dawread[worker]
+
+		with open("artname.txt", "w") as f:
+			for each in dawread:
+				f.write(str(each + "$"))
+
+		#Lets delete from STANDART DATE
+
+		f = open("daysoflife.txt", "r+")
+		dawread = f.read()
+		f.close()
+		dawread = dawread.split("$")
+		del dawread[-1]
+		worker = dawread.index(inf_art)
+		del dawread[worker]
+		del dawread[worker]
+
+		with open("daysoflife.txt", "w") as f:
+			for each in dawread:
+				f.write(str(each + "$"))
+
+		#Finally lets delete all entries for it
+
+		f = open("saver.txt", "r+")
+		dawread = f.read()
+		f.close()
+		dawread = dawread.split("$")
+		del dawread[-1]
+		hound = [i for i,x in enumerate(dawread) if x==inf_art]
+		worker = []
+
+		for each in hound:
+			worker.append(each-1)
+
+		worker = worker[::-1]
+
+		for each in worker:
+			del dawread[each]
+			del dawread[each]
+
+		with open("saver.txt", "w") as f:
+			for each in dawread:
+				f.write(str(each + "$"))
+
+		sync()
+		self.clean()
+		s2 = self.manager.get_screen('database')
+		s2.get_them(0)
+		self.manager.current = "database"
 
 	def go_back(self):
 		s2 = self.manager.get_screen('information')
@@ -1134,7 +1300,7 @@ class Editions(Screen):
 
 inf_art = StringProperty("z")
 
-sm = ScreenManager(transition=FadeTransition())
+sm = ScreenManager(transition=NoTransition())
 sm.add_widget(MenuScreen(name="menu"))
 sm.add_widget(WorkScreen(name="work"))
 sm.add_widget(DataBase(name="database"))
