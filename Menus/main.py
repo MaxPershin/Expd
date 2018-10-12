@@ -59,7 +59,6 @@ Builder.load_string("""
 		background_down: "butp.png"
 		on_release:
 			root.manager.current = "database"
-
 <WorkScreen>:
 	canvas:
 		Rectangle:
@@ -191,22 +190,11 @@ Builder.load_string("""
 			text: ""
 			font_size: sp(30)
 			pos_hint:{"center_x":.5,"center_y":.5}
-		
-
-		Button:
-			text: "Обновить"
-			font_size: sp(22)
-			pos_hint: {'center_x': .25, 'center_y': .2}
-			size_hint: (.5, .12)
-			background_normal: "but.png"
-			background_down: "butp.png"
-			on_release:
-				root.start_one()
 
 		Button:
 			text: "Редактировать"
 			font_size: sp(22)
-			pos_hint: {'center_x': .75, 'center_y': .2}
+			pos_hint: {'center_x': .5, 'center_y': .2}
 			size_hint: (.5, .12)
 			background_normal: "but.png"
 			background_down: "butp.png"
@@ -223,7 +211,6 @@ Builder.load_string("""
 			on_release:
 				root.clearer()
 				root.manager.current = "database"
-
 <Editions>:
 	FloatLayout:
 		id: canvas
@@ -240,7 +227,6 @@ Builder.load_string("""
 
 		TextInput:
 			id: name
-			disabled: root.blocked
 			text: "Обновите информацию"
 			multiline: False
 			size_hint: (.5, .05)
@@ -248,7 +234,6 @@ Builder.load_string("""
 
 		TextInput:
 			id: article
-			disabled: root.blocked
 			text: "Обновите информацию"
 			multiline: False
 			size_hint: (.5, .05)
@@ -256,7 +241,6 @@ Builder.load_string("""
 
 		TextInput:
 			id: standartdate
-			disabled: root.blocked
 			text: "Обновите информацию"
 			multiline: False
 			size_hint: (.5, .05)
@@ -264,7 +248,6 @@ Builder.load_string("""
 
 		Button:
 			text: "Сохранить"
-			disabled: root.blocked
 			font_size: sp(22)
 			pos_hint: {'center_x': .75, 'center_y': .7}
 			size_hint: (.4, .10)
@@ -274,7 +257,6 @@ Builder.load_string("""
 				root.change_popup_name()
 		Button:
 			text: "Добавить дату"
-			disabled: root.blocked
 			font_size: sp(16)
 			pos_hint: {'center_x': .75, 'center_y': .6}
 			size_hint: (.4, .10)
@@ -302,24 +284,14 @@ Builder.load_string("""
 		Button:
 			text: "Назад"
 			font_size: sp(22)
-			pos_hint: {'center_x': .75, 'center_y': .1}
+			pos_hint: {'center_x': .5, 'center_y': .1}
 			size_hint: (.5, .12)
 			background_normal: "but.png"
 			background_down: "butp.png"
 			on_release:
-				root.blocked = True
 				root.clean()
+				root.go_back()
 				root.manager.current = "information"
-		Button:
-			text: "Обновить"
-			font_size: sp(22)
-			pos_hint: {'center_x': .25, 'center_y': .1}
-			size_hint: (.5, .12)
-			background_normal: "but.png"
-			background_down: "butp.png"
-			on_release:
-				root.blocked = False
-				root.letedit()
 
 	""")
 
@@ -757,7 +729,11 @@ class DataBase(Screen):
 		if art_names[inf_art][0] == " ":
 			art_names[inf_art] = art_names[inf_art][1:]
 
+		s2 = self.manager.get_screen('information')
+		s2.start_one() 
+
 class Information(Screen):
+
 	def start_one(self):
 		self.ids.ghost.text = art_names[inf_art]
 		self.ids.ghost2.text = inf_art
@@ -777,6 +753,8 @@ class Information(Screen):
 		if self.ids.ghost2.text == "":
 			pass
 		else:
+			s2 = self.manager.get_screen('edition')
+			s2.letedit()
 			self.manager.current = "edition"
 
 	def clearer(self):
@@ -787,7 +765,10 @@ class Information(Screen):
 
 class Editions(Screen):
 
-	blocked = BooleanProperty(True)
+	def go_back(self):
+		s2 = self.manager.get_screen('information')
+		s2.start_one()
+
 	def add_entry(self):
 		sentence = "Добавьте дату артикулу\n{} вручную".format(inf_art)
 
@@ -835,7 +816,6 @@ class Editions(Screen):
 				self.popup.dismiss()
 		else:
 			popup("Внимание!", "Вы ничего не ввели")
-
 
 	def letedit(self):
 		self.ids.name.text = art_names[inf_art]
