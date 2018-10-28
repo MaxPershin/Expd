@@ -19,9 +19,12 @@ from kivy.uix.floatlayout import FloatLayout
 from kivy.uix.textinput import TextInput
 from kivy.factory import Factory
 
-from kivy.properties import StringProperty, NumericProperty, BooleanProperty
+from kivy.properties import StringProperty, NumericProperty, BooleanProperty, ObjectProperty
 from kivy.uix.popup import Popup
 from kivy.uix.button import Button
+from kivy.uix.checkbox import CheckBox
+from kivy.uix.image import Image
+from kivy.uix.listview import ListItemButton
 
 year = int(strftime("%Y"))
 if year % 4 == 0:
@@ -63,6 +66,25 @@ Builder.load_string("""
 		background_down: "butp.png"
 		on_release:
 			root.manager.current = "database"
+
+	Button:
+		pos_hint: {'center_x': .85, 'center_y': .94}
+		size_hint: (.9/4, .5/4)
+		background_normal: "gear.png"
+		background_down: "gearp.png"
+		on_release:
+			root.open_settings()
+
+	Button:
+		text: "Лист списания"
+		font_size: sp(35)
+		size_hint: (.8, .15)
+		pos_hint: {'center_x': .5, 'center_y': .1}
+		background_normal: "but.png"
+		background_down: "butp.png"
+		on_release:
+			root.prepare_today()
+			root.manager.current = "today"
 <WorkScreen>:
 	canvas:
 		Rectangle:
@@ -317,11 +339,89 @@ Builder.load_string("""
 				root.clean()
 				root.go_back()
 				root.manager.current = "information"
+<Today>:
+	FloatLayout:
+		id: canvas
+		canvas:
+			Rectangle:
+				size: self.size
+				pos: self.pos
+				source: "clean.png"
 
+	TextInput:
+		id: inin
+		multiline: False
+		size_hint: (.33, .05*1.75)
+		pos_hint:{"center_x":.5,"center_y":.9}
+		font_size: sp(50)
+		on_text: root.dot()
+
+	Button:
+		text: "Назад"
+		font_size: sp(22)
+		pos_hint: {'center_x': .5, 'center_y': .1}
+		size_hint: (.5, .12)
+		background_normal: "but.png"
+		background_down: "butp.png"
+		on_release:
+			root.manager.current = "menu"
 	""")
 
 class MenuScreen(Screen):
-	pass
+	
+	def open_settings(self):
+
+		self.layout = FloatLayout(size=(self.width, self.height))
+		self.btn1 = Button(background_normal="but_red.png", text="Удалить базу данных", size_hint_y=None, size_hint_x=None, height=0.13*self.height, width=0.8*self.width, font_size=0.035*self.height, pos_hint={"center_x":.5,"center_y":.34}, on_release=lambda x:self.are_you_sure())
+		self.lbl = Label(text="Настройки", font_size=0.025*self.height, pos_hint={"center_x":.5,"center_y":.86})
+
+		self.layout.add_widget(self.lbl)
+		self.layout.add_widget(self.btn1)
+
+		self.popup = Popup(title="Настройки",
+		content=self.layout,
+		size_hint=(.8, .3))
+		self.popup.open()
+
+	def are_you_sure(self):
+		title = "Внимание!!!"
+		text = "Нажав на кнопку УДАЛИТЬ вы уничтожите\nвсю базу данных безвозвратно!"
+		self.lay = FloatLayout(size=(self.width, self.height))
+		self.btn1 = Button(background_normal="but_red.png", text="УДАЛИТЬ", size_hint_y=None, size_hint_x=None, height=0.13*self.height, width=0.8*self.width, font_size=0.035*self.height, pos_hint={"center_x":.5,"center_y":.34}, on_release=lambda x:self.exterminate())
+		self.lbl = Label(text=text, font_size=0.025*self.height, pos_hint={"center_x":.5,"center_y":.86})
+
+		self.lay.add_widget(self.lbl)
+		self.lay.add_widget(self.btn1)
+
+		self.poz = Popup(title=title,
+		content=self.lay,
+		size_hint=(.8, .3))
+		self.poz.open()
+
+	def exterminate(self):
+		none = ""
+
+		f = open("daysoflife.txt", "w")
+		f.write(none)
+		f.close()
+
+		f = open("artname.txt", "w")
+		f.write(none)
+		f.close()
+
+		f = open("saver.txt", "w")
+		f.write(none)
+		f.close()
+
+		sync()
+
+		self.poz.dismiss()
+
+		popup("Внимание", "База данных была полностью удалена")
+
+	def prepare_today(self):
+		s2 = self.manager.get_screen('today')
+		s2.today_and_beyond()
 
 class WorkScreen(Screen):
 	worktext = StringProperty("Введите артикул")
@@ -1302,6 +1402,51 @@ class Editions(Screen):
 		else:
 			return False
 
+class Today(Screen):
+	def dot(self):
+
+		res = fnum2text(todaynum+1) #res returns str "0204"
+
+		if len(res) < 4:
+			newres = "0%s" % res
+		else:
+			newres = res
+
+		if len(self.ids.inin.text) > 4:
+			self.ids.inin.text = self.ids.inin.text[:4]
+		if self.ids.inin.text.isdigit() == False:
+			self.ids.inin.text = self.ids.inin.text[:len(self.ids.inin.text)-1]
+		if len(self.ids.inin.text) == 4:
+			self.ids.inin.focus = False
+			if self.ids.inin.text != newres:
+				self.tomorrow()
+
+	def today_and_beyond(self):
+		count = 0
+		abol = todaynum+1
+		res = fnum2text(abol) #res returns str "0204"
+
+		if len(res) < 4:
+			newres = "0%s" % res
+		else:
+			newres = res
+
+		self.ids.inin.text = newres
+
+		hold = [i for i,x in enumerate(entries) if x==newres]
+		holder = []
+
+		for each in hold:
+			holder.append(entries[each+1])
+
+		list_of_obj = ObjectProperty()
+
+	def tomorrow(self):
+		print("tomorrow")
+
+class StudentListButton(ListItemButton):
+	pass
+
 inf_art = StringProperty("z")
 
 sm = ScreenManager(transition=NoTransition())
@@ -1310,10 +1455,78 @@ sm.add_widget(WorkScreen(name="work"))
 sm.add_widget(DataBase(name="database"))
 sm.add_widget(Information(name="information"))
 sm.add_widget(Editions(name="edition"))
+sm.add_widget(Today(name="today"))
 
 entries = []
 art_names = {}
 days_of_life = {}
+
+def fnum2text(nu):
+	if nu <= 32:
+		a = 31 - nu
+		res = 31 - a			
+		ent = "%0d01" % res
+		return ent
+	elif nu <= (59+extra):
+		a = (59+extra) - nu
+		res = (28+extra) - a			
+		ent = "%0d02" % res
+		return ent
+	elif nu <= (90+extra):
+		a = (90+extra) - nu
+		res = 31 - a			
+		ent = "%0d03" % res
+		return ent
+	elif nu <= (120+extra):
+		a = (120+extra) - nu
+		res = 30 - a			
+		ent = "%0d04" % res
+		return ent
+	elif nu <= (151+extra):
+		a = (151+extra) - nu
+		res = 31 - a			
+		ent = "%0d05" % res
+		return ent
+	elif nu <= (181+extra):
+		a = (181+extra) - nu
+		res = 30 - a			
+		ent = "%0d06" % res
+		return ent
+	elif nu <= (212+extra):
+		a = (212+extra) - nu
+		res = 31 - a			
+		ent = "%0d07" % res
+		return ent
+	elif nu <= (243+extra):
+		a = (243+extra) - nu
+		res = 31 - a			
+		ent = "%0d08" % res
+		return ent
+	elif nu <= (273+extra):
+		a = (273+extra) - nu
+		res = 30 - a			
+		ent = "%0d09" % res
+		return ent
+	elif nu <= (304+extra):
+		a = (304+extra) - nu
+		res = 31 - a			
+		ent = "%0d10" % res
+		return ent
+	elif nu <= (334+extra):
+		a = (334+extra) - nu
+		res = 30 - a			
+		ent = "%0d11" % res
+		return ent
+	elif nu <= (365+extra):
+		a = (365+extra) - nu
+		res = 31 - a			
+		ent = "%0d12" % res
+		return ent
+	elif abol > (365+extra):
+		count = 0
+		res = 1			
+		ent = "%0d01" % res
+		return ent
 
 def popup(title, text):
 	popup = Popup(title=title,
