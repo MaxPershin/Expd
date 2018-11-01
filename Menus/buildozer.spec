@@ -1,13 +1,13 @@
 [app]
 
 # (str) Title of your application
-title = EXPD
+title = Avocado
 
 # (str) Package name
-package.name = menuapp
+package.name = myapp
 
 # (str) Package domain (needed for android/ios packaging)
-package.domain = org.menuapp
+package.domain = org.test
 
 # (str) Source code where the main.py live
 source.dir = .
@@ -28,7 +28,7 @@ source.include_exts = py,png,jpg,kv,atlas
 #source.exclude_patterns = license,images/*/*.jpg
 
 # (str) Application versioning (method 1)
-version = 2.2.1
+version = 1.0
 
 # (str) Application versioning (method 2)
 # version.regex = __version__ = ['"](.*)['"]
@@ -65,10 +65,10 @@ orientation = portrait
 # author = © Copyright Info
 
 # change the major version of python used by the app
-osx.python_version = 3.6.5
+osx.python_version = 3
 
 # Kivy version to use
-osx.kivy_version = 1.10.1
+osx.kivy_version = 1.9.1
 
 #
 # Android specific
@@ -82,7 +82,7 @@ fullscreen = 0
 # red, blue, green, black, white, gray, cyan, magenta, yellow, lightgray,
 # darkgray, grey, lightgrey, darkgrey, aqua, fuchsia, lime, maroon, navy,
 # olive, purple, silver, teal.
-android.presplash_color = blue
+#android.presplash_color = #FFFFFF
 
 # (list) Permissions
 #android.permissions = INTERNET
@@ -220,7 +220,7 @@ android.arch = armeabi-v7a
 [buildozer]
 
 # (int) Log level (0 = error only, 1 = info, 2 = debug (with command output))
-log_level = 2
+log_level = 1
 
 # (int) Display warning if buildozer is run as root (0 = False, 1 = True)
 warn_on_root = 1
