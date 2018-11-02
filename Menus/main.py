@@ -1,6 +1,6 @@
-import sys
-reload(sys)
-sys.setdefaultencoding("utf-8")
+#import sys
+#reload(sys)
+#sys.setdefaultencoding("utf-8")
 
 from kivy.config import Config
 Config.set('graphics', 'resizable', True)
@@ -212,7 +212,7 @@ class Core(BoxLayout):
 								self.go()
 							else:
 								self.ids.inputer.text = ""
-								self.worktext = "Введите срок годности в днях или месяцах \n"+"Или введите 0 чтобы указать дату окончания срока"
+								self.worktext = "Введите срок годности в днях или месяцах"
 								self.press = 99
 
 						else:
@@ -670,6 +670,28 @@ class Core(BoxLayout):
 		for each in temper:
 			hound.append(entries[each])
 
+		# Lets sort those dates!
+
+		sorter = []
+
+		for each in hound:
+			month = each[2:]
+			day = each[:2]
+			exactday = allmonth[month] + int(day)
+			sorter.append(exactday)
+
+		sorter.sort()
+
+		hound = []
+
+		for each in sorter:
+			temp = fnum2text(each)
+			if len(temp) == 3:
+				temp = '0'+temp
+			hound.append(temp)
+
+		# We sorted dates in overview
+
 		for each in hound:
 			self.texter = "  До\n"+str(each)
 			self.btn = Button(text=self.texter, size_hint_y=None, height=0.09*self.height, font_size=0.035*self.height)
@@ -833,6 +855,28 @@ class Core(BoxLayout):
 		hound = []
 		for each in leisu:
 			hound.append(entries[each])
+
+		#Lets sort dates in edit view
+
+		sorter = []
+
+		for each in hound:
+			month = each[2:]
+			day = each[:2]
+			exactday = allmonth[month] + int(day)
+			sorter.append(exactday)
+
+		sorter.sort()
+
+		hound = []
+
+		for each in sorter:
+			temp = fnum2text(each)
+			if len(temp) == 3:
+				temp = '0'+temp
+			hound.append(temp)
+
+		# Should be sorted now
 
 		for each in hound:
 			self.texter = "  До\n"+str(each)
@@ -1135,19 +1179,6 @@ class Core(BoxLayout):
 			return False
 
 ###########################---Settings---#####################################
-	def open_settings(self):
-
-		self.layout = FloatLayout(size=(self.width, self.height))
-		self.btn1 = Button(background_normal="but_red.png", text="Удалить базу данных", size_hint_y=None, size_hint_x=None, height=0.13*self.height, width=0.8*self.width, font_size=0.035*self.height, pos_hint={"center_x":.5,"center_y":.34}, on_release=lambda x:self.are_you_sure())
-		self.lbl = Label(text="Настройки", font_size=0.025*self.height, pos_hint={"center_x":.5,"center_y":.86})
-
-		self.layout.add_widget(self.lbl)
-		self.layout.add_widget(self.btn1)
-
-		self.popup = Popup(title="Настройки",
-		content=self.layout,
-		size_hint=(.8, .3))
-		self.popup.open()
 
 	def are_you_sure(self):
 		title = "Внимание!!!"
@@ -1187,7 +1218,6 @@ class Core(BoxLayout):
 		self.clearer()
 		self.ids.griddy.clear_widgets()
 		self.ids.griddy4.clear_widgets()
-		self.ids.mana.current='work'
 
 ###########################---App_Classes---##################################
 class ProtoApp(App):
@@ -1272,10 +1302,13 @@ Core:
 						pos: self.pos
 						source: "work.png"
 				Label:
+					halign: 'center'
+					valign: "middle"
 					text: root.worktext
-					size: self.texture_size
+					text_size: self.size
+					size_hint: (.8, .15)
 					font_size: sp(25)
-					pos_hint:{"center_x": .5,"center_y":.88}
+					pos_hint:{"center_x": .5,"center_y":.87}
 
 				TextInput:
 					font_size: sp(65)
@@ -1580,7 +1613,7 @@ Core:
 				Button:
 					text: "Удалить артикул"
 					font_size: sp(18)
-					pos_hint: {'center_x': .5, 'center_y': .2}
+					pos_hint: {'center_x': .75, 'center_y': .1}
 					size_hint: (.5, .12)
 					background_normal: "but.png"
 					background_down: "butp.png"
@@ -1589,8 +1622,8 @@ Core:
 
 				ScrollView:
 					size_hint_x: .8
-					size_hint_y: .25
-					pos_hint: {'center_x': .5, 'center_y': .4}
+					size_hint_y: .35
+					pos_hint: {'center_x': .5, 'center_y': .35}
 					GridLayout:
 						id: griddy2
 						canvas:
@@ -1604,15 +1637,51 @@ Core:
 						height: 0
 
 				Button:
-					text: "Назад"
-					font_size: sp(22)
-					pos_hint: {'center_x': .5, 'center_y': .1}
-					size_hint: (.5, .12)
-					background_normal: "but.png"
+					pos_hint: {'center_x': .2, 'center_y': .1}
+					size_hint: (.24, .15)
+					background_normal: "arrow_previous.png"
 					background_down: "butp.png"
 					on_release:
 						root.start_one()
 						root.ids.mana.current = "information"
+
+
+		Screen:
+			name: 'settings'
+			FloatLayout:
+
+				id: canvas
+				canvas:
+					Rectangle:
+						size: self.size
+						pos: self.pos
+						source: "clean.png"
+
+				Button:
+					text: "Язык"
+					font_size: sp(22)
+					pos_hint: {'center_x': .5, 'center_y': .8}
+					size_hint: (.65, .12)
+					background_normal: "but.png"
+					background_down: "butp.png"
+
+				Button:
+					text: "Синхронизировать"
+					font_size: sp(22)
+					pos_hint: {'center_x': .5, 'center_y': .7}
+					size_hint: (.65, .12)
+					background_normal: "but.png"
+					background_down: "butp.png"
+
+				Button:
+					text: "Удалить базу данных"
+					font_size: sp(22)
+					pos_hint: {'center_x': .5, 'center_y': .6}
+					size_hint: (.65, .12)
+					background_normal: "but.png"
+					background_down: "butp.png"
+					on_release:
+						root.are_you_sure()
 
 
 
@@ -1643,8 +1712,8 @@ Core:
 		ToggleButton:
 			allow_no_selection: False
 			group: 'test'
-			text: 'not used'
-			on_press: root.open_settings()
+			text: 'Settings'
+			on_press: root.ids.mana.current = "settings"
 	""")
 
 entries = []
