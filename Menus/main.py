@@ -104,7 +104,7 @@ class Core(BoxLayout):
 
 		if len(hound) == 0:
 			self.ids.mana.current = "today"
-
+			self.ids.griddy4.clear_widgets()
 			self.col = (.1, .1, .1, .3)
 			self.sp_text ='Нет артикулов с \nистекающим сроком годности'
 		else:
@@ -1073,17 +1073,13 @@ class Core(BoxLayout):
 		f.close()
 		dawread = dawread.split("$")
 		del dawread[-1]
-		worker = [i for i,x in enumerate(dawread) if x==self.date]
-
-		count = 0
+		worker = [i for i,x in enumerate(dawread) if x==inf_art]
 
 		for each in worker:
-			count+=1
-			if dawread[each-1] == inf_art:
+			if dawread[each-1] == self.date:
+				del dawread[each-1]
+				del dawread[each-1]
 				break
-
-		del dawread[worker[count-1]]
-		del dawread[worker[count-1]]
 
 
 		with open("saver.txt", "w") as f:
