@@ -292,7 +292,7 @@ class Core(BoxLayout):
 		yer = self.ids.ex_inputer3.text
 
 		if len(yer) == 0:
-			yer = self.yez
+			yer = str(self.yez)
 
 		if len(day) < 2:
 			day = '0'+day
@@ -307,7 +307,7 @@ class Core(BoxLayout):
 				if ask[0].isalpha() == False and ask[1].isalpha() == False and ask[2].isalpha() == False and ask[3].isalpha() == False:
 					if int(ask[2:]) <= 12 and int(ask[2:]) >= 1 and int(ask[:2]) <= 31 and int(ask[:2]) >= 1:
 						if self.check2(ask):
-							self.cudate = ask
+							self.cudate = (ask, yer)
 
 							if self.cuart in days_of_life:
 								self.standartdate = days_of_life[self.cuart]
@@ -315,7 +315,13 @@ class Core(BoxLayout):
 								self.ids.inputer.text = ''
 								self.dater_invisible()
 								self.step = 0
+								self.ids.ex_inputer.text = ''
+								self.ids.ex_inputer2.text = ''
+								self.ids.ex_inputer3.text = ''
 							else:
+								self.ids.ex_inputer.text = ''
+								self.ids.ex_inputer2.text = ''
+								self.ids.ex_inputer3.text = ''
 								self.ids.inputer.text = ""
 								self.dater_invisible()
 								self.step = 0
@@ -324,23 +330,28 @@ class Core(BoxLayout):
 
 						else:
 							popup("Внимание!", "В этом месяце нет столько дней")
-							self.ids.inputer.text = ""
+							self.ids.ex_inputer.text = ""
+							self.ids.ex_inputer2.text = ""
 							self.press -= 1
 					else:
 						popup("Внимание!", "Вы вне диапазона!")
-						self.ids.inputer.text = ""
+						self.ids.ex_inputer.text = ""
+						self.ids.ex_inputer2.text = ""
 						self.press -= 1
 				else:
 					popup("Внимание!", "Вы ввели буквы")
-					self.ids.inputer.text = ""
+					self.ids.ex_inputer.text = ""
+					self.ids.ex_inputer2.text = ""
 					self.press -= 1
 			else:
 				popup("Внимание!", "Необходимый формат - ДДММ")
-				self.ids.inputer.text = ""
+				self.ids.ex_inputer.text = ""
+				self.ids.ex_inputer2.text = ""
 				self.press -= 1
 		else:
 			popup("Внимание!", "Вы ввели символы!")
-			self.ids.inputer.text = ""
+			self.ids.ex_inputer.text = ""
+			self.ids.ex_inputer2.text = ""
 			self.press -= 1
 
 	def define_date(self):
@@ -372,10 +383,10 @@ class Core(BoxLayout):
 		self.go()
 
 	def go(self):
-		month = self.cudate[2:]
-		day = self.cudate[:2]
+		month = self.cudate[0][2:]
+		day = self.cudate[0][:2]
 
-		c = date(int(2018), int(month), int(day))
+		c = date(int(self.cudate[1]), int(month), int(day))
 
 		ex = self.standartdate
 		if ex[len(ex)-1].upper() == "M":
@@ -418,6 +429,8 @@ class Core(BoxLayout):
 
 			sell = 'Срок годности до {}{}'.format(day, month)
 			ent = '{}{}'.format(day, month)
+
+			print('Фактически дата такова ', day, month, year)
 
 			self.save(ent, self.cuart)
 			popup("Сохранено", sell)
@@ -1292,6 +1305,8 @@ Builder.load_string("""
 					background_down: "butp.png"
 					on_release: root.previous()
 					on_release: root.dater_invisible()
+					on_release: root.ids.ex_inputer.text = ''
+					on_release: root.ids.ex_inputer2.text = ''
 					on_release: root.step = 0
 
 				GridLayout:
