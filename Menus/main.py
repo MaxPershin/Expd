@@ -27,24 +27,14 @@ from kivy.uix.button import Button
 from kivy.uix.checkbox import CheckBox
 from kivy.uix.image import Image
 from kivy.uix.togglebutton import ToggleButton
-from datetime import date, timedelta
+from datetime import date, timedelta, datetime
 from dateutil.relativedelta import relativedelta
-
-todaynum = int(strftime("%j"))
 
 year = int(strftime("%Y"))
 if year % 4 == 0:
-	extra = 1
+ 	extra = 1
 else:
-	extra = 0
-
-todaynum = int(strftime("%j"))
-#We define actual month start days here:
-
-allmonth = {"01": 0, "02": 31, "03": 59+extra, 
-"04": 90+extra, "05": 120+extra, "06": 151+extra, 
-"07": 181+extra, "08": 212+extra, "09": 243+extra,
-"10": 273+extra, "11": 304+extra, "12": 334+extra, "13": 365+extra}
+ 	extra = 0
 
 class Core(BoxLayout):
 	col = ObjectProperty((.1, .1, .1, .0))
@@ -55,6 +45,82 @@ class Core(BoxLayout):
 	cudate = ""
 	standartdate = ""
 	standartname = ""
+
+	now = datetime.now()
+	yez = str(now.year)
+
+	step = 0
+
+	g_input = ObjectProperty({"center_x":.5,"center_y":.68})
+	ex_input1 = ObjectProperty({"center_x":-5,"center_y":.68})
+	ex_input2 = ObjectProperty({"center_x":-5,"center_y":.68})
+	ex_input3 = ObjectProperty({"center_x":-5,"center_y":.68})
+
+	def dater_visible(self):
+		self.g_input = {"center_x": -5,"center_y":.68}
+		self.ex_input1 = {"center_x":.18,"center_y":.68}
+		self.ex_input2 = {"center_x":.407,"center_y":.68}
+		self.ex_input3 = {"center_x":.73,"center_y":.68}
+
+	def dater_invisible(self):
+		self.g_input = {"center_x": .5,"center_y":.68}
+		self.ex_input1 = {"center_x":-5,"center_y":.68}
+		self.ex_input2 = {"center_x":-5,"center_y":.68}
+		self.ex_input3 = {"center_x":-5,"center_y":.68}
+
+	def type(self, data):
+		if self.step == 0:
+			if data == 'CLS':
+				self.ids.inputer.text = ''
+			elif data == '<<':
+				self.ids.inputer.text = self.ids.inputer.text[:len(self.ids.inputer.text)-1]
+			else:
+				self.ids.inputer.text = self.ids.inputer.text+data
+
+		if self.step == 1:
+			current_lenght = len(self.ids.ex_inputer.text) + len(self.ids.ex_inputer2.text)
+			
+			if current_lenght == 0:
+				if data == 'CLS':
+					pass
+				elif data == '<<':
+					pass
+				else:
+					self.ids.ex_inputer.text = self.ids.ex_inputer.text+data
+
+			elif current_lenght == 1:
+				if data == 'CLS':
+					self.ids.ex_inputer.text = ''
+				elif data == '<<':
+					self.ids.ex_inputer.text = self.ids.ex_inputer.text[:len(self.ids.ex_inputer.text)-1]
+				else:
+					self.ids.ex_inputer.text = self.ids.ex_inputer.text+data
+
+			elif current_lenght == 2:
+				if data == 'CLS':
+					self.ids.ex_inputer.text = ''
+				elif data == '<<':
+					self.ids.ex_inputer.text = self.ids.ex_inputer.text[:len(self.ids.ex_inputer.text)-1]
+				else:
+					self.ids.ex_inputer2.text = self.ids.ex_inputer2.text+data
+
+			elif current_lenght == 3:
+				if data == 'CLS':
+					self.ids.ex_inputer2.text = ''
+				elif data == '<<':
+					self.ids.ex_inputer2.text = self.ids.ex_inputer2.text[:len(self.ids.ex_inputer2.text)-1]
+				else:
+					self.ids.ex_inputer2.text = self.ids.ex_inputer2.text+data
+
+			elif current_lenght == 4:
+				if data == 'CLS':
+					self.ids.ex_inputer2.text = ''
+				elif data == '<<':
+					self.ids.ex_inputer2.text = self.ids.ex_inputer2.text[:len(self.ids.ex_inputer.text)-1]
+
+
+	def change_pos(self):
+		self.test = {"center_x":.18,"center_y":.58}
 
 	def trash_out(self):
 		global found_arts
@@ -191,6 +257,9 @@ class Core(BoxLayout):
 			self.press -= 1
 			return
 		else:
+			self.step = 1
+			self.dater_visible()
+
 			global last_art
 			last_art = self.ids.inputer.text
 			self.cuart = article
@@ -1137,28 +1206,30 @@ Builder.load_string("""
 					id: inputer
 					multiline: False
 					size_hint: (.8, .15)
-					pos_hint:{"center_x":.5,"center_y":.68}
+					pos_hint: root.g_input
 
 				TextInput:
 					font_size: sp(65)
 					id: ex_inputer
 					multiline: False
 					size_hint: (.2, .15)
-					pos_hint:{"center_x":.18,"center_y":.68}
+					pos_hint:root.ex_input1
 
 				TextInput:
 					font_size: sp(65)
 					id: ex_inputer2
 					multiline: False
 					size_hint: (.2, .15)
-					pos_hint:{"center_x":.407,"center_y":.68}
+					pos_hint: root.ex_input2
 
 				TextInput:
 					font_size: sp(65)
 					id: ex_inputer3
+					text: root.yez
 					multiline: False
 					size_hint: (.4, .15)
-					pos_hint:{"center_x":.73,"center_y":.68}
+					pos_hint: root.ex_input3
+
 
 				Button:
 					pos_hint: {'center_x': .72, 'center_y': .53}
@@ -1168,6 +1239,7 @@ Builder.load_string("""
 					on_release:
 						root.press += 1
 						root.catch_art()
+
 
 				Button:
 					pos_hint: {'center_x': .5, 'center_y': .53}
@@ -1183,8 +1255,9 @@ Builder.load_string("""
 					size_hint: (.24, .15)
 					background_normal: "arrow_previous.png"
 					background_down: "butp.png"
-					on_release:
-						root.previous()
+					on_release: root.previous()
+					on_release: root.dater_invisible()
+					on_release: root.step = 0
 
 				GridLayout:
 					cols: 3
@@ -1200,40 +1273,40 @@ Builder.load_string("""
 					Button:
 						text: "1"
 						on_release:
-							root.ids.inputer.text = root.ids.inputer.text + "1"
+							root.type('1')
 					Button:
 						text: "2"
-						on_release: root.ids.inputer.text = root.ids.inputer.text + "2"
+						on_release: root.type('2')
 					Button:
 						text: "3"
-						on_release: root.ids.inputer.text = root.ids.inputer.text + "3"
+						on_release: root.type('3')
 					Button:
 						text: "4"
-						on_release: root.ids.inputer.text = root.ids.inputer.text + "4"
+						on_release: root.type('4')
 					Button:
 						text: "5"
-						on_release: root.ids.inputer.text = root.ids.inputer.text + "5"
+						on_release: root.type('5')
 					Button:
 						text: "6"
-						on_release: root.ids.inputer.text = root.ids.inputer.text + "6"
+						on_release: root.type('6')
 					Button:
 						text: "7"
-						on_release: root.ids.inputer.text = root.ids.inputer.text + "7"
+						on_release: root.type('7')
 					Button:
 						text: "8"
-						on_release: root.ids.inputer.text = root.ids.inputer.text + "8"
+						on_release: root.type('8')
 					Button:
 						text: "9"
-						on_release: root.ids.inputer.text = root.ids.inputer.text + "9"
+						on_release: root.type('9')
 					Button:
 						text: "CLS"
-						on_release: root.ids.inputer.text = ''
+						on_release: root.type('CLS')
 					Button:
 						text: "0"
-						on_release: root.ids.inputer.text = root.ids.inputer.text + "0"
+						on_release: root.type('0')
 					Button:
 						text: "<<"
-						on_release: root.ids.inputer.text = root.ids.inputer.text[:len(root.ids.inputer.text)-1]
+						on_release: root.type('<<')
 
 
 		Screen:
