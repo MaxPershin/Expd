@@ -1096,8 +1096,6 @@ def sync():
 Builder.load_string("""
 #:import NoTransition kivy.uix.screenmanager.NoTransition
 
-Core:
-
 <Core>:
 	orientation: "vertical"
 	BoxLayout:
@@ -1140,6 +1138,27 @@ Core:
 					multiline: False
 					size_hint: (.8, .15)
 					pos_hint:{"center_x":.5,"center_y":.68}
+
+				TextInput:
+					font_size: sp(65)
+					id: ex_inputer
+					multiline: False
+					size_hint: (.2, .15)
+					pos_hint:{"center_x":.18,"center_y":.68}
+
+				TextInput:
+					font_size: sp(65)
+					id: ex_inputer2
+					multiline: False
+					size_hint: (.2, .15)
+					pos_hint:{"center_x":.407,"center_y":.68}
+
+				TextInput:
+					font_size: sp(65)
+					id: ex_inputer3
+					multiline: False
+					size_hint: (.4, .15)
+					pos_hint:{"center_x":.73,"center_y":.68}
 
 				Button:
 					pos_hint: {'center_x': .72, 'center_y': .53}
