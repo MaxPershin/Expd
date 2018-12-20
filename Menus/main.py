@@ -36,6 +36,11 @@ if year % 4 == 0:
 else:
  	extra = 0
 
+allmonth = {"01": 0, "02": 31, "03": 59+extra, 
+"04": 90+extra, "05": 120+extra, "06": 151+extra, 
+"07": 181+extra, "08": 212+extra, "09": 243+extra,
+"10": 273+extra, "11": 304+extra, "12": 334+extra, "13": 365+extra}
+
 class Core(BoxLayout):
 	col = ObjectProperty((.1, .1, .1, .0))
 	sp_text = ObjectProperty("")
@@ -78,7 +83,7 @@ class Core(BoxLayout):
 				self.ids.inputer.text = self.ids.inputer.text+data
 
 		if self.step == 1:
-			current_lenght = len(self.ids.ex_inputer.text) + len(self.ids.ex_inputer2.text)
+			current_lenght = len(self.ids.ex_inputer.text) + len(self.ids.ex_inputer2.text) + len(self.ids.ex_inputer3.text)
 			
 			if current_lenght == 0:
 				if data == 'CLS':
@@ -112,11 +117,21 @@ class Core(BoxLayout):
 				else:
 					self.ids.ex_inputer2.text = self.ids.ex_inputer2.text+data
 
-			elif current_lenght == 4:
+			elif current_lenght >= 4 and current_lenght < 8:
 				if data == 'CLS':
 					self.ids.ex_inputer2.text = ''
+				elif data == '<<' and len(self.ids.ex_inputer3.text) == 0:
+					self.ids.ex_inputer2.text = self.ids.ex_inputer2.text[:len(self.ids.ex_inputer2.text)-1]
 				elif data == '<<':
-					self.ids.ex_inputer2.text = self.ids.ex_inputer2.text[:len(self.ids.ex_inputer.text)-1]
+					self.ids.ex_inputer3.text = self.ids.ex_inputer3.text[:len(self.ids.ex_inputer3.text)-1]
+				else:
+					self.ids.ex_inputer3.text = self.ids.ex_inputer3.text+data
+
+			elif current_lenght == 8:
+				if data == 'CLS':
+					self.ids.ex_inputer3.text = ''
+				elif data == '<<':
+					self.ids.ex_inputer3.text = self.ids.ex_inputer3.text[:len(self.ids.ex_inputer3.text)-1]
 
 
 	def change_pos(self):
@@ -271,7 +286,22 @@ class Core(BoxLayout):
 		global standartdate
 
 		article = self.cuart
-		ask = self.ids.inputer.text
+
+		day = self.ids.ex_inputer.text
+		mon = self.ids.ex_inputer2.text
+		yer = self.ids.ex_inputer3.text
+
+		if len(yer) == 0:
+			yer = self.yez
+
+		if len(day) < 2:
+			day = '0'+day
+
+		if len(mon) < 2:
+			mon = '0'+mon
+
+		ask = '{}{}'.format(day, mon)
+
 		if ask.isalnum(): 
 			if len(ask) == 4:
 				if ask[0].isalpha() == False and ask[1].isalpha() == False and ask[2].isalpha() == False and ask[3].isalpha() == False:
@@ -282,8 +312,13 @@ class Core(BoxLayout):
 							if self.cuart in days_of_life:
 								self.standartdate = days_of_life[self.cuart]
 								self.go()
+								self.ids.inputer.text = ''
+								self.dater_invisible()
+								self.step = 0
 							else:
 								self.ids.inputer.text = ""
+								self.dater_invisible()
+								self.step = 0
 								self.worktext = "Введите срок годности в днях или месяцах"
 								self.press = 99
 
@@ -1225,7 +1260,7 @@ Builder.load_string("""
 				TextInput:
 					font_size: sp(65)
 					id: ex_inputer3
-					text: root.yez
+					hint_text: root.yez
 					multiline: False
 					size_hint: (.4, .15)
 					pos_hint: root.ex_input3
