@@ -27,6 +27,10 @@ from kivy.uix.button import Button
 from kivy.uix.checkbox import CheckBox
 from kivy.uix.image import Image
 from kivy.uix.togglebutton import ToggleButton
+from datetime import date, timedelta
+from dateutil.relativedelta import relativedelta
+
+todaynum = int(strftime("%j"))
 
 year = int(strftime("%Y"))
 if year % 4 == 0:
@@ -41,7 +45,6 @@ allmonth = {"01": 0, "02": 31, "03": 59+extra,
 "04": 90+extra, "05": 120+extra, "06": 151+extra, 
 "07": 181+extra, "08": 212+extra, "09": 243+extra,
 "10": 273+extra, "11": 304+extra, "12": 334+extra, "13": 365+extra}
-
 
 class Core(BoxLayout):
 	col = ObjectProperty((.1, .1, .1, .0))
@@ -267,22 +270,28 @@ class Core(BoxLayout):
 	def go(self):
 		month = self.cudate[2:]
 		day = self.cudate[:2]
-		exactday = allmonth[month] + int(day)
+
+		c = date(int(2018), int(month), int(day))
+
 		ex = self.standartdate
 		if ex[len(ex)-1].upper() == "M":
 			newex = ex.replace("M","")
-			newex2 = newex.replace("m", "")
-			ex = newex2
-			halfm = int(month) + int(ex)
-			while halfm > 12:
-				halfm -= 12
-			newhalfm = str(halfm)
-			halfm = newhalfm
-			halfd = self.cudate[:2]
-			if len(halfm) < 2:
-				halfmm = "0"+ halfm
-				halfm = halfmm
-			final = halfd + halfm
+			ex = newex.replace("m", "")
+
+			c += relativedelta(months=int(ex))
+
+			year = str(c.year)
+			month = str(c.month)
+			day = str(c.day)
+
+			if len(month) < 2:
+				month = '0'+month
+
+			if len(day) < 2:
+				day = '0'+day
+
+			final = '{}{}'.format(day, month)
+
 			self.save(final, self.cuart)
 			sell = "Expd is before {}".format(final)
 			popup("Сохранено", sell)
@@ -290,204 +299,30 @@ class Core(BoxLayout):
 			self.ids.inputer.text = ""
 			self.press = 0
 
-		elif str(ex).isdigit() == True and int(ex) >= 0:
+		elif str(ex).isdigit() and int(ex) >= 0:
 			ex = int(ex)
-			ex = self.newcycle(ex)
-			summing = exactday + ex
-			if summing <= 32:
-				a = 31 - summing
-				dayf = 31 - a
-				sell = "ExpD is BEFORE %0d.01" % dayf
-				ent = "%0d01" % dayf
-				self.save(ent, self.cuart)
-				popup("Сохранено", sell)
-				self.worktext = "Введите артикул"
-				self.ids.inputer.text = ""
-				self.press = 0
-			elif summing <= (59+extra):
-				a = (59+extra) - summing
-				dayf = (28+extra) - a
-				sell = "ExpD is BEFORE %0d.02" % dayf
-				ent = "%0d02" % dayf
-				self.save(ent, self.cuart)
-				popup("Сохранено", sell)
-				self.worktext = "Введите артикул"
-				self.ids.inputer.text = ""
-				self.press = 0
-			elif summing <= (90+extra):
-				a = (90+extra) - summing
-				dayf = 31 - a
-				sell = "ExpD is BEFORE %0d.03" % dayf
-				ent = "%0d03" % dayf
-				self.save(ent, self.cuart)
-				popup("Сохранено", sell)
-				self.worktext = "Введите артикул"
-				self.ids.inputer.text = ""
-				self.press = 0
-			elif summing <= (120+extra):
-				a = (120+extra) - summing
-				dayf = 30 - a
-				sell = "ExpD is BEFORE %0d.04" % dayf
-				ent = "%0d04" % dayf
-				self.save(ent, self.cuart)
-				popup("Сохранено", sell)
-				self.worktext = "Введите артикул"
-				self.ids.inputer.text = ""
-				self.press = 0
-			elif summing <= (151+extra):
-				a = (151+extra) - summing
-				dayf = 31 - a
-				sell = "ExpD is BEFORE %0d.05" % dayf
-				ent = "%0d05" % dayf
-				self.save(ent, self.cuart)
-				popup("Сохранено", sell)
-				self.worktext = "Введите артикул"
-				self.ids.inputer.text = ""
-				self.press = 0
-			elif summing <= (181+extra):
-				a = (181+extra) - summing
-				dayf = 30 - a
-				sell = "ExpD is BEFORE %0d.06" % dayf
-				ent = "%0d06" % dayf
-				self.save(ent, self.cuart)
-				popup("Сохранено", sell)
-				self.worktext = "Введите артикул"
-				self.ids.inputer.text = ""
-				self.press = 0
-			elif summing <= (212+extra):
-				a = (212+extra) - summing
-				dayf = 31 - a
-				sell = "ExpD is BEFORE %0d.07" % dayf
-				ent = "%0d07" % dayf
-				self.save(ent, self.cuart)
-				popup("Сохранено", sell)
-				self.worktext = "Введите артикул"
-				self.ids.inputer.text = ""
-				self.press = 0
-			elif summing <= (243+extra):
-				a = (243+extra) - summing
-				dayf = 31 - a
-				sell = "ExpD is BEFORE %0d.08" % dayf
-				ent = "%0d08" % dayf
-				self.save(ent, self.cuart)
-				popup("Сохранено", sell)
-				self.worktext = "Введите артикул"
-				self.ids.inputer.text = ""
-				self.press = 0
-			elif summing <= (273+extra):
-				a = (273+extra) - summing
-				dayf = 30 - a
-				sell = "ExpD is BEFORE %0d.09" % dayf
-				ent = "%0d09" % dayf
-				self.save(ent, self.cuart)
-				popup("Сохранено", sell)
-				self.worktext = "Введите артикул"
-				self.ids.inputer.text = ""
-				self.press = 0
-			elif summing <= (304+extra):
-				a = (304+extra) - summing
-				dayf = 31 - a
-				sell = "ExpD is BEFORE %0d.10" % dayf
-				ent = "%0d10" % dayf
-				self.save(ent, self.cuart)
-				popup("Сохранено", sell)
-				self.worktext = "Введите артикул"
-				self.ids.inputer.text = ""
-				self.press = 0
-			elif summing <= (334+extra):
-				a = (334+extra) - summing
-				dayf = 30 - a
-				sell = "ExpD is BEFORE %0d.11" % dayf
-				ent = "%0d11" % dayf
-				self.save(ent, self.cuart)
-				popup("Сохранено", sell)
-				self.worktext = "Введите артикул"
-				self.ids.inputer.text = ""
-				self.press = 0
-			elif summing <= (365+extra):
-				a = (365+extra) - summing
-				dayf = 31 - a
-				sell = "ExpD is BEFORE %0d.12" % dayf
-				ent = "%0d12" % dayf
-				self.save(ent, self.cuart)
-				popup("Сохранено", sell)
-				self.worktext = "Введите артикул"
-				self.ids.inputer.text = ""
-				self.press = 0
-			elif summing >= (365+extra):
-				ov = summing - (365+extra)
-				realanwser = self.cycle(ov)
-				if len(realanwser) != 19:
-					ent = realanwser[15] + realanwser[16] + realanwser[18] + realanwser[19]
-					self.save(ent, self.cuart)
-					popup("Сохранено", realanwser)
-					self.worktext = "Введите артикул"
-					self.ids.inputer.text = ""
-					self.press = 0
-					sync()
-				else:
-					ent = realanwser[15] + realanwser[17] + realanwser[18]
-					self.save(ent, self.cuart)
-					popup("Сохранено", realanwser)
-					self.worktext = "Введите артикул"
-					self.ids.inputer.text = ""
-					self.press = 0
-					sync()
+			c += timedelta(ex)
+			year = str(c.year)
+			month = str(c.month)
+			day = str(c.day)
+
+			if len(month) < 2:
+				month = '0'+month
+
+			if len(day) < 2:
+				day = '0'+day
+
+			sell = 'Срок годности до {}{}'.format(day, month)
+			ent = '{}{}'.format(day, month)
+
+			self.save(ent, self.cuart)
+			popup("Сохранено", sell)
+			self.worktext = "Введите артикул"
+			self.ids.inputer.text = ""
+			self.press = 0
+			
 		else:
 			popup("Внимание", "Некорректное количество дней")
-
-	def cycle(self, ov):
-		if ov < 32:
-			a = 31 - ov
-			dayf = 31 - a
-			return "ExpD is BEFORE %0d.01" % dayf
-		elif ov < (59+extra):
-			a = (59+extra) - ov
-			dayf = (28+extra) - a
-			return "ExpD is BEFORE %0d.02" % dayf
-		elif ov < (90+extra):
-			a = (90+extra) - ov
-			dayf = 31 - a
-			return "ExpD is BEFORE %0d.03" % dayf
-		elif ov < (120+extra):
-			a = (120+extra) - ov
-			dayf = 30 - a
-			return "ExpD is BEFORE %0d.04" % dayf
-		elif ov < (151+extra):
-			a = (151+extra) - ov
-			dayf = 31 - a
-			return "ExpD is BEFORE %0d.05" % dayf
-		elif ov < (181+extra):
-			a = (181+extra) - ov
-			dayf = 30 - a
-			return "ExpD is BEFORE %0d.06" % dayf
-		elif ov < (212+extra):
-			a = (212+extra) - ov
-			dayf = 31 - a
-			return "ExpD is BEFORE %0d.07" % dayf
-		elif ov < (243+extra):
-			a = (243+extra) - ov
-			dayf = 31 - a
-			return "ExpD is BEFORE %0d.08" % dayf
-		elif ov < (273+extra):
-			a = (273+extra) - ov
-			dayf = 30 - a
-			return "ExpD is BEFORE %0d.09" % dayf
-		elif ov < (304+extra):
-			a = (304+extra) - ov
-			dayf = 31 - a
-			return "ExpD is BEFORE %0d.10" % dayf
-		elif ov < (334+extra):
-			a = (334+extra) - ov
-			dayf = 30 - a
-			return "ExpD is BEFORE %0d.11" % dayf
-		elif ov < (365+extra):
-			a = (365+extra) - ov
-			dayf = 31 - a
-			return "ExpD is BEFORE %0d.12" % dayf
-		elif ov >= (365+extra):
-			ov - (365+extra)
-			self.cycle(ov)
 
 	def check2(self, ask):
 		dayz = ask[:2]
@@ -532,13 +367,6 @@ class Core(BoxLayout):
 			f.close()
 			sync()
 
-	def newcycle(self, ov):
-		switch = True
-		while switch:
-			if ov > 365:
-				ov -= 365
-			else:
-				return ov
 ##########################################################------Database------##############################3
 	def create_new(self):
 		sentence = "Заполните необходимые поля\n чтобы создать артикул"
