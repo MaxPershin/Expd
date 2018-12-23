@@ -118,8 +118,10 @@ class Core(BoxLayout):
 					self.ids.ex_inputer2.text = self.ids.ex_inputer2.text+data
 
 			elif current_lenght >= 4 and current_lenght < 8:
-				if data == 'CLS':
+				if data == 'CLS' and len(self.ids.ex_inputer3.text) == 0:
 					self.ids.ex_inputer2.text = ''
+				elif data == 'CLS':
+					self.ids.ex_inputer3.text = ''
 				elif data == '<<' and len(self.ids.ex_inputer3.text) == 0:
 					self.ids.ex_inputer2.text = self.ids.ex_inputer2.text[:len(self.ids.ex_inputer2.text)-1]
 				elif data == '<<':
@@ -143,9 +145,13 @@ class Core(BoxLayout):
 		if len(self.found_arts) == 0:
 			return
 		else:
-			tommorow = fnum2text(int(strftime("%j"))+1)
-			if len(tommorow) < 4:
-				tommorow = '0'+tommorow
+			tommorow = date.today() + timedelta(days=1)
+
+			day = str(tommorow.day)
+			month = str(tommorow.month)
+			year = str(tommorow.year)
+
+			tommorow = '{}{}{}'.format(day, month, year)
 
 			f = open("saver.txt", "r+")
 			dawread = f.read()
@@ -180,9 +186,13 @@ class Core(BoxLayout):
 			popup("Внимание", "Данные были удалены")
 
 	def define_today_art(self):
-		tommorow = fnum2text(int(strftime("%j"))+1)
-		if len(tommorow) < 4:
-			tommorow = '0'+tommorow
+		tommorow = date.today() + timedelta(days=1)
+
+		day = str(tommorow.day)
+		month = str(tommorow.month)
+		year = str(tommorow.year)
+
+		tommorow = '{}{}{}'.format(day, month, year)
 
 		hound = [i for i,x in enumerate(entries) if x==tommorow]
 
@@ -405,10 +415,11 @@ class Core(BoxLayout):
 			if len(day) < 2:
 				day = '0'+day
 
-			final = '{}{}'.format(day, month)
+			repres = '{}.{}.{}'.format(day, month, year)
+			final = '{}{}{}'.format(day, month, year)
 
 			self.save(final, self.cuart)
-			sell = "Expd is before {}".format(final)
+			sell = "Срок годности до {}".format(repres)
 			popup("Сохранено", sell)
 			self.worktext = "Введите артикул"
 			self.ids.inputer.text = ""
@@ -427,8 +438,8 @@ class Core(BoxLayout):
 			if len(day) < 2:
 				day = '0'+day
 
-			sell = 'Срок годности до {}{}'.format(day, month)
-			ent = '{}{}'.format(day, month)
+			sell = 'Срок годности до {}.{}.{}'.format(day, month, year)
+			ent = '{}{}{}'.format(day, month, year)
 
 			print('Фактически дата такова ', day, month, year)
 
@@ -465,7 +476,7 @@ class Core(BoxLayout):
 		popup.open()
 
 	def save(self, ent, article):
-		if len(ent) == 3:
+		if len(ent) == 7:
 			ent = "0" + ent
 
 		hound = [i for i,x in enumerate(entries) if x==article]
@@ -620,9 +631,10 @@ class Core(BoxLayout):
 		sorter = []
 
 		for each in hound:
-			month = each[2:]
+			year = each[4:]
+			month = each[2:4]
 			day = each[:2]
-			exactday = allmonth[month] + int(day)
+			exactday = date(int(year), int(month), int(day))
 			sorter.append(exactday)
 
 		sorter.sort()
@@ -630,10 +642,18 @@ class Core(BoxLayout):
 		hound = []
 
 		for each in sorter:
-			temp = fnum2text(each)
-			if len(temp) == 3:
-				temp = '0'+temp
-			hound.append(temp)
+			year = str(each.year)
+			month = str(each.month)
+			day = str(each.day)
+
+
+			if len(month) == 1:
+				month = '0'+month
+			if len(day) == 1:
+				day = '0'+day
+
+
+			hound.append('{}.{}.{}'.format(day, month, year[2:]))
 
 		# We sorted dates in overview
 
@@ -806,9 +826,10 @@ class Core(BoxLayout):
 		sorter = []
 
 		for each in hound:
-			month = each[2:]
+			year = each[4:]
+			month = each[2:4]
 			day = each[:2]
-			exactday = allmonth[month] + int(day)
+			exactday = date(int(year), int(month), int(day))
 			sorter.append(exactday)
 
 		sorter.sort()
@@ -816,10 +837,18 @@ class Core(BoxLayout):
 		hound = []
 
 		for each in sorter:
-			temp = fnum2text(each)
-			if len(temp) == 3:
-				temp = '0'+temp
-			hound.append(temp)
+			year = str(each.year)
+			month = str(each.month)
+			day = str(each.day)
+
+
+			if len(month) == 1:
+				month = '0'+month
+			if len(day) == 1:
+				day = '0'+day
+
+
+			hound.append('{}.{}.{}'.format(day, month, year))
 
 		# Should be sorted now
 
@@ -1084,12 +1113,13 @@ class Core(BoxLayout):
 			popup("Внимание!", "Вы не изменили дату")
 
 	def datetest(self, date):
-		ask = date
+		ask = date[:4]
+		year = date[4:]
 		if ask.isalnum(): 
 			if len(ask) == 4:
 				if ask[0].isalpha() == False and ask[1].isalpha() == False and ask[2].isalpha() == False and ask[3].isalpha() == False:
 					if int(ask[2:]) <= 12 and int(ask[2:]) >= 1 and int(ask[:2]) <= 31 and int(ask[:2]) >= 1:
-						if self.check666(ask):
+						if self.check666(ask, year):
 							return True
 						else:
 							popup("Внимание!", "В этом месяце нет столько дней")
@@ -1102,7 +1132,7 @@ class Core(BoxLayout):
 		else:
 			popup("Внимание!", "Вы ввели символы!")
 
-	def check666(self, ask):
+	def check666(self, ask, year):
 		dayz = ask[:2]
 		month = ask[2:]       
 		digidayz = int(dayz)
@@ -1114,7 +1144,7 @@ class Core(BoxLayout):
 		else:
 			newmonthD = newmonth[1:]
 			result = allmonth[newmonthD] - realdayz
-		if digidayz <= result:
+		if digidayz <= result and len(year) == 4:
 			return True
 		else:
 			return False
