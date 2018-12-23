@@ -1,9 +1,9 @@
-#import sys
-#reload(sys)
-#sys.setdefaultencoding("utf-8")
+import sys
+reload(sys)
+sys.setdefaultencoding("utf-8")
 
 from kivy.config import Config
-Config.set('graphics', 'resizable', True)
+Config.set('graphics', 'resizable', False)
 Config.set('graphics', 'width', '414')
 Config.set('graphics', 'height', '736')
 
