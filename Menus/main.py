@@ -61,6 +61,35 @@ class Core(BoxLayout):
 	ex_input2 = ObjectProperty({"center_x":-5,"center_y":.68})
 	ex_input3 = ObjectProperty({"center_x":-5,"center_y":.68})
 
+	before_after = ObjectProperty('before')
+
+	pos_before_after1 = ObjectProperty({"center_x": -5,"center_y":.8}) #{"center_x": .35,"center_y":.8}
+	pos_before_after2 = ObjectProperty({"center_x": -5,"center_y":.8}) #{"center_x": .65,"center_y":.8}
+
+	pos_day_month_year1 = ObjectProperty({"center_x": -5,"center_y":.8}) #{"center_x": .2,"center_y":.8}
+	pos_day_month_year2 = ObjectProperty({"center_x": -5,"center_y":.8}) #{"center_x": .5,"center_y":.8}
+	pos_day_month_year3 = ObjectProperty({"center_x": -5,"center_y":.8}) #{"center_x": .8,"center_y":.8}
+
+	day_or_what = ObjectProperty('day')
+
+	def day_or_what_changer(self, data):
+		if data != self.day_or_what:
+			self.day_or_what = data
+
+	def pos_day_month_visible(self, data):
+		if data == True:
+			self.pos_day_month_year1 = ({"center_x": .2,"center_y":.8})
+			self.pos_day_month_year2 = ({"center_x": .5,"center_y":.8})
+			self.pos_day_month_year3 = ({"center_x": .8,"center_y":.8})
+		else:
+			self.pos_day_month_year1 = ({"center_x": -5,"center_y":.8})
+			self.pos_day_month_year2 = ({"center_x": -5,"center_y":.8})
+			self.pos_day_month_year3 = ({"center_x": -5,"center_y":.8})
+
+	def switch_before_after(self, data):
+		if self.before_after != data:
+			self.before_after = data
+
 	def dater_visible(self):
 		self.g_input = {"center_x": -5,"center_y":.68}
 		self.ex_input1 = {"center_x":.18,"center_y":.68}
@@ -245,6 +274,8 @@ class Core(BoxLayout):
 		self.ids.inputer.text = ''
 		self.worktext = 'Введите артикул'
 
+		self.pos_day_month_visible(False)
+
 		self.catch_art()
 
 	def repeat(self):
@@ -253,6 +284,14 @@ class Core(BoxLayout):
 			popup("Внимание", "Нет прошлого артикула")
 		else:
 			self.ids.inputer.text = last_art
+
+	def show_buttons_before_after(self, argument):
+		if argument == 'show':
+			self.pos_before_after1 = ({"center_x": .35,"center_y":.8})
+			self.pos_before_after2 = ({"center_x": .65,"center_y":.8})
+		else:
+			self.pos_before_after1 = ({"center_x": -5,"center_y":.8})
+			self.pos_before_after2 = ({"center_x": -5,"center_y":.8})
 
 	def catch_art(self):
 		global standartdate
@@ -270,6 +309,43 @@ class Core(BoxLayout):
 		elif self.press == 200:
 			self.standartname = self.ids.inputer.text
 			self.define_name()
+		elif self.press == 500:
+			self.standartdate = self.ids.inputer.text
+			self.define_date_sp()
+
+	def define_date_sp(self):
+
+		if len(self.standartdate) == 0:
+			self.ids.inputer.text = ""
+			self.pos_day_month_visible(True)
+			self.worktext = "Введите срок годности" 
+			self.press = 99
+			popup("Внимание!", "Срок годности должен быть числом")
+			return
+
+		for each in self.standartdate:
+			if each.isdigit() == False and (each.upper() != "M"):
+				self.ids.inputer.text = ""
+				self.pos_day_month_visible(True)
+				self.worktext = "Введите срок годности в днях или месяцах \n"+"Или укажите 0 для указания даты ДО"
+				self.press = 499
+				popup("Внимание!", "Срок годности должен быть числом дней или месяцев с буквой 'M' в конце")
+				return
+
+		if self.day_or_what == 'month':
+			self.standartdate = self.standartdate + 'm'
+		elif self.day_or_what == 'year':
+			self.standartdate = self.standartdate + 'y'
+
+		self.pos_day_month_visible(False)
+
+		f = open("daysoflife.txt", "a")
+		f.write(str((self.cuart + "$" + self.standartdate + "$")))
+		f.close()
+
+		sync()
+
+		self.go()
 
 	def work(self):
 		global cuart
@@ -284,6 +360,7 @@ class Core(BoxLayout):
 		else:
 			self.step = 1
 			self.dater_visible()
+			self.show_buttons_before_after('show')
 
 			global last_art
 			last_art = self.ids.inputer.text
@@ -294,6 +371,8 @@ class Core(BoxLayout):
 	def work2(self):
 		global cudate
 		global standartdate
+
+		sitrep = self.before_after
 
 		article = self.cuart
 
@@ -319,24 +398,53 @@ class Core(BoxLayout):
 						if self.check2(ask):
 							self.cudate = (ask, yer)
 
-							if self.cuart in days_of_life:
-								self.standartdate = days_of_life[self.cuart]
-								self.go()
-								self.ids.inputer.text = ''
-								self.dater_invisible()
-								self.step = 0
-								self.ids.ex_inputer.text = ''
-								self.ids.ex_inputer2.text = ''
-								self.ids.ex_inputer3.text = ''
+							worker = True
+
+							if self.cuart in art_names:
+								if sitrep == 'after':
+									self.standartdate = "0"
+									worker = False
+								else:
+									self.standartdate = days_of_life[self.cuart]
+
+								if self.standartdate == "0" and worker == True:
+									self.pos_day_month_visible(True)
+									self.worktext = 'Введите срок годности'
+									self.ids.ex_inputer.text = ''
+									self.ids.ex_inputer2.text = ''
+									self.ids.ex_inputer3.text = ''
+									self.ids.inputer.text = ""
+									self.show_buttons_before_after('hide')
+									self.dater_invisible()
+									self.step = 0
+									self.press = 499
+								else:
+									self.go()
+									self.ids.inputer.text = ''
+									self.show_buttons_before_after('hide')
+									self.dater_invisible()
+									self.step = 0
+									self.ids.ex_inputer.text = ''
+									self.ids.ex_inputer2.text = ''
+									self.ids.ex_inputer3.text = ''
 							else:
 								self.ids.ex_inputer.text = ''
 								self.ids.ex_inputer2.text = ''
 								self.ids.ex_inputer3.text = ''
 								self.ids.inputer.text = ""
+								self.show_buttons_before_after('hide')
 								self.dater_invisible()
 								self.step = 0
-								self.worktext = "Введите срок годности в днях или месяцах"
-								self.press = 99
+								if sitrep == 'before':
+									self.pos_day_month_visible(True)
+									self.worktext = "Введите срок годности"
+									self.press = 99
+								else:
+									global standartdate
+									self.ids.inputer.focus = True
+									self.worktext = 'Введите название артикула'
+									self.standartdate = "0"
+									self.press = 199
 
 						else:
 							popup("Внимание!", "В этом месяце нет столько дней")
@@ -365,14 +473,29 @@ class Core(BoxLayout):
 			self.press -= 1
 
 	def define_date(self):
+		if len(self.standartdate) == 0:
+			self.ids.inputer.text = ""
+			self.pos_day_month_visible(True)
+			self.worktext = "Введите срок годности" 
+			self.press = 99
+			popup("Внимание!", "Срок годности должен быть числом")
+			return
+
 		for each in self.standartdate:
-			if each.isdigit() == False and (each.upper() != "M"):
+			if each.isdigit() == False:
 				self.ids.inputer.text = ""
-				self.worktext = "Введите срок годности в днях или месяцах \n"+"Или укажите 0 для указания даты ДО" 
+				self.pos_day_month_visible(True)
+				self.worktext = "Введите срок годности" 
 				self.press = 99
-				popup("Внимание!", "Срок годности должен быть числом дней или месяцев с буквой 'M' в конце")
+				popup("Внимание!", "Срок годности должен быть числом")
 				return
 
+		if self.day_or_what == 'month':
+			self.standartdate = self.standartdate + 'm'
+		elif self.day_or_what == 'year':
+			self.standartdate = self.standartdate + 'y'
+
+		self.pos_day_month_visible(False)
 		self.worktext = "Введите название артикула"
 		self.ids.inputer.text = ""
 		self.press = 199
@@ -404,6 +527,32 @@ class Core(BoxLayout):
 			ex = newex.replace("m", "")
 
 			c += relativedelta(months=int(ex))
+
+			year = str(c.year)
+			month = str(c.month)
+			day = str(c.day)
+
+			if len(month) < 2:
+				month = '0'+month
+
+			if len(day) < 2:
+				day = '0'+day
+
+			repres = '{}.{}.{}'.format(day, month, year)
+			final = '{}{}{}'.format(day, month, year)
+
+			self.save(final, self.cuart)
+			sell = "Срок годности до {}".format(repres)
+			popup("Сохранено", sell)
+			self.worktext = "Введите артикул"
+			self.ids.inputer.text = ""
+			self.press = 0
+
+		elif ex[len(ex)-1].upper() == "Y":
+			newex = ex.replace("Y","")
+			ex = newex.replace("y", "")
+
+			c += relativedelta(years=int(ex))
 
 			year = str(c.year)
 			month = str(c.month)
@@ -1266,10 +1415,12 @@ Builder.load_string("""
 			name: 'work'
 			FloatLayout:
 				canvas:
+					Color: 
+						rgb: 1, .94, .57
+
 					Rectangle:
 						size: self.size
 						pos: self.pos
-						source: "work.png"
 				Label:
 					halign: 'center'
 					valign: "middle"
@@ -1277,7 +1428,51 @@ Builder.load_string("""
 					text_size: self.size
 					size_hint: (.8, .15)
 					font_size: sp(25)
-					pos_hint:{"center_x": .5,"center_y":.87}
+					pos_hint:{"center_x": .5,"center_y":.92}
+
+				ToggleButton:
+					allow_no_selection: False
+					group: 'before_after'
+					state: 'down'
+					text: "От"
+					size_hint: (.3, .06)
+					pos_hint: root.pos_before_after1
+					on_press: root.switch_before_after('before')
+
+				ToggleButton:
+					allow_no_selection: False
+					group: 'before_after'
+					text: "До"
+					size_hint: (.3, .06)
+					pos_hint: root.pos_before_after2
+					on_press: root.switch_before_after('after')
+
+				ToggleButton:
+					allow_no_selection: False
+					state: 'down'
+					group: 'day_month_year'
+					state: 'down'
+					text: "Дни"
+					size_hint: (.3, .06)
+					pos_hint: root.pos_day_month_year1
+					on_press: root.day_or_what_changer('day')
+
+				ToggleButton:
+					allow_no_selection: False
+					group: 'day_month_year'
+					text: "Месяцы"
+					size_hint: (.3, .06)
+					pos_hint: root.pos_day_month_year2
+					on_press: root.day_or_what_changer('month')
+
+				ToggleButton:
+					allow_no_selection: False
+					group: 'day_month_year'
+					text: "Годы"
+					size_hint: (.3, .06)
+					pos_hint: root.pos_day_month_year3
+					on_press: root.day_or_what_changer('year')
+
 
 				TextInput:
 					font_size: sp(65)
@@ -1335,6 +1530,7 @@ Builder.load_string("""
 					background_down: "butp.png"
 					on_release: root.previous()
 					on_release: root.dater_invisible()
+					on_release: root.show_buttons_before_after('hide')
 					on_release: root.ids.ex_inputer.text = ''
 					on_release: root.ids.ex_inputer2.text = ''
 					on_release: root.step = 0
