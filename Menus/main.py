@@ -29,6 +29,7 @@ from kivy.uix.image import Image
 from kivy.uix.togglebutton import ToggleButton
 from datetime import date, timedelta, datetime
 from dateutil.relativedelta import relativedelta
+import gc
 
 year = int(strftime("%Y"))
 if year % 4 == 0:
@@ -40,6 +41,11 @@ allmonth = {"01": 0, "02": 31, "03": 59+extra,
 "04": 90+extra, "05": 120+extra, "06": 151+extra, 
 "07": 181+extra, "08": 212+extra, "09": 243+extra,
 "10": 273+extra, "11": 304+extra, "12": 334+extra, "13": 365+extra}
+
+class SuppaLabel(Label):
+
+	container1 = ObjectProperty(10)
+	container2 = ObjectProperty(10)
 
 class Core(BoxLayout):
 	col = ObjectProperty((.1, .1, .1, .0))
@@ -70,7 +76,55 @@ class Core(BoxLayout):
 	pos_day_month_year2 = ObjectProperty({"center_x": -5,"center_y":.8}) #{"center_x": .5,"center_y":.8}
 	pos_day_month_year3 = ObjectProperty({"center_x": -5,"center_y":.8}) #{"center_x": .8,"center_y":.8}
 
+	pos_el1 = ObjectProperty({"center_x":-5,"center_y":.795})
+	pos_el2 = ObjectProperty({"center_x":-5,"center_y":.795})
+	pos_el3 = ObjectProperty({"center_x":-5,"center_y":.795})
+	pos_el4 = ObjectProperty({"center_x":-5,"center_y":.795})
+	pos_el5 = ObjectProperty({'center_x':.5, 'center_y': .1})
+
+	container1 = ObjectProperty(10)
+	container2 = ObjectProperty(10)
+
 	day_or_what = ObjectProperty('day')
+
+	def extra_checker(self, data):
+		if data == 'dd':
+			if len(self.ids.to_d1.text) == 2:
+				if self.ids.to_d2.text != '':
+					self.ids.to_d1.focus = False
+				else:
+					self.ids.to_d2.focus = True
+			if len(self.ids.to_d1.text) > 2:
+				self.ids.to_d1.text = ''
+		elif data == 'mm':
+			if len(self.ids.to_d2.text) == 2:
+				if self.ids.to_d3.text != '':
+					self.ids.to_d2.focus = False
+				else:
+					self.ids.to_d3.focus = True
+			if len(self.ids.to_d2.text) > 2:
+				self.ids.to_d2.text = ''
+		elif data == 'yy':
+			if len(self.ids.to_d3.text) == 4:
+				self.ids.to_d3.focus = False
+			if len(self.ids.to_d3.text) > 4:
+				self.ids.to_d3.text = ''
+
+	def show_el(self, data):
+		if data == True:
+			self.pos_el1 = ({"center_x":.185,"center_y":.795})
+			self.pos_el2 = ({"center_x":.3,"center_y":.795})
+			self.pos_el3 = ({"center_x":.46,"center_y":.795})
+			self.pos_el4 = ({"center_x": .73,"center_y":.795})
+
+			self.pos_el5 = ({'center_x': -5, 'center_y': .1})
+		else:
+			self.pos_el1 = ({"center_x":-5,"center_y":.795})
+			self.pos_el2 = ({"center_x":-5,"center_y":.795})
+			self.pos_el3 = ({"center_x":-5,"center_y":.795})
+			self.pos_el4 = ({"center_x":-5,"center_y":.795})
+
+			self.pos_el5 = ({'center_x': .5, 'center_y': .1})
 
 	def day_or_what_changer(self, data):
 		if data != self.day_or_what:
@@ -214,43 +268,116 @@ class Core(BoxLayout):
 
 			popup("Внимание", "Данные были удалены")
 
-	def define_today_art(self):
-		tommorow = date.today() + timedelta(days=1)
+	def define_another_art(self):
 
-		day = str(tommorow.day)
-		month = str(tommorow.month)
-		year = str(tommorow.year)
+			day = self.ids.to_d1.text
+			month = self.ids.to_d2.text
+			year = self.ids.to_d3.text
 
-		tommorow = '{}{}{}'.format(day, month, year)
+			absolute = date.today()
+			if year == '':
+				year = absolute.year
 
-		hound = [i for i,x in enumerate(entries) if x==tommorow]
+			check = self.check2('{}{}'.format(day, month))
 
-		if len(hound) == 0:
-			self.ids.mana.current = "today"
+			if check:
+				tommorow = '{}{}{}'.format(day, month, year)
+
+				hound = [i for i,x in enumerate(entries) if x==tommorow]
+
+				if len(hound) == 0:
+					self.ids.mana.current = "today"
+					self.ids.griddy4.clear_widgets()
+					self.col = (.1, .1, .1, .3)
+					self.sp_text ='Нет артикулов с \nистекающим сроком годности'
+				else:
+					self.col = (.1, .1, .1, .0)
+					self.sp_text =''
+					storage = []
+
+					for each in hound:
+						storage.append(entries[each+1])
+
+
+					self.grid = self.ids.griddy4
+					self.grid.bind(minimum_height=self.grid.setter("height"))
+					self.grid.clear_widgets()
+
+					m_label = SuppaLabel()
+
+					m_label.text = 'Списать до {}.{}.{}'.format(day, month, year)
+					m_label.container1 = 0.06*self.height
+					m_label.container2 = 0.035*self.height
+
+
+					self.grid.add_widget(m_label)
+
+
+					for each in storage:
+						self.texter = each + ' ' + art_names[each]
+						self.btn = Button(text=self.texter, size_hint_y=None, height=0.09*self.height, font_size=0.035*self.height)
+						self.grid.add_widget(self.btn)
+
+					self.ids.mana.current = "today"
+					self.ids.to_d1.text = ''
+					self.ids.to_d2.text = ''
+					self.ids.to_d3.text = ''
+			else:
+				popup("Внимание", "Вы ввели неверную дату")
+				self.ids.to_d1.text = ''
+				self.ids.to_d2.text = ''
+				self.ids.to_d3.text = ''
+
+	def define_today_art(self, data):
+		if data == 'today':
+			tommorow = date.today() + timedelta(days=1)
+
+			day = str(tommorow.day)
+			month = str(tommorow.month)
+			year = str(tommorow.year)
+
+			tommorow = '{}{}{}'.format(day, month, year)
+
+			hound = [i for i,x in enumerate(entries) if x==tommorow]
+
+			if len(hound) == 0:
+				self.ids.mana.current = "today"
+				self.ids.griddy4.clear_widgets()
+				self.col = (.1, .1, .1, .3)
+				self.sp_text ='Нет артикулов с \nистекающим сроком годности'
+			else:
+				self.col = (.1, .1, .1, .0)
+				self.sp_text =''
+				storage = []
+
+				for each in hound:
+					storage.append(entries[each+1])
+
+
+				self.grid = self.ids.griddy4
+				self.grid.bind(minimum_height=self.grid.setter("height"))
+				self.grid.clear_widgets()
+
+				m_label = SuppaLabel()
+
+				m_label.text = 'Списать сегодня'
+				m_label.container1 = 0.06*self.height
+				m_label.container2 = 0.035*self.height
+
+
+				self.grid.add_widget(m_label)
+
+
+				for each in storage:
+					self.texter = each + ' ' + art_names[each]
+					self.btn = ToggleButton(text=self.texter, size_hint_y=None, height=0.09*self.height, font_size=0.035*self.height)
+					self.grid.add_widget(self.btn)
+					self.btn.bind(on_press=self.check_status)
+
+				self.ids.mana.current = "today"
+
+		elif data == 'another':
 			self.ids.griddy4.clear_widgets()
-			self.col = (.1, .1, .1, .3)
-			self.sp_text ='Нет артикулов с \nистекающим сроком годности'
-		else:
-			self.col = (.1, .1, .1, .0)
-			self.sp_text =''
-			storage = []
-
-			for each in hound:
-				storage.append(entries[each+1])
-
-			self.ids.inin.text = tommorow
-
-			self.grid = self.ids.griddy4
-			self.grid.bind(minimum_height=self.grid.setter("height"))
-			self.grid.clear_widgets()
-
-			for each in storage:
-				self.texter = each + ' ' + art_names[each]
-				self.btn = ToggleButton(text=self.texter, size_hint_y=None, height=0.09*self.height, font_size=0.035*self.height)
-				self.grid.add_widget(self.btn)
-				self.btn.bind(on_press=self.check_status)
-
-			self.ids.mana.current = "today"
 
 	found_arts = []
 
@@ -590,8 +717,6 @@ class Core(BoxLayout):
 			sell = 'Срок годности до {}.{}.{}'.format(day, month, year)
 			ent = '{}{}{}'.format(day, month, year)
 
-			print('Фактически дата такова ', day, month, year)
-
 			self.save(ent, self.cuart)
 			popup("Сохранено", sell)
 			self.worktext = "Введите артикул"
@@ -602,20 +727,23 @@ class Core(BoxLayout):
 			popup("Внимание", "Некорректное количество дней")
 
 	def check2(self, ask):
-		dayz = ask[:2]
-		month = ask[2:]       
-		digidayz = int(dayz)
-		digimonth = int(month)
-		newmonth = "0%d" % (digimonth + 1)  
-		realdayz = allmonth[month]
-		if len(newmonth) == 2:
-			result = allmonth[newmonth] - realdayz
-		else:
-			newmonthD = newmonth[1:]
-			result = allmonth[newmonthD] - realdayz
-		if digidayz <= result:
-			return True
-		else:
+		try:
+			dayz = ask[:2]
+			month = ask[2:]       
+			digidayz = int(dayz)
+			digimonth = int(month)
+			newmonth = "0%d" % (digimonth + 1)  
+			realdayz = allmonth[month]
+			if len(newmonth) == 2:
+				result = allmonth[newmonth] - realdayz
+			else:
+				newmonthD = newmonth[1:]
+				result = allmonth[newmonthD] - realdayz
+			if digidayz <= result:
+				return True
+			else:
+				return False
+		except:
 			return False
 
 	def popup(self, title, text):
@@ -671,11 +799,9 @@ class Core(BoxLayout):
 			if self.inputi3.text.isdigit():
 				correct = True
 			elif self.inputi3.text.lower()[-1] == "m":
-				print('WE DEFINE M In there')
 				tester = []
 				for each in self.inputi3.text:
 					tester.append(each.lower())
-				print(tester)
 				tester.remove("m")
 				new = "".join(tester)
 				if not new.isdigit():
@@ -1392,6 +1518,18 @@ def sync():
 Builder.load_string("""
 #:import NoTransition kivy.uix.screenmanager.NoTransition
 
+<SuppaLabel>:
+	canvas.before:
+		Color: 
+			rgb: 0, .8, .4, 
+		Rectangle: 
+			pos: self.pos 
+			size: self.size
+	text: 'LMAO'
+	size_hint_y: None
+	height: root.container1
+	font_size: root.container2
+
 <Core>:
 	orientation: "vertical"
 	BoxLayout:
@@ -1641,19 +1779,78 @@ Builder.load_string("""
 						size: self.size
 						pos: self.pos
 						source: "clean.png"
+
+				ToggleButton:
+					id: bom_bom_bom
+					allow_no_selection: False
+					state: 'down'
+					group: 'which_trash'
+					state: 'down'
+					text: "Сегодня"
+					size_hint: (.3, .06)
+					pos_hint: {"center_x": .2,"center_y":.9}
+					on_press: root.show_el(False)
+					on_press: root.define_today_art('today')
+
+				ToggleButton:
+					id: bom_bom_bom2
+					allow_no_selection: False
+					group: 'which_trash'
+					text: "Произвольно"
+					size_hint: (.3, .06)
+					pos_hint: {"center_x": .5,"center_y":.9}
+					on_press: root.show_el(True)
+					on_press: root.define_today_art('another')
+
+				ToggleButton:
+					id: bom_bom_bom3
+					allow_no_selection: False
+					group: 'which_trash'
+					text: "Период"
+					size_hint: (.3, .06)
+					pos_hint: {"center_x": .8,"center_y":.9}
+					on_press: root.show_el(False)
+					on_press: root.define_today_art('range')
+
 				TextInput:
-					disabled: True
-					id: inin
+					font_size: 28
+					id: to_d1
+					hint_text: 'ДД'
 					multiline: False
-					size_hint: (.33, .05*1.75)
-					pos_hint:{"center_x":.5,"center_y":.9}
-					font_size: sp(35)
+					size_hint: (.11, .08)
+					pos_hint: root.pos_el1
+					on_text: root.extra_checker('dd')
+
+				TextInput:
+					font_size: 28
+					id: to_d2
+					hint_text: 'ММ'
+					multiline: False
+					size_hint: (.11, .08)
+					pos_hint: root.pos_el2
+					on_text: root.extra_checker('mm')
+
+				TextInput:
+					font_size: 28
+					id: to_d3
+					hint_text: '2018'
+					multiline: False
+					size_hint: (.2, .08)
+					pos_hint: root.pos_el3
+					on_text: root.extra_checker('yy')
+
+				Button:
+					text: "Найти"
+					size_hint: (.3, .08)
+					pos_hint: root.pos_el4
+					on_press: root.define_another_art()
 
 				ScrollView:
 					size_hint_x: .8
-					size_hint_y: .65
-					pos_hint: {'center_x': .5, 'center_y': .5}
-					GridLayout:
+					size_hint_y: .55
+					pos_hint: {'center_x': .5, 'center_y': .45}
+					BoxLayout:
+						orientation: "vertical"
 						id: griddy4
 						canvas:
 							Rectangle:
@@ -1678,8 +1875,8 @@ Builder.load_string("""
 							size: self.size
 
 				Button:
-					pos_hint: {'center_x': .5, 'center_y': .1}
-					size_hint: (.24, .22)
+					pos_hint: root.pos_el5
+					size_hint: (.25, .2)
 					background_normal: "trash.png"
 					background_down: "butp.png"
 					on_release:
@@ -1899,7 +2096,11 @@ Builder.load_string("""
 			allow_no_selection: False
 			group: 'test'
 			text: 'Today'
-			on_press: root.define_today_art()
+			on_press: root.ids.bom_bom_bom.state = 'down'
+			on_press: root.ids.bom_bom_bom2.state = 'normal'
+			on_press: root.ids.bom_bom_bom3.state = 'normal'
+			on_press: root.show_el(False)
+			on_press: root.define_today_art('today')
 
 		ToggleButton:
 			allow_no_selection: False
