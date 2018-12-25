@@ -87,6 +87,157 @@ class Core(BoxLayout):
 
 	day_or_what = ObjectProperty('day')
 
+	ranger1 = ObjectProperty({"center_x":-5,"center_y":.795})
+	ranger2 = ObjectProperty({"center_x":-5,"center_y":.795})
+	ranger3 = ObjectProperty({"center_x":-5,"center_y":.795})
+	ranger4 = ObjectProperty({"center_x":-5,"center_y":.795})
+	ranger5 = ObjectProperty({"center_x":-5,"center_y":.795})
+	ranger6 = ObjectProperty({"center_x":-5,"center_y":.795})
+	ranger7 = ObjectProperty({"center_x":-5,"center_y":.795})
+	ranger8 = ObjectProperty({"center_x":-5,"center_y":.795})
+	ranger9 = ObjectProperty({"center_x":-5,"center_y":.795})
+
+	def ranger_main(self):
+
+		try:
+			self.grid.clear_widgets()
+		except:
+			print('Not created')
+			
+		try:
+			start_date = date(int(self.ids.to_range3.text), int(self.ids.to_range2.text), int(self.ids.to_range1.text))
+			end_date = date(int(self.ids.to_range6.text), int(self.ids.to_range5.text), int(self.ids.to_range4.text))
+		except:
+			popup('Внимание', 'Дата введена не корректно!')
+			return
+
+		between = (end_date-start_date).days
+		between += 1
+
+		start_date -= timedelta(1)
+		
+		for x in range(between):
+			start_date += timedelta(1)
+
+			day = str(start_date.day)
+			month = str(start_date.month)
+			year = str(start_date.year)
+
+			if len(day) == 1:
+				day = '0'+day
+
+			if len(month) == 1:
+				month = '0'+month
+
+			tommorow = '{}{}{}'.format(day, month, year)
+
+
+			hound = [i for i,x in enumerate(entries) if x==tommorow]
+
+			if len(hound) == 0:
+				continue
+			else:
+				self.col = (.1, .1, .1, .0)
+				self.sp_text =''
+				storage = []
+
+				for each in hound:
+					storage.append(entries[each+1])
+
+
+				self.grid = self.ids.griddy4
+				self.grid.bind(minimum_height=self.grid.setter("height"))
+
+				m_label = SuppaLabel()
+
+				m_label.text = 'Списать до {}.{}.{}'.format(day, month, year)
+				m_label.container1 = 0.06*self.height
+				m_label.container2 = 0.035*self.height
+
+
+				self.grid.add_widget(m_label)
+
+
+				for each in storage:
+					self.texter = each + ' ' + art_names[each]
+					self.btn = Button(text=self.texter, size_hint_y=None, height=0.09*self.height, font_size=0.035*self.height)
+					self.grid.add_widget(self.btn)
+		
+
+	def show_rangers(self, data):
+		if data == True:
+			self.ranger1 = ({"center_x":.22,"center_y":.83})
+			self.ranger2 = ({"center_x":.335,"center_y":.83})
+			self.ranger3 = ({"center_x":.497,"center_y":.83})
+			self.ranger4 = ({"center_x":.22,"center_y":.77})
+			self.ranger5 = ({"center_x":.335,"center_y":.77})
+			self.ranger6 = ({"center_x":.497,"center_y":.77})
+			self.ranger7 = ({"center_x":.78,"center_y":.8})
+			self.ranger8 = ({"center_x":.1,"center_y":.83})
+			self.ranger9 = ({"center_x":.1,"center_y":.77})
+
+			self.pos_el5 = ({"center_x":-5,"center_y":.77})
+
+		else:
+			self.ranger1 = ({"center_x":-5,"center_y":.83})
+			self.ranger2 = ({"center_x":-5,"center_y":.83})
+			self.ranger3 = ({"center_x":-5,"center_y":.83})
+			self.ranger4 = ({"center_x":-5,"center_y":.77})
+			self.ranger5 = ({"center_x":-5,"center_y":.77})
+			self.ranger6 = ({"center_x":-5,"center_y":.77})
+			self.ranger7 = ({"center_x":-5,"center_y":.8})
+			self.ranger8 = ({"center_x":-5,"center_y":.83})
+			self.ranger9 = ({"center_x":-5,"center_y":.77})
+
+	def extra_checker2(self, data):
+		if data[0] == '1':
+			if data == '1dd':
+				if len(self.ids.to_range1.text) == 2:
+					if self.ids.to_range2.text != '':
+						self.ids.to_range1.focus = False
+					else:
+						self.ids.to_range2.focus = True
+				if len(self.ids.to_range1.text) > 2:
+					self.ids.to_range1.text = ''
+			elif data == '1mm':
+				if len(self.ids.to_range2.text) == 2:
+					if self.ids.to_range3.text != '':
+						self.ids.to_range2.focus = False
+					else:
+						self.ids.to_range3.focus = True
+				if len(self.ids.to_range2.text) > 2:
+					self.ids.to_range2.text = ''
+			elif data == '1yy':
+				if len(self.ids.to_range3.text) == 4:
+					self.ids.to_range3.focus = False
+				if len(self.ids.to_range3.text) > 4:
+					self.ids.to_range3.text = ''
+		else:
+			if data == '2dd':
+				if len(self.ids.to_range4.text) == 2:
+					if self.ids.to_range5.text != '':
+						self.ids.to_range4.focus = False
+					else:
+						self.ids.to_range5.focus = True
+				if len(self.ids.to_range4.text) > 2:
+					self.ids.to_range4.text = ''
+			elif data == '2mm':
+				if len(self.ids.to_range5.text) == 2:
+					if self.ids.to_range6.text != '':
+						self.ids.to_range5.focus = False
+					else:
+						self.ids.to_range6.focus = True
+				if len(self.ids.to_range5.text) > 2:
+					self.ids.to_range5.text = ''
+			elif data == '2yy':
+				if len(self.ids.to_range6.text) == 4:
+					self.ids.to_range6.focus = False
+				if len(self.ids.to_range6.text) > 4:
+					self.ids.to_range6.text = ''
+
+
+
+
 	def extra_checker(self, data):
 		if data == 'dd':
 			if len(self.ids.to_d1.text) == 2:
@@ -1789,6 +1940,7 @@ Builder.load_string("""
 					text: "Сегодня"
 					size_hint: (.3, .06)
 					pos_hint: {"center_x": .2,"center_y":.9}
+					on_press: root.show_rangers(False)
 					on_press: root.show_el(False)
 					on_press: root.define_today_art('today')
 
@@ -1799,6 +1951,7 @@ Builder.load_string("""
 					text: "Произвольно"
 					size_hint: (.3, .06)
 					pos_hint: {"center_x": .5,"center_y":.9}
+					on_press: root.show_rangers(False)
 					on_press: root.show_el(True)
 					on_press: root.define_today_art('another')
 
@@ -1809,6 +1962,7 @@ Builder.load_string("""
 					text: "Период"
 					size_hint: (.3, .06)
 					pos_hint: {"center_x": .8,"center_y":.9}
+					on_press: root.show_rangers(True)
 					on_press: root.show_el(False)
 					on_press: root.define_today_art('range')
 
@@ -1838,6 +1992,93 @@ Builder.load_string("""
 					size_hint: (.2, .08)
 					pos_hint: root.pos_el3
 					on_text: root.extra_checker('yy')
+##################################################################################
+				TextInput:
+					font_size: 18
+					id: to_range1
+					hint_text: 'ДД'
+					multiline: False
+					size_hint: (.11, .05)
+					pos_hint: root.ranger1
+					on_text: root.extra_checker2('1dd')
+
+				TextInput:
+					font_size: 18
+					id: to_range2
+					hint_text: 'ММ'
+					multiline: False
+					size_hint: (.11, .05)
+					pos_hint: root.ranger2
+					on_text: root.extra_checker2('1mm')
+
+				TextInput:
+					font_size: 18
+					id: to_range3
+					hint_text: '2018'
+					multiline: False
+					size_hint: (.2, .05)
+					pos_hint: root.ranger3
+					on_text: root.extra_checker2('1yy')
+
+				TextInput:
+					font_size: 18
+					id: to_range4
+					hint_text: 'ДД'
+					multiline: False
+					size_hint: (.11, .05)
+					pos_hint: root.ranger4
+					on_text: root.extra_checker2('2dd')
+
+				TextInput:
+					font_size: 18
+					id: to_range5
+					hint_text: 'ММ'
+					multiline: False
+					size_hint: (.11, .05)
+					pos_hint: root.ranger5
+					on_text: root.extra_checker2('2mm')
+
+				TextInput:
+					font_size: 18
+					id: to_range6
+					hint_text: '2018'
+					multiline: False
+					size_hint: (.2, .05)
+					pos_hint: root.ranger6
+					on_text: root.extra_checker2('2yy')
+
+				Button:
+					font_size: 28
+					text: "Найти"
+					size_hint: (.31, .11)
+					pos_hint: root.ranger7
+					on_release: root.ranger_main()
+
+######################################################################################
+
+				Label:
+					canvas.before: 
+						Color: 
+							rgb: 0, .8, 0 
+						Rectangle: 
+							pos: self.pos 
+							size: self.size
+					font_size: 18
+					text: 'От:'
+					size_hint: (.1, .05)
+					pos_hint: root.ranger8
+
+				Label:
+					canvas.before: 
+						Color: 
+							rgb: 0, .8, 0 
+						Rectangle: 
+							pos: self.pos 
+							size: self.size
+					font_size: 18
+					text: 'До:'
+					size_hint: (.1, .05)
+					pos_hint: root.ranger9
 
 				Button:
 					text: "Найти"
@@ -2096,6 +2337,7 @@ Builder.load_string("""
 			allow_no_selection: False
 			group: 'test'
 			text: 'Today'
+			on_press: root.show_rangers(False)
 			on_press: root.ids.bom_bom_bom.state = 'down'
 			on_press: root.ids.bom_bom_bom2.state = 'normal'
 			on_press: root.ids.bom_bom_bom3.state = 'normal'
