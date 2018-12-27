@@ -49,6 +49,7 @@ class SuppaLabel(Label):
 	container1 = ObjectProperty(10)
 	container2 = ObjectProperty(10)
 
+
 class Core(BoxLayout):
 	col = ObjectProperty((.1, .1, .1, .0))
 	sp_text = ObjectProperty("")
@@ -99,6 +100,207 @@ class Core(BoxLayout):
 	ranger8 = ObjectProperty({"center_x":-5,"center_y":.795})
 	ranger9 = ObjectProperty({"center_x":-5,"center_y":.795})
 
+	def old_trash_out(self):
+
+		master = []
+
+		for each in self.arch:
+			hm = each.split('.')
+			resulter = hm[2]+hm[0]
+			master.append(resulter)
+
+		if len(self.arch) == 0:
+			return
+		else:
+
+			f = open("saver.txt", "r+")
+			dawread = f.read()
+			f.close()
+			dawread = dawread.split("$")
+			del dawread[-1]
+
+			special = []
+
+			enough = False
+			temp = []
+
+			for each in dawread:
+				if enough == False:
+					temp.append(each)
+					enough = not enough
+				else:
+					temp.append(each)
+					special.append(temp)
+					temp = []
+					enough = not enough
+
+			superb = []
+
+			for each in special:
+				resulter = each[0]+each[1]
+				superb.append(resulter)
+
+
+			for each in master:
+				if each in superb:
+					superb.remove(each)
+
+			soviet = []
+
+			for each in superb:
+				first = each[:8]
+				second = each[8:]
+
+				soviet.append(first)
+				soviet.append(second)
+
+			with open("saver.txt", "w") as f:
+				for each in soviet:
+					f.write(str(each + "$"))
+
+			sync()
+
+			self.ids.griddy_trash.clear_widgets()
+
+			self.arch = []
+			self.memory = []
+
+			self.ids.fi.state = 'down'
+			self.ids.mana.current = 'work'
+
+			popup("Внимание", "Данные были удалены")
+
+			
+
+
+
+	def put_trash(self):
+
+		list_temp = []
+		temp = []
+
+		ddate = True
+		for each in entries:
+			if ddate:
+				temp.append(each)
+				ddate = not ddate
+			else:
+				temp.append(each)
+				list_temp.append((temp[0], temp[1]))
+				temp = []
+				ddate = not ddate
+
+		another_list = []
+
+		for each in list_temp:
+			day = each[0][:2]
+			month = each[0][2:4]
+			year = each[0][4:]
+
+			c = date(int(year), int(month), int(day))
+
+			temp = (c, each[1])
+
+			another_list.append(temp)
+
+		just_list = []
+
+		curent = datetime.now()
+
+		for each in another_list:
+			if each[0] < curent.date():
+				just_list.append(each)
+
+		new_kind = sorted(just_list, key=lambda x: x[0])
+
+########################-------------------------We have all what we want sorted now###############
+
+		self.grid = self.ids.griddy_trash
+		self.grid.bind(minimum_height=self.grid.setter("height"))
+		self.grid.clear_widgets()
+
+		last_year = ''
+
+		counter = 0
+		for each in new_kind:
+			counter += 1
+
+			day = str(each[0].day)
+			month = str(each[0].month)
+			year = str(each[0].year)
+
+			if len(day) == 1:
+				day = '0'+day
+			if len(month) == 1:
+				month = '0'+month
+
+			sentence = '{}{}{}'.format(day, month, year)
+			self.memory.append(sentence)
+
+			m_label = SuppaLabel()
+
+
+			if last_year != each[0].year:
+				m_label.text = 'Должно быть списано до {}'.format(each[0].year)
+				m_label.container1 = 0.06*self.height
+				m_label.container2 = 0.035*self.height
+				self.grid.add_widget(m_label)
+			else:
+				pass
+
+			self.texter = str(counter)+'. ' + each[1] + ' ' + art_names[each[1]]
+			self.btn = ToggleButton(text=self.texter, size_hint_y=None, height=0.09*self.height, font_size=0.035*self.height)
+			self.grid.add_widget(self.btn)
+			self.btn.bind(on_press=self.check_status2)
+
+
+
+
+	def check_status2(self, button):
+
+		if button.state == 'down':
+			flat = button.text.split(' ')
+			number = flat[0]
+			article = flat[1]
+			name = flat[2]
+
+			number = number.replace(' ', '')
+			article = article.replace(' ', '')
+			name = name.replace(' ', '')
+
+			number = number.replace('.', '')
+
+			mem_date = self.memory[int(number)-1]
+
+			self.arch.append('{}.{}.{}'.format(article, name, mem_date))
+		else:
+			flat = button.text.split(' ')
+			number = flat[0]
+			article = flat[1]
+			name = flat[2]
+
+			number = number.replace(' ', '')
+			article = article.replace(' ', '')
+			name = name.replace(' ', '')
+
+			number = number.replace('.', '')
+
+			mem_date = self.memory[int(number)-1]
+
+			searching_for = '{}.{}.{}'.format(article, name, mem_date)
+			self.arch.remove(searching_for)
+
+
+	memory = []
+	arch = []
+
+	def alarm_out(self, *args):
+		self.animation = Animation(pos_hint=({"center_x": .4,"center_y": 2}), duration=0.25)
+		self.animation.start(self.ids.warner)
+
+		self.a = Animation(pos_hint=({"center_x": .9,"center_y": 2}), duration=0.25)
+		self.a.start(self.ids.warner2)
+
 	def alarm(self, *args):
 
 		counter = True
@@ -114,11 +316,14 @@ class Core(BoxLayout):
 					curent = datetime.now()
 
 					if c < curent.date():
-						self.animation = Animation(pos_hint=({"center_x": .5,"center_y":.5}), duration=1)
+						self.animation = Animation(pos_hint=({"center_x": .4,"center_y":.5}), duration=1)
 						self.animation.start(self.ids.warner)
+
+						self.a = Animation(pos_hint=({"center_x": .9,"center_y":.5}), duration=1)
+						self.a.start(self.ids.warner2)
 						break
 					else:
-						print('NOTHING')
+						None
 
 				else:
 					counter = not counter
@@ -1741,22 +1946,44 @@ Builder.load_string("""
 			font_size: sp(25)
 			pos_hint: {"center_x": .5,"center_y": .5}
 
-		Label:
+		Button:
 			id: warner
-			canvas.before: 
-				Color: 
-					rgb: 1, .35, .35 
-				Rectangle: 
-					pos: self.pos 
-					size: self.size
-
+			background_normal: ''
+			background_color: 1, .35, .35, 1
 			halign: 'center'
 			valign: "middle"
 			text: 'Есть не списанные артикулы'
 			text_size: self.size
-			size_hint: (1, 1)
+			size_hint: (.8, 1)
 			font_size: sp(25)
-			pos_hint: {"center_x": .5,"center_y": 2}
+			pos_hint: {"center_x": .4,"center_y": 2}
+			on_press: root.ids.fi.state = 'normal'
+			on_press: root.ids.se.state = 'normal'
+			on_press: root.ids.th.state = 'normal'
+			on_press: root.ids.fo.state = 'normal'
+
+			on_press: root.ids.mana.current = "old_arts"
+			on_press: root.alarm_out()
+			on_press: root.put_trash()
+
+		Button:
+			canvas.before:
+		        Color:
+					rgba: 0, 0, 0, 1
+				Line:
+					width: 2
+					rectangle: self.x, self.y, 0, self.height
+			id: warner2
+			background_normal: ''
+			background_color: 1, .35, .35, 1
+			halign: 'center'
+			valign: "middle"
+			text: 'X'
+			text_size: self.size
+			size_hint: (.2, 1)
+			font_size: sp(25)
+			pos_hint: {"center_x": .9,"center_y": 2}
+			on_press: root.alarm_out()
 
 
 
@@ -2379,6 +2606,54 @@ Builder.load_string("""
 					on_release:
 						root.are_you_sure()
 
+		Screen:
+			name: 'old_arts'
+			FloatLayout:
+
+				id: canvas
+				canvas:
+					Rectangle:
+						size: self.size
+						pos: self.pos
+						source: "clean.png"
+
+
+				ScrollView:
+					size_hint_x: .8
+					size_hint_y: .55
+					pos_hint: {'center_x': .5, 'center_y': .45}
+					BoxLayout:
+						orientation: "vertical"
+						id: griddy_trash
+						canvas:
+							Rectangle:
+								pos: self.pos
+								size: self.size
+								source: "cleanbl.png"
+						spacing: 2
+						cols: 1
+						size_hint_y: None
+						height: 0
+
+				Label:
+					pos_hint: {'center_x': .5, 'center_y': .5}
+					text: 'TEST'
+					font_size: sp(20)
+					size_hint: (.8, .3)
+					canvas.before: 
+						Color: 
+							rgba: root.col
+						Rectangle:
+							pos: self.pos 
+							size: self.size
+
+				Button:
+					pos_hint: {'center_x':.5, 'center_y': .1}
+					size_hint: (.25, .2)
+					background_normal: "trash.png"
+					background_down: "butp.png"
+					on_release:
+						root.old_trash_out()
 
 
 
@@ -2387,6 +2662,7 @@ Builder.load_string("""
 	BoxLayout:
 		size_hint_y: 8
 		ToggleButton:
+			id: fi
 			allow_no_selection: False
 			group: 'test'
 			state: 'down'
@@ -2394,12 +2670,14 @@ Builder.load_string("""
 			on_press: root.ids.mana.current = "work"
 
 		ToggleButton:
+			id: se
 			allow_no_selection: False
 			group: 'test'
 			text: 'DB'
 			on_press: root.ids.mana.current = "database"
 
 		ToggleButton:
+			id: th
 			allow_no_selection: False
 			group: 'test'
 			text: 'Today'
@@ -2411,6 +2689,7 @@ Builder.load_string("""
 			on_press: root.define_today_art('today')
 
 		ToggleButton:
+			id: fo
 			allow_no_selection: False
 			group: 'test'
 			text: 'Settings'
