@@ -30,6 +30,8 @@ from kivy.uix.togglebutton import ToggleButton
 from datetime import date, timedelta, datetime
 from dateutil.relativedelta import relativedelta
 import gc
+from kivy.animation import Animation
+from kivy.clock import Clock
 
 year = int(strftime("%Y"))
 if year % 4 == 0:
@@ -97,12 +99,39 @@ class Core(BoxLayout):
 	ranger8 = ObjectProperty({"center_x":-5,"center_y":.795})
 	ranger9 = ObjectProperty({"center_x":-5,"center_y":.795})
 
+	def alarm(self, *args):
+
+		counter = True
+		for each in entries:
+			try:
+				if counter == True:
+					counter = not counter
+					day = int(each[:2])
+					month = int(each[2:4])
+					year = int(each[4:])
+
+					c = date(year, month, day)
+					curent = datetime.now()
+
+					if c < curent.date():
+						self.animation = Animation(pos_hint=({"center_x": .5,"center_y":.5}), duration=1)
+						self.animation.start(self.ids.warner)
+						break
+					else:
+						print('NOTHING')
+
+				else:
+					counter = not counter
+					continue
+			except:
+				pass
+
 	def ranger_main(self):
 
 		try:
 			self.grid.clear_widgets()
 		except:
-			print('Not created')
+			None
 			
 		try:
 			start_date = date(int(self.ids.to_range3.text), int(self.ids.to_range2.text), int(self.ids.to_range1.text))
@@ -480,6 +509,7 @@ class Core(BoxLayout):
 				self.ids.to_d3.text = ''
 
 	def define_today_art(self, data):
+		self.ids.griddy4.clear_widgets()
 		if data == 'today':
 			tommorow = date.today() + timedelta(days=1)
 
@@ -1618,6 +1648,15 @@ class Core(BoxLayout):
 
 ###########################---App_Classes---##################################
 class ProtoApp(App):
+	def on_start(self):
+		mine = ''
+		for obj in gc.get_objects(): #This way I could find an instance ;)
+			if isinstance(obj, Core):
+				mine = obj
+				break
+
+		Clock.schedule_once(mine.alarm, 2)
+
 	def build(self):
 		return Core()
 
@@ -1683,16 +1722,43 @@ Builder.load_string("""
 
 <Core>:
 	orientation: "vertical"
-	BoxLayout:
+	FloatLayout:
 		size_hint_y: 8
-		canvas.before: 
-			Color: 
-				rgb: 0, .8, 0 
-			Rectangle: 
-				pos: self.pos 
-				size: self.size
+
 		Label:
-			text: 'AVOCADO'
+			canvas.before: 
+				Color: 
+					rgb: 0, .8, 0
+				Rectangle: 
+					pos: self.pos 
+					size: self.size
+
+			halign: 'center'
+			valign: "middle"
+			text: 'Avocado'
+			text_size: self.size
+			size_hint: (1, 1)
+			font_size: sp(25)
+			pos_hint: {"center_x": .5,"center_y": .5}
+
+		Label:
+			id: warner
+			canvas.before: 
+				Color: 
+					rgb: 1, .35, .35 
+				Rectangle: 
+					pos: self.pos 
+					size: self.size
+
+			halign: 'center'
+			valign: "middle"
+			text: 'Есть не списанные артикулы'
+			text_size: self.size
+			size_hint: (1, 1)
+			font_size: sp(25)
+			pos_hint: {"center_x": .5,"center_y": 2}
+
+
 
 	ScreenManagement:
 		transition: NoTransition()
