@@ -3,7 +3,7 @@
 #sys.setdefaultencoding("utf-8")
 
 from kivy.config import Config
-Config.set('graphics', 'resizable', False)
+Config.set('graphics', 'resizable', True)
 Config.set('graphics', 'width', '414')
 Config.set('graphics', 'height', '736')
 
@@ -1928,22 +1928,18 @@ Builder.load_string("""
 <Core>:
 	orientation: "vertical"
 	FloatLayout:
+		canvas.before: 
+			Color: 
+				rgb: 1, .65, .18
+			Rectangle:
+				pos: self.pos 
+				size: self.size
+
 		size_hint_y: 8
 
-		Label:
-			canvas.before: 
-				Color: 
-					rgb: 0, .8, 0
-				Rectangle: 
-					pos: self.pos 
-					size: self.size
-
-			halign: 'center'
-			valign: "middle"
-			text: 'Avocado'
-			text_size: self.size
+		Image:
+			source: 'head.jpg'
 			size_hint: (1, 1)
-			font_size: sp(25)
 			pos_hint: {"center_x": .5,"center_y": .5}
 
 		Button:
@@ -1998,9 +1994,10 @@ Builder.load_string("""
 			FloatLayout:
 				canvas:
 					Color: 
-						rgb: 1, .94, .57
+						rgb: 1, 1, 1
 
 					Rectangle:
+						source: 'back.png'
 						size: self.size
 						pos: self.pos
 				Label:
