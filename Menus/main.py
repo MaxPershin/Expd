@@ -2171,7 +2171,7 @@ Builder.load_string("""
 					Rectangle:
 						size: self.size
 						pos: self.pos
-						source: "clean.png"
+						source: 'back.png'
 
 			Button:
 				pos_hint: {'center_x': .5, 'center_y': .1}
@@ -2219,7 +2219,7 @@ Builder.load_string("""
 					Rectangle:
 						size: self.size
 						pos: self.pos
-						source: "clean.png"
+						source: 'back.png'
 
 				ToggleButton:
 					id: bom_bom_bom
@@ -2421,7 +2421,7 @@ Builder.load_string("""
 					Rectangle:
 						size: self.size
 						pos: self.pos
-						source: "clean.png"
+						source: 'back.png'
 
 				Label:
 					id: ghost
@@ -2483,7 +2483,7 @@ Builder.load_string("""
 					Rectangle:
 						size: self.size
 						pos: self.pos
-						source: "clean.png"
+						source: 'back.png'
 				Label:
 					size: self.texture_size
 					text: "Редактирование"
@@ -2575,7 +2575,7 @@ Builder.load_string("""
 					Rectangle:
 						size: self.size
 						pos: self.pos
-						source: "clean.png"
+						source: 'back.png'
 
 				Button:
 					text: "Язык"
@@ -2612,7 +2612,7 @@ Builder.load_string("""
 					Rectangle:
 						size: self.size
 						pos: self.pos
-						source: "clean.png"
+						source: 'back.png'
 
 
 				ScrollView:
