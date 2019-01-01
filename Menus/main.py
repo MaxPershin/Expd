@@ -3,7 +3,7 @@
 #sys.setdefaultencoding("utf-8")
 
 from kivy.config import Config
-Config.set('graphics', 'resizable', True)
+Config.set('graphics', 'resizable', False)
 Config.set('graphics', 'width', '414')
 Config.set('graphics', 'height', '736')
 
@@ -100,6 +100,16 @@ class Core(BoxLayout):
 	ranger8 = ObjectProperty({"center_x":-5,"center_y":.795})
 	ranger9 = ObjectProperty({"center_x":-5,"center_y":.795})
 
+	prosrochka_button = ObjectProperty({"center_x": -5,"center_y":.9625})
+
+	current_year = str(datetime.now().year)
+
+	def show_prosrok(self, data):
+		if data:
+			self.prosrochka_button = {"center_x": .5,"center_y":.9625}
+		else:
+			self.prosrochka_button = {"center_x": -5,"center_y":.9625}
+
 	def old_trash_out(self):
 
 		master = []
@@ -169,6 +179,10 @@ class Core(BoxLayout):
 			self.ids.mana.current = 'work'
 
 			popup("Внимание", "Данные были удалены")
+
+			self.show_prosrok(False)
+
+			self.alarm()
 
 			
 
@@ -241,7 +255,15 @@ class Core(BoxLayout):
 
 
 			if last_year != each[0].year:
-				m_label.text = 'Должно быть списано до {}'.format(each[0].year)
+				dayr = str(each[0].day)
+				monthr = str(each[0].month)
+
+				if len(dayr) < 2:
+					dayr = '0'+dayr
+				if len(monthr) < 2:
+					monthr = '0'+monthr
+
+				m_label.text = 'Просрок до {}.{}.{}'.format(dayr, monthr, each[0].year)
 				m_label.container1 = 0.06*self.height
 				m_label.container2 = 0.035*self.height
 				self.grid.add_widget(m_label)
@@ -315,21 +337,22 @@ class Core(BoxLayout):
 					c = date(year, month, day)
 					curent = datetime.now()
 
-					if c < curent.date():
+					if c <= curent.date():
 						self.animation = Animation(pos_hint=({"center_x": .4,"center_y":.5}), duration=1)
 						self.animation.start(self.ids.warner)
 
 						self.a = Animation(pos_hint=({"center_x": .9,"center_y":.5}), duration=1)
 						self.a.start(self.ids.warner2)
+						self.show_prosrok(True)
 						break
 					else:
-						None
+						self.alarm_out()
 
 				else:
 					counter = not counter
 					continue
 			except:
-				pass
+				self.alarm_out()
 
 	def ranger_main(self):
 
@@ -674,7 +697,7 @@ class Core(BoxLayout):
 					self.ids.mana.current = "today"
 					self.ids.griddy4.clear_widgets()
 					self.col = (.1, .1, .1, .3)
-					self.sp_text ='Нет артикулов с \nистекающим сроком годности'
+					self.sp_text ='Нет артикулов'
 				else:
 					self.col = (.1, .1, .1, .0)
 					self.sp_text =''
@@ -722,6 +745,11 @@ class Core(BoxLayout):
 			month = str(tommorow.month)
 			year = str(tommorow.year)
 
+			if len(day) < 2:
+				day = '0'+day
+			if len(month) < 2:
+				month = '0'+month
+
 			tommorow = '{}{}{}'.format(day, month, year)
 
 			hound = [i for i,x in enumerate(entries) if x==tommorow]
@@ -730,7 +758,7 @@ class Core(BoxLayout):
 				self.ids.mana.current = "today"
 				self.ids.griddy4.clear_widgets()
 				self.col = (.1, .1, .1, .3)
-				self.sp_text ='Нет артикулов с \nистекающим сроком годности'
+				self.sp_text ='Нет артикулов'
 			else:
 				self.col = (.1, .1, .1, .0)
 				self.sp_text =''
@@ -1028,6 +1056,42 @@ class Core(BoxLayout):
 
 		self.go()
 
+	def save_anyway(self, final):
+		self.popup.dismiss()
+		self.save(final, self.cuart)
+		sell = "Срок годности до {}".format(final)
+		popup("Сохранено", sell)
+		self.worktext = "Введите артикул"
+		self.ids.inputer.text = ""
+		self.press = 0
+		self.alarm()
+
+	def wise(self):
+		self.popup.dismiss()
+		self.worktext = "Введите артикул"
+		self.ids.inputer.text = ""
+		self.press = 0
+
+
+	def enter_prosrok(self, final):
+		title = 'Внимание!'
+		label = Label(text='Сохраняемый артикул просрочен,\n все равно сохранить?')
+		btn1 = Button(text='Да', on_release=lambda x: self.save_anyway(final))
+		btn2 = Button(text='Нет', on_release=lambda x: self.wise())
+
+		fl = BoxLayout(orientation='vertical')
+		fl.add_widget(label)
+		bx = BoxLayout(orientation='horizontal')
+		bx.add_widget(btn1)
+		bx.add_widget(btn2)
+
+		fl.add_widget(bx)
+
+		self.popup = Popup(title=title,
+		content=fl,
+		size_hint=(None, None), size=(300, 200))
+		self.popup.open()
+
 	def go(self):
 		month = self.cudate[0][2:]
 		day = self.cudate[0][:2]
@@ -1054,12 +1118,19 @@ class Core(BoxLayout):
 			repres = '{}.{}.{}'.format(day, month, year)
 			final = '{}{}{}'.format(day, month, year)
 
-			self.save(final, self.cuart)
-			sell = "Срок годности до {}".format(repres)
-			popup("Сохранено", sell)
-			self.worktext = "Введите артикул"
-			self.ids.inputer.text = ""
-			self.press = 0
+			###-----space------###
+
+			todayer = date.today()
+
+			if c <= todayer:
+				self.enter_prosrok(final)
+			else:
+				self.save(final, self.cuart)
+				sell = "Срок годности до {}".format(repres)
+				popup("Сохранено", sell)
+				self.worktext = "Введите артикул"
+				self.ids.inputer.text = ""
+				self.press = 0
 
 		elif ex[len(ex)-1].upper() == "Y":
 			newex = ex.replace("Y","")
@@ -1080,12 +1151,17 @@ class Core(BoxLayout):
 			repres = '{}.{}.{}'.format(day, month, year)
 			final = '{}{}{}'.format(day, month, year)
 
-			self.save(final, self.cuart)
-			sell = "Срок годности до {}".format(repres)
-			popup("Сохранено", sell)
-			self.worktext = "Введите артикул"
-			self.ids.inputer.text = ""
-			self.press = 0
+			todayer = date.today()
+
+			if c <= todayer:
+				self.enter_prosrok(final)
+			else:
+				self.save(final, self.cuart)
+				sell = "Срок годности до {}".format(repres)
+				popup("Сохранено", sell)
+				self.worktext = "Введите артикул"
+				self.ids.inputer.text = ""
+				self.press = 0
 
 		elif str(ex).isdigit() and int(ex) >= 0:
 			ex = int(ex)
@@ -1103,11 +1179,16 @@ class Core(BoxLayout):
 			sell = 'Срок годности до {}.{}.{}'.format(day, month, year)
 			ent = '{}{}{}'.format(day, month, year)
 
-			self.save(ent, self.cuart)
-			popup("Сохранено", sell)
-			self.worktext = "Введите артикул"
-			self.ids.inputer.text = ""
-			self.press = 0
+			todayer = date.today()
+			
+			if c <= todayer:
+				self.enter_prosrok(ent)
+			else:
+				self.save(ent, self.cuart)
+				popup("Сохранено", sell)
+				self.worktext = "Введите артикул"
+				self.ids.inputer.text = ""
+				self.press = 0
 			
 		else:
 			popup("Внимание", "Некорректное количество дней")
@@ -1412,6 +1493,10 @@ class Core(BoxLayout):
 				f.write(str(each + "$"))
 
 		sync()
+
+		self.show_prosrok(False)
+		self.alarm()
+
 		self.clean()
 		self.get_them(0)
 		self.ids.mana.current = "database"
@@ -1437,6 +1522,39 @@ class Core(BoxLayout):
 		size_hint=(.8, .3))
 		self.popup.open()
 
+	def save_anyway2(self, boomb):
+		self.popup.dismiss()
+		f = open("saver.txt", "a")
+		f.write(str((boomb + "$" + inf_art + "$")))
+		f.close()
+		sync()
+		self.letedit()
+		self.popup2.dismiss()
+		self.alarm()
+
+	def wise2(self):
+		self.popup2.dismiss()
+
+	def enter_prosrok2(self, final):
+
+		title = 'Внимание!'
+		label = Label(text='Сохраняемый артикул просрочен,\n все равно сохранить?')
+		btn1 = Button(text='Да', on_release=lambda x: self.save_anyway2(final))
+		btn2 = Button(text='Нет', on_release=lambda x: self.wise2())
+
+		fl = BoxLayout(orientation='vertical')
+		fl.add_widget(label)
+		bx = BoxLayout(orientation='horizontal')
+		bx.add_widget(btn1)
+		bx.add_widget(btn2)
+
+		fl.add_widget(bx)
+
+		self.popup2 = Popup(title=title,
+		content=fl,
+		size_hint=(None, None), size=(300, 200))
+		self.popup2.open()
+
 	def add_entry2(self):
 		global new_date
 
@@ -1450,18 +1568,29 @@ class Core(BoxLayout):
 
 		if change:
 			if self.datetest(boomb):
+				day = boomb[:2]
+				month = boomb[2:4]
+				year = boomb[4:]
+				c = date(int(year), int(month), int(day))
+
+				todayer = date.today()
+
+				if c <= todayer:
+					self.enter_prosrok2(boomb)
+					return
+			else:
 				hound = [i for i,x in enumerate(entries) if x==inf_art]
 				for each in hound:
 					if entries[each-1] == boomb:
 						popup("Внимание!", "Введенная дата уже записана")
 						return
 
-				f = open("saver.txt", "a")
-				f.write(str((boomb + "$" + inf_art + "$")))
-				f.close()
-				sync()
-				self.letedit()
-				self.popup.dismiss()
+			f = open("saver.txt", "a")
+			f.write(str((boomb + "$" + inf_art + "$")))
+			f.close()
+			sync()
+			self.letedit()
+			self.popup.dismiss()
 		else:
 			popup("Внимание!", "Вы ничего не ввели")
 
@@ -1722,6 +1851,8 @@ class Core(BoxLayout):
 				f.write(str(each + "$"))
 
 		sync()
+		self.show_prosrok(False)
+		self.alarm()
 
 		self.letedit()
 
@@ -1729,6 +1860,55 @@ class Core(BoxLayout):
 		global new_date
 
 		new_date = args[-1]
+
+#######################################################################################
+	def save_anyway3(self, boomb):
+		f = open("saver.txt", "r+")
+		dawread = f.read()
+		f.close()
+		dawread = dawread.split("$")
+		del dawread[-1]
+		worker = [i for i,x in enumerate(dawread) if x==inf_art]
+
+		for each in worker:
+			if dawread[each-1] == self.date:
+				dawread[each-1] = boomb
+
+		with open("saver.txt", "w") as f:
+			for each in dawread:
+				f.write(str(each + "$"))
+
+		sync()
+
+		self.popup.dismiss()
+		self.popup2.dismiss()
+		self.alarm()
+
+		self.letedit()
+
+	def wise3(self):
+		self.popup2.dismiss()
+
+	def enter_prosrok3(self, final):
+
+		title = 'Внимание!'
+		label = Label(text='Сохраняемый артикул просрочен,\n все равно сохранить?')
+		btn1 = Button(text='Да', on_release=lambda x: self.save_anyway3(final))
+		btn2 = Button(text='Нет', on_release=lambda x: self.wise3())
+
+		fl = BoxLayout(orientation='vertical')
+		fl.add_widget(label)
+		bx = BoxLayout(orientation='horizontal')
+		bx.add_widget(btn1)
+		bx.add_widget(btn2)
+
+		fl.add_widget(bx)
+
+		self.popup2 = Popup(title=title,
+		content=fl,
+		size_hint=(None, None), size=(300, 200))
+		self.popup2.open()
+#######################################################################################
 
 	def save_entry(self):
 		global new_date
@@ -1750,6 +1930,17 @@ class Core(BoxLayout):
 						popup("Внимание!", "Эта дата уже записана")
 						return
 
+				day = boomb[:2]
+				month = boomb[2:4]
+				year = boomb[4:]
+				c = date(int(year), int(month), int(day))
+
+				todayer = date.today()
+
+				if c <= todayer:
+					self.enter_prosrok3(boomb)
+					return
+
 				self.popup.dismiss()
 
 				f = open("saver.txt", "r+")
@@ -1768,6 +1959,10 @@ class Core(BoxLayout):
 						f.write(str(each + "$"))
 
 				sync()
+
+				self.show_prosrok(False)
+
+				self.alarm()
 
 				self.letedit()
 		else:
@@ -1845,9 +2040,11 @@ class Core(BoxLayout):
 		sync()
 
 		self.poz.dismiss()
+		self.show_prosrok(False)
 
 		popup("Внимание", "База данных была полностью удалена")
 		self.clearer()
+		self.alarm()
 		self.ids.griddy.clear_widgets()
 		self.ids.griddy4.clear_widgets()
 
@@ -1948,7 +2145,7 @@ Builder.load_string("""
 			background_color: 1, .35, .35, 1
 			halign: 'center'
 			valign: "middle"
-			text: 'Есть не списанные артикулы'
+			text: 'Есть просроченные артикулы'
 			text_size: self.size
 			size_hint: (.8, 1)
 			font_size: sp(25)
@@ -2001,6 +2198,13 @@ Builder.load_string("""
 						size: self.size
 						pos: self.pos
 				Label:
+					canvas.before:
+						Color: 
+							rgb: 0, .8, .4
+						Rectangle:
+							size: self.size
+							pos: self.pos
+
 					halign: 'center'
 					valign: "middle"
 					text: root.worktext
@@ -2197,7 +2401,7 @@ Builder.load_string("""
 				pos_hint:{"center_x":.40,"center_y":.9}
 
 			ScrollView:
-				size_hint_x: .8
+				size_hint_x: .95
 				size_hint_y: .65
 				pos_hint: {'center_x': .5, 'center_y': .5}
 				GridLayout:
@@ -2220,6 +2424,21 @@ Builder.load_string("""
 						size: self.size
 						pos: self.pos
 						source: 'back.png'
+
+				Button:
+					id: posrok_button
+					text: "Просрок"
+					size_hint: (.3, .06)
+					background_normal: ''
+					background_color: .92, 0, 0, 1
+					pos_hint: root.prosrochka_button
+					on_press: root.ids.fi.state = 'normal'
+					on_press: root.ids.se.state = 'normal'
+					on_press: root.ids.th.state = 'normal'
+					on_press: root.ids.fo.state = 'normal'
+
+					on_press: root.ids.mana.current = "old_arts"
+					on_press: root.put_trash()
 
 				ToggleButton:
 					id: bom_bom_bom
@@ -2277,7 +2496,7 @@ Builder.load_string("""
 				TextInput:
 					font_size: 28
 					id: to_d3
-					hint_text: '2018'
+					hint_text: root.current_year
 					multiline: False
 					size_hint: (.2, .08)
 					pos_hint: root.pos_el3
@@ -2304,7 +2523,7 @@ Builder.load_string("""
 				TextInput:
 					font_size: 18
 					id: to_range3
-					hint_text: '2018'
+					hint_text: root.current_year
 					multiline: False
 					size_hint: (.2, .05)
 					pos_hint: root.ranger3
@@ -2331,7 +2550,7 @@ Builder.load_string("""
 				TextInput:
 					font_size: 18
 					id: to_range6
-					hint_text: '2018'
+					hint_text: root.current_year
 					multiline: False
 					size_hint: (.2, .05)
 					pos_hint: root.ranger6
@@ -2377,9 +2596,9 @@ Builder.load_string("""
 					on_press: root.define_another_art()
 
 				ScrollView:
-					size_hint_x: .8
-					size_hint_y: .55
-					pos_hint: {'center_x': .5, 'center_y': .45}
+					size_hint_x: .95
+					size_hint_y: .72
+					pos_hint: {'center_x': .5, 'center_y': .375}
 					BoxLayout:
 						orientation: "vertical"
 						id: griddy4
@@ -2541,7 +2760,7 @@ Builder.load_string("""
 						root.del_ask()
 
 				ScrollView:
-					size_hint_x: .8
+					size_hint_x: .95
 					size_hint_y: .35
 					pos_hint: {'center_x': .5, 'center_y': .35}
 					GridLayout:
@@ -2616,9 +2835,9 @@ Builder.load_string("""
 
 
 				ScrollView:
-					size_hint_x: .8
-					size_hint_y: .55
-					pos_hint: {'center_x': .5, 'center_y': .45}
+					size_hint_x: .95
+					size_hint_y: .8
+					pos_hint: {'center_x': .5, 'center_y': .55}
 					BoxLayout:
 						orientation: "vertical"
 						id: griddy_trash
@@ -2632,17 +2851,6 @@ Builder.load_string("""
 						size_hint_y: None
 						height: 0
 
-				Label:
-					pos_hint: {'center_x': .5, 'center_y': .5}
-					text: 'TEST'
-					font_size: sp(20)
-					size_hint: (.8, .3)
-					canvas.before: 
-						Color: 
-							rgba: root.col
-						Rectangle:
-							pos: self.pos 
-							size: self.size
 
 				Button:
 					pos_hint: {'center_x':.5, 'center_y': .1}
