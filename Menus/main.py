@@ -1935,7 +1935,7 @@ Builder.load_string("""
 				pos: self.pos 
 				size: self.size
 
-		size_hint_y: 8
+		size_hint_y: 10
 
 		Image:
 			source: 'head.jpg'
@@ -1986,7 +1986,7 @@ Builder.load_string("""
 	ScreenManagement:
 		transition: NoTransition()
 		id: mana
-		size_hint_y: 84
+		size_hint_y: 82
 
 
 		Screen:
