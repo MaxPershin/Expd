@@ -222,7 +222,7 @@ class Core(BoxLayout):
 		curent = datetime.now()
 
 		for each in another_list:
-			if each[0] < curent.date():
+			if each[0] <= curent.date():
 				just_list.append(each)
 
 		new_kind = sorted(just_list, key=lambda x: x[0])
