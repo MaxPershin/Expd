@@ -184,8 +184,6 @@ class Core(BoxLayout):
 
 			self.alarm()
 
-			
-
 
 
 	def put_trash(self):
@@ -1508,6 +1506,8 @@ class Core(BoxLayout):
 		
 		self.layout = FloatLayout(size=(self.width, self.height))
 		self.inputi = TextInput(multiline=False, size_hint_x=.5, size_hint_y=0.2, pos_hint={"center_x":.5,"center_y":.61})
+		self.inputi_2 = TextInput(multiline=False, size_hint_x=.5, size_hint_y=0.2, pos_hint={"center_x":.5,"center_y":.61})
+		self.inputi_3 = TextInput(multiline=False, size_hint_x=.5, size_hint_y=0.2, pos_hint={"center_x":.5,"center_y":.61})
 		self.btn1 = Button(text="Добавить", size_hint_y=None, size_hint_x=None, height=0.06*self.height, width=0.6*self.width, font_size=0.035*self.height, pos_hint={"center_x":.5,"center_y":.34}, on_release=lambda x:self.add_entry2())
 		self.lbl = Label(text=sentence, font_size=0.025*self.height, pos_hint={"center_x":.5,"center_y":.86})
 
