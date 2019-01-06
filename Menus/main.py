@@ -366,42 +366,52 @@ class Core(BoxLayout):
 			popup('Внимание', 'Дата введена не корректно!')
 			return
 
-		between = (end_date-start_date).days
-		between += 1
+		holder = {}
 
-		start_date -= timedelta(1)
-		
-		for x in range(between):
-			start_date += timedelta(1)
+		this_date = True
 
-			day = str(start_date.day)
-			month = str(start_date.month)
-			year = str(start_date.year)
+		for x in range(len(entries)-1):
+			if this_date:
+				c = date(int(entries[x][4:]),int(entries[x][2:4]),int(entries[x][:2]))
+				if c >= start_date and c <= end_date:
+					if c in holder:
+						holder[c].append(entries[x+1])
+					else:
+						holder[c] = [entries[x+1]]
 
-			if len(day) == 1:
-				day = '0'+day
-
-			if len(month) == 1:
-				month = '0'+month
-
-			tommorow = '{}{}{}'.format(day, month, year)
-
-
-			hound = [i for i,x in enumerate(entries) if x==tommorow]
-
-			if len(hound) == 0:
-				continue
+					this_date = not this_date
+				else:
+					this_date = not this_date
+					continue
 			else:
-				self.col = (.1, .1, .1, .0)
-				self.sp_text =''
-				storage = []
-
-				for each in hound:
-					storage.append(entries[each+1])
+				this_date = not this_date
 
 
-				self.grid = self.ids.griddy4
-				self.grid.bind(minimum_height=self.grid.setter("height"))
+		hope = []
+
+		for key in sorted(holder.keys()):
+			hope.append((key, holder[key]))
+
+
+		if len(hope) == 0:
+			return
+		else:
+			self.col = (.1, .1, .1, .0)
+			self.sp_text =''
+
+			self.grid = self.ids.griddy4
+			self.grid.bind(minimum_height=self.grid.setter("height"))
+
+
+			for each in hope:
+				day = str(each[0].day)
+				month = str(each[0].month)
+				year = str(each[0].year)
+
+				if len(day) < 2:
+					day = '0'+day
+				if len(month) < 2:
+					month = '0'+month
 
 				m_label = SuppaLabel()
 
@@ -409,12 +419,10 @@ class Core(BoxLayout):
 				m_label.container1 = 0.06*self.height
 				m_label.container2 = 0.035*self.height
 
-
 				self.grid.add_widget(m_label)
 
-
-				for each in storage:
-					self.texter = each + ' ' + art_names[each]
+				for eaz in each[1]:
+					self.texter = eaz + ' ' + art_names[eaz]
 					self.btn = Button(text=self.texter, size_hint_y=None, height=0.09*self.height, font_size=0.035*self.height)
 					self.grid.add_widget(self.btn)
 		
@@ -1227,7 +1235,7 @@ class Core(BoxLayout):
 			if entries[each-1] == ent:
 				samer = True
 		if samer:
-			self.popup("Внимание!", "Эта дата уже записана для этого артикула")
+			popup("Внимание!", "Эта дата уже записана для этого артикула")
 			self.worktext = "Введите артикул"
 			self.ids.inputer.text = ""
 			self.press = 0
