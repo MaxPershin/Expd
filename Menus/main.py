@@ -1505,22 +1505,53 @@ class Core(BoxLayout):
 
 		
 		self.layout = FloatLayout(size=(self.width, self.height))
-		self.inputi = TextInput(multiline=False, size_hint_x=.5, size_hint_y=0.2, pos_hint={"center_x":.5,"center_y":.61})
-		self.inputi_2 = TextInput(multiline=False, size_hint_x=.5, size_hint_y=0.2, pos_hint={"center_x":.5,"center_y":.61})
-		self.inputi_3 = TextInput(multiline=False, size_hint_x=.5, size_hint_y=0.2, pos_hint={"center_x":.5,"center_y":.61})
+		self.inputi = TextInput(multiline=False, size_hint_x=.2, size_hint_y=0.2, pos_hint={"center_x":.2,"center_y":.61}, hint_text='День')
+		self.inputi_2 = TextInput(multiline=False, size_hint_x=.2, size_hint_y=0.2, pos_hint={"center_x":.4,"center_y":.61}, hint_text='Месяц')
+		self.inputi_3 = TextInput(multiline=False, size_hint_x=.4, size_hint_y=0.2, pos_hint={"center_x":.7,"center_y":.61}, hint_text='Год')
 		self.btn1 = Button(text="Добавить", size_hint_y=None, size_hint_x=None, height=0.06*self.height, width=0.6*self.width, font_size=0.035*self.height, pos_hint={"center_x":.5,"center_y":.34}, on_release=lambda x:self.add_entry2())
 		self.lbl = Label(text=sentence, font_size=0.025*self.height, pos_hint={"center_x":.5,"center_y":.86})
 
-		self.inputi.bind(text=self.save_entry1)
+		self.inputi.bind(focus=lambda x, y: self.clear_field(1, y))
+		self.inputi_2.bind(focus=lambda x, y: self.clear_field(2, y))
+		self.inputi_3.bind(focus=lambda x, y: self.clear_field(3, y))
+
+		self.inputi.bind(text=lambda x, y: self.pass_it_up(1, y))
+		self.inputi_2.bind(text=lambda x, y: self.pass_it_up(2, y))
+		self.inputi_3.bind(text=lambda x, y: self.pass_it_up(3, y))
 
 		self.layout.add_widget(self.lbl)
 		self.layout.add_widget(self.inputi)
+		self.layout.add_widget(self.inputi_2)
+		self.layout.add_widget(self.inputi_3)
 		self.layout.add_widget(self.btn1)
 
 		self.popup = Popup(title="Добавление",
 		content=self.layout,
 		size_hint=(.8, .3))
 		self.popup.open()
+
+	def pass_it_up(self, *args):
+		number, text = args
+
+		if number == 1 and len(text) >= 2:
+			self.inputi_2.focus = True
+		elif number == 2 and len(text) >= 2:
+			self.inputi_3.focus = True
+		elif number == 3 and len(text) >= 4:
+			self.inputi_3.focus = False
+
+	def clear_field(self, *args):
+		which_field, value = args
+		if value:
+			if which_field == 1:
+				if len(self.inputi.text) >= 2:
+					self.inputi.text = ''
+			elif which_field == 2:
+				if len(self.inputi_2.text) >= 2:
+					self.inputi_2.text = ''
+			else:
+				if len(self.inputi_3.text) >= 4:
+					self.inputi_3.text = ''
 
 	def save_anyway2(self, boomb):
 		self.popup.dismiss()
@@ -1556,7 +1587,18 @@ class Core(BoxLayout):
 		self.popup2.open()
 
 	def add_entry2(self):
-		global new_date
+
+		first = self.inputi.text
+		second = self.inputi_2.text
+		third = self.inputi_3.text
+
+		if len(first) < 2:
+			first = '0'+first
+		if len(second) < 2:
+			second = '0'+second
+
+		new_date = '{}{}{}'.format(first, second, third)
+
 
 		change = True
 		boomb = "some"
@@ -1567,10 +1609,29 @@ class Core(BoxLayout):
 			change = False
 
 		if change:
+
 			if self.datetest(boomb):
+
+				hound = [i for i,x in enumerate(entries) if x==inf_art]
+				for each in hound:
+					if entries[each-1] == boomb:
+						popup("Внимание!", "Введенная дата уже записана")				
+						self.inputi.text = ''
+						self.inputi_2.text = ''
+						self.inputi_3.text = ''
+						return
+
 				day = boomb[:2]
 				month = boomb[2:4]
 				year = boomb[4:]
+
+				if len(year) < 4:
+					popup("Внимание!", "Введите 4-х значный год")				
+					self.inputi.text = ''
+					self.inputi_2.text = ''
+					self.inputi_3.text = ''
+					return
+
 				c = date(int(year), int(month), int(day))
 
 				todayer = date.today()
@@ -1578,19 +1639,19 @@ class Core(BoxLayout):
 				if c <= todayer:
 					self.enter_prosrok2(boomb)
 					return
+				else:
+					f = open("saver.txt", "a")
+					f.write(str((boomb + "$" + inf_art + "$")))
+					f.close()
+					sync()
+					self.letedit()
+					self.popup.dismiss()
 			else:
-				hound = [i for i,x in enumerate(entries) if x==inf_art]
-				for each in hound:
-					if entries[each-1] == boomb:
-						popup("Внимание!", "Введенная дата уже записана")
-						return
-
-			f = open("saver.txt", "a")
-			f.write(str((boomb + "$" + inf_art + "$")))
-			f.close()
-			sync()
-			self.letedit()
-			self.popup.dismiss()
+				popup("Внимание!", "Ошибка ввода!")				
+				self.inputi.text = ''
+				self.inputi_2.text = ''
+				self.inputi_3.text = ''
+				return
 		else:
 			popup("Внимание!", "Вы ничего не ввели")
 
@@ -1809,25 +1870,64 @@ class Core(BoxLayout):
 
 		self.date = "".join(cont)
 
+		day = self.date[:2]
+		month = self.date[2:4]
+		year = self.date[4:]
+
+
 		sentence = "Вы можете изменить дату"
 		
 		self.layout = FloatLayout(size=(self.width, self.height))
-		self.inputi = TextInput(id="newent", text=self.date, multiline=False, size_hint_x=.5, size_hint_y=0.15, pos_hint={"center_x":.5,"center_y":.7})
+		self.inputi_4 = TextInput(text=day, multiline=False, size_hint_x=.2, size_hint_y=0.13, pos_hint={"center_x":.2,"center_y":.63}, hint_text='День')
+		self.inputi_5 = TextInput(text=month, multiline=False, size_hint_x=.2, size_hint_y=0.13, pos_hint={"center_x":.4,"center_y":.63}, hint_text='Месяц')
+		self.inputi_6 = TextInput(text=year, multiline=False, size_hint_x=.4, size_hint_y=0.13, pos_hint={"center_x":.7,"center_y":.63}, hint_text='Год')
 		self.btn1 = Button(text="Изменить", size_hint_y=None, size_hint_x=None, height=0.06*self.height, width=0.6*self.width, font_size=0.035*self.height, pos_hint={"center_x":.5,"center_y":.45}, on_release=lambda x:self.save_entry())
 		self.btn2 = Button(text="Удалить", size_hint_y=None, size_hint_x=None, height=0.06*self.height, width=0.6*self.width, font_size=0.035*self.height, pos_hint={"center_x":.5,"center_y":.25}, on_release=lambda x:self.delete_entry())
 		self.lbl = Label(text=sentence, font_size=0.025*self.height, pos_hint={"center_x":.5,"center_y":.85})
 
-		self.inputi.bind(text=self.save_entry1)
 
 		self.layout.add_widget(self.lbl)
-		self.layout.add_widget(self.inputi)
+		self.layout.add_widget(self.inputi_4)
+		self.layout.add_widget(self.inputi_5)
+		self.layout.add_widget(self.inputi_6)
 		self.layout.add_widget(self.btn1)
 		self.layout.add_widget(self.btn2)
+
+		self.inputi_4.bind(focus=lambda x, y: self.clear_field2(1, y))
+		self.inputi_5.bind(focus=lambda x, y: self.clear_field2(2, y))
+		self.inputi_6.bind(focus=lambda x, y: self.clear_field2(3, y))
+
+		self.inputi_4.bind(text=lambda x, y: self.pass_it_up2(1, y))
+		self.inputi_5.bind(text=lambda x, y: self.pass_it_up2(2, y))
+		self.inputi_6.bind(text=lambda x, y: self.pass_it_up2(3, y))
 
 		self.popup = Popup(title="Редактирование",
 		content=self.layout,
 		size_hint=(.8, .4))
 		self.popup.open()
+
+	def pass_it_up2(self, *args):
+		number, text = args
+
+		if number == 1 and len(text) >= 2:
+			self.inputi_5.focus = True
+		elif number == 2 and len(text) >= 2:
+			self.inputi_6.focus = True
+		elif number == 3 and len(text) >= 4:
+			self.inputi_6.focus = False
+
+	def clear_field2(self, *args):
+		which_field, value = args
+		if value:
+			if which_field == 1:
+				if len(self.inputi_4.text) >= 2:
+					self.inputi_4.text = ''
+			elif which_field == 2:
+				if len(self.inputi_5.text) >= 2:
+					self.inputi_5.text = ''
+			else:
+				if len(self.inputi_6.text) >= 4:
+					self.inputi_6.text = ''
 
 	def delete_entry(self):
 		self.popup.dismiss()
@@ -1855,11 +1955,6 @@ class Core(BoxLayout):
 		self.alarm()
 
 		self.letedit()
-
-	def save_entry1(self, *args):
-		global new_date
-
-		new_date = args[-1]
 
 #######################################################################################
 	def save_anyway3(self, boomb):
@@ -1911,7 +2006,12 @@ class Core(BoxLayout):
 #######################################################################################
 
 	def save_entry(self):
-		global new_date
+
+		day = self.inputi_4.text
+		month = self.inputi_5.text
+		year = self.inputi_6.text
+
+		new_date = '{}{}{}'.format(day, month, year)
 
 		change = True
 		boomb = "some"
@@ -1971,6 +2071,10 @@ class Core(BoxLayout):
 	def datetest(self, date):
 		ask = date[:4]
 		year = date[4:]
+
+		if len(year) < 4:
+			popup("Внимание!", "Укажите 4-х значный год")
+			return
 		if ask.isalnum(): 
 			if len(ask) == 4:
 				if ask[0].isalpha() == False and ask[1].isalpha() == False and ask[2].isalpha() == False and ask[3].isalpha() == False:
