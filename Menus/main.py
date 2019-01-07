@@ -231,7 +231,7 @@ class Core(BoxLayout):
 		self.grid.bind(minimum_height=self.grid.setter("height"))
 		self.grid.clear_widgets()
 
-		last_year = ''
+		last_date = ''
 
 		counter = 0
 		for each in new_kind:
@@ -252,7 +252,8 @@ class Core(BoxLayout):
 			m_label = SuppaLabel()
 
 
-			if last_year != each[0].year:
+			if last_date != '{}{}{}'.format(each[0].day, each[0].month, each[0].year):
+				last_date = '{}{}{}'.format(each[0].day, each[0].month, each[0].year)
 				dayr = str(each[0].day)
 				monthr = str(each[0].month)
 
@@ -2978,26 +2979,39 @@ Builder.load_string("""
 
 	BoxLayout:
 		size_hint_y: 8
+		canvas.before:
+			Color: 
+				rgb: 1, 1, 1, 
+			Rectangle:
+				source: 'bar.jpg'
+				pos: self.pos 
+				size: self.size
 		ToggleButton:
 			id: fi
+			border: 0,0,0,0
 			allow_no_selection: False
+			background_normal: 'work_1.png'
+			background_down: 'work_2.png'
 			group: 'test'
 			state: 'down'
-			text: "WORK"
 			on_press: root.ids.mana.current = "work"
 
 		ToggleButton:
 			id: se
+			border: 0,0,0,0
 			allow_no_selection: False
+			background_normal: 'DB_1.png'
+			background_down: 'DB_2.png'
 			group: 'test'
-			text: 'DB'
 			on_press: root.ids.mana.current = "database"
 
 		ToggleButton:
 			id: th
+			border: 0,0,0,0
 			allow_no_selection: False
+			background_normal: 'today_1.png'
+			background_down: 'today_2.png'
 			group: 'test'
-			text: 'Today'
 			on_press: root.show_rangers(False)
 			on_press: root.ids.bom_bom_bom.state = 'down'
 			on_press: root.ids.bom_bom_bom2.state = 'normal'
@@ -3007,9 +3021,11 @@ Builder.load_string("""
 
 		ToggleButton:
 			id: fo
+			border: 0,0,0,0
 			allow_no_selection: False
+			background_normal: 'settings_1.png'
+			background_down: 'settings_2.png'
 			group: 'test'
-			text: 'Settings'
 			on_press: root.ids.mana.current = "settings"
 	""")
 
