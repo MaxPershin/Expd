@@ -1,6 +1,6 @@
-#import sys
-#reload(sys)
-#sys.setdefaultencoding("utf-8")
+import sys
+reload(sys)
+sys.setdefaultencoding("utf-8")
 
 from kivy.config import Config
 Config.set('graphics', 'resizable', False)
@@ -32,6 +32,9 @@ from dateutil.relativedelta import relativedelta
 import gc
 from kivy.animation import Animation
 from kivy.clock import Clock
+
+import json
+import requests
 
 year = int(strftime("%Y"))
 if year % 4 == 0:
@@ -2161,6 +2164,168 @@ class Core(BoxLayout):
 		self.ids.griddy.clear_widgets()
 		self.ids.griddy4.clear_widgets()
 
+	#______________HERE IS THE INTERNET SYNC CODE____________________#
+
+	url = "https://avocado-a066c.firebaseio.com/.json"
+
+	def try_to_log_in(self, group_name, password):
+		if self.read_from_base(group_name):
+			if self.check_password(group_name, password):
+				self.compare_data(group_name)
+
+
+	def compare_data(self, group_name):
+		data = self.read_from_base(group_name)
+		
+
+
+	def check_password(self, group_name, password):
+		auth_key = "HqpU7WbJBeA4wN058kf9nPo9PZAAiUiEBrC3ZvP5"
+
+		path = '{}/Password'.format(group_name)
+
+		request = requests.get(self.url[:-5] + path + ".json" + "?auth=" + auth_key)
+		anwser = request.json()
+
+		if anwser == None:
+			return False
+		elif anwser == password:
+			self.internet_sync(group_name, password)
+			return True
+
+	def read_from_base(self, group_name):
+
+		auth_key = "HqpU7WbJBeA4wN058kf9nPo9PZAAiUiEBrC3ZvP5"
+
+		request = requests.get(self.url[:-5] + group_name + ".json" + "?auth=" + auth_key)
+		anwser = request.json()
+		raw = request.json()
+		if anwser == None:
+			return False
+		else:
+			return anwser
+
+	def write_to_base(self, text):
+
+		to_database = json.loads(text)
+
+		requests.patch(url=self.url, json=to_database)
+
+	def create_digital_copy(self, group, names, days_of_life, saver, password):
+
+		first_phrase = '{' + '"{}"'.format(group) + ': {' + '"Names":' + '"{}"'.format(names)+ ', ' + '"DaysOfLife":' + '"{}"'.format(days_of_life) + ', ' + '"Saver":' + '"{}"'.format(saver) + ', ' + '"Password":' + '"{}"'.format(password) + '}}'
+
+		self.write_to_base(first_phrase)
+
+	def internet_sync(self, group_name, password):
+		data = self.read_from_base(group_name)
+		print()
+		print(data)
+		print('__________________________________________________')
+
+		if data != None:
+			days_of_life_from_server = data['DaysOfLife'].split('$')[:-1]
+			names_from_server = data['Names'].split('$')[:-1]
+			print('This is how it is read', names_from_server)
+			saves_from_server = data['Saver'].split('$')[:-1]
+
+			f = open("daysoflife.txt", "r+")
+			rawread = f.read()
+			f.close()
+
+			days_of_life_local = rawread.split('$')[:-1]
+
+			#_______--We updade date of life--___________#
+
+			updated_days_of_life = []
+
+			articles_only = [i for i in days_of_life_local if days_of_life_local.index(i) % 2 == 0]
+
+			updated_days_of_life = days_of_life_from_server[:]
+
+			for each in articles_only:
+				if each not in updated_days_of_life:
+					updated_days_of_life.append(each)
+					updated_days_of_life.append(days_of_life_local[days_of_life_local.index(each)+1])	
+
+			#_______--We update names--_________________#
+
+			f = open("artname.txt", "r+")
+			rawread = f.read()
+			f.close()
+
+			names_local = rawread.split('$')[:-1]
+
+
+			articles_only = [i for i in names_local if names_local.index(i) % 2 == 0]
+
+			updated_names = names_from_server[:]
+			print(updated_names)
+
+
+			for each in articles_only:
+				if each not in updated_names:
+					updated_names.append(each)
+					updated_names.append(names_local[names_local.index(each)+1])
+
+
+			#______--We update dates--________________#
+
+			f = open("saver.txt", "r+")
+			rawread = f.read()
+			f.close()
+
+			saves_local = rawread.split('$')[:-1]
+
+			saves_local += saves_from_server
+
+			articles_only = []
+			dates_only = []
+
+			for x in range(len(saves_local)):
+				if x % 2 != 0:
+					articles_only.append(saves_local[x])
+				else:
+					dates_only.append(saves_local[x])
+
+
+			final_hub = {}
+
+
+			for x in range(len(articles_only)):
+				
+				if articles_only[x] not in final_hub:
+					final_hub[articles_only[x]] = [dates_only[x]]
+				else:
+					old = final_hub[articles_only[x]]
+					realm = dates_only[x]
+					old.append(realm)
+					old = list(set(old))
+					final_hub[articles_only[x]] = old
+
+			updated_saves = []
+
+			for each in final_hub:
+				for eaz in final_hub[each]:
+					updated_saves.append(eaz)
+					updated_saves.append(each)
+
+			#self.create_digital_copy(group_name, updated_names, updated_days_of_life, updated_saves, password)
+			print(updated_names)
+			with open("artname.txt", "w") as f:
+				for each in updated_names:
+					f.write(str(each + "$"))
+
+			with open("daysoflife.txt", "w") as f:
+				for each in updated_days_of_life:
+					f.write(str(each + "$"))
+
+			with open("saver.txt", "w") as f:
+				for each in updated_saves:
+					f.write(str(each + "$"))
+
+			sync()
+
 ###########################---App_Classes---##################################
 class ProtoApp(App):
 	def on_start(self):
@@ -2177,6 +2342,8 @@ class ProtoApp(App):
 
 class ScreenManagement(ScreenManager):
 	pass
+
+
 
 def sync():
 	try:
@@ -2219,6 +2386,7 @@ def sync():
 	except:
 		f = open("daysoflife.txt", "w+")
 		f.close()
+
 
 Builder.load_string("""
 #:import NoTransition kivy.uix.screenmanager.NoTransition
@@ -2924,6 +3092,8 @@ Builder.load_string("""
 					size_hint: (.65, .12)
 					background_normal: "but.png"
 					background_down: "butp.png"
+					on_release:
+						root.ids.mana.current = "sync_data"
 
 				Button:
 					text: "Удалить базу данных"
@@ -2973,6 +3143,66 @@ Builder.load_string("""
 					on_release:
 						root.old_trash_out()
 
+		Screen:
+			name: 'sync_data'
+
+			FloatLayout:
+				id: canvas
+				canvas:
+					Rectangle:
+						size: self.size
+						pos: self.pos
+						source: 'back.png'
+
+				TextInput:
+					font_size: sp(24)
+					id: group_name
+					hint_text: 'Имя группы'
+					multiline: False
+					size_hint: (.8, .08)
+					pos_hint: {'center_x': .5, 'center_y': .85}
+					on_text: root.extra_checker2('1dd')
+
+				TextInput:
+					font_size: sp(24)
+					id: group_password
+					password: True
+					hint_text: 'Пароль'
+					multiline: False
+					size_hint: (.8, .08)
+					pos_hint: {'center_x': .5, 'center_y': .75}
+					on_text: root.extra_checker2('1dd')
+
+				Button:
+					text: "Обновить"
+					font_size: sp(22)
+					pos_hint: {'center_x': .5, 'center_y': .6}
+					size_hint: (.65, .12)
+					background_normal: "but.png"
+					background_down: "butp.png"
+					on_release:
+						root.try_to_log_in(group_name.text, group_password.text)
+
+				Button:
+					text: "Очистить поля"
+					font_size: sp(22)
+					pos_hint: {'center_x': .5, 'center_y': .5}
+					size_hint: (.65, .12)
+					background_normal: "but.png"
+					background_down: "butp.png"
+					on_release:
+						root.ids.mana.current = "sync_data"
+
+				Button:
+					text: "Создать группу"
+					font_size: sp(22)
+					pos_hint: {'center_x': .5, 'center_y': .4}
+					size_hint: (.65, .12)
+					background_normal: "but.png"
+					background_down: "butp.png"
+					on_release:
+						root.ids.mana.current = "sync_data"
+
 
 
 
@@ -2986,6 +3216,7 @@ Builder.load_string("""
 				source: 'bar.jpg'
 				pos: self.pos 
 				size: self.size
+
 		ToggleButton:
 			id: fi
 			border: 0,0,0,0
