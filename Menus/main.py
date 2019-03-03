@@ -1,6 +1,6 @@
-import sys
-reload(sys)
-sys.setdefaultencoding("utf-8")
+#import sys
+#reload(sys)
+#sys.setdefaultencoding("utf-8")
 
 from kivy.config import Config
 Config.set('graphics', 'resizable', False)
@@ -2169,13 +2169,10 @@ class Core(BoxLayout):
 	url = "https://avocado-a066c.firebaseio.com/.json"
 
 	def try_to_log_in(self, group_name, password):
+		print('Group - ', group_name, 'Pass = ', password)
 		if self.read_from_base(group_name):
 			if self.check_password(group_name, password):
-				self.compare_data(group_name)
-
-
-	def compare_data(self, group_name):
-		data = self.read_from_base(group_name)
+				self.internet_sync(group_name, password)
 		
 
 
@@ -2190,7 +2187,6 @@ class Core(BoxLayout):
 		if anwser == None:
 			return False
 		elif anwser == password:
-			self.internet_sync(group_name, password)
 			return True
 
 	def read_from_base(self, group_name):
@@ -2219,6 +2215,7 @@ class Core(BoxLayout):
 
 	def internet_sync(self, group_name, password):
 		data = self.read_from_base(group_name)
+		print('THis is DATA ', data)
 		print()
 		print(data)
 		print('__________________________________________________')
@@ -2226,8 +2223,8 @@ class Core(BoxLayout):
 		if data != None:
 			days_of_life_from_server = data['DaysOfLife'].split('$')[:-1]
 			names_from_server = data['Names'].split('$')[:-1]
-			print('This is how it is read', names_from_server)
 			saves_from_server = data['Saver'].split('$')[:-1]
+
 
 			f = open("daysoflife.txt", "r+")
 			rawread = f.read()
@@ -2237,16 +2234,21 @@ class Core(BoxLayout):
 
 			#_______--We updade date of life--___________#
 
-			updated_days_of_life = []
+			if len(days_of_life_local) == 0:
+				updated_days_of_life = days_of_life_from_server[:]
+			elif len(days_of_life_from_server) == 0:
+				updated_days_of_life = days_of_life_local[:]
+			else:
+				updated_days_of_life = []
 
-			articles_only = [i for i in days_of_life_local if days_of_life_local.index(i) % 2 == 0]
+				articles_only = [i for i in days_of_life_local if days_of_life_local.index(i) % 2 == 0]
 
-			updated_days_of_life = days_of_life_from_server[:]
+				updated_days_of_life = days_of_life_from_server[:]
 
-			for each in articles_only:
-				if each not in updated_days_of_life:
-					updated_days_of_life.append(each)
-					updated_days_of_life.append(days_of_life_local[days_of_life_local.index(each)+1])	
+				for each in articles_only:
+					if each not in updated_days_of_life:
+						updated_days_of_life.append(each)
+						updated_days_of_life.append(days_of_life_local[days_of_life_local.index(each)+1])	
 
 			#_______--We update names--_________________#
 
@@ -2257,16 +2259,21 @@ class Core(BoxLayout):
 			names_local = rawread.split('$')[:-1]
 
 
-			articles_only = [i for i in names_local if names_local.index(i) % 2 == 0]
+			if (len(names_local)) == 0:
+				updated_names = names_from_server
+			elif len(names_from_server) == 0:
+				updated_names = names_local
+			else:
+				articles_only = [i for i in names_local if names_local.index(i) % 2 == 0]
 
-			updated_names = names_from_server[:]
-			print(updated_names)
+				updated_names = names_from_server
+				print(updated_names)
 
 
-			for each in articles_only:
-				if each not in updated_names:
-					updated_names.append(each)
-					updated_names.append(names_local[names_local.index(each)+1])
+				for each in articles_only:
+					if each not in updated_names:
+						updated_names.append(each)
+						updated_names.append(names_local[names_local.index(each)+1])
 
 
 			#______--We update dates--________________#
@@ -2276,42 +2283,65 @@ class Core(BoxLayout):
 			f.close()
 
 			saves_local = rawread.split('$')[:-1]
+			print("LOCAL SAVE ", saves_local)
 
-			saves_local += saves_from_server
+			if len(saves_from_server) == 0:
+				updated_saves = saves_local
+			elif len(saves_local) == 0:
+				updated_saves = saves_from_server
+			else:
 
-			articles_only = []
-			dates_only = []
+				saves_local += saves_from_server
 
-			for x in range(len(saves_local)):
-				if x % 2 != 0:
-					articles_only.append(saves_local[x])
-				else:
-					dates_only.append(saves_local[x])
+				print()
+				print('BOTH SERVER AND LOCAL ', saves_local, 'on serv -', saves_from_server)
+
+				articles_only = []
+				dates_only = []
+
+				for x in range(len(saves_local)):
+					if x % 2 != 0:
+						articles_only.append(saves_local[x])
+					else:
+						dates_only.append(saves_local[x])
+
+				print('Articles only --- ', articles_only)
+
+				final_hub = {}
 
 
-			final_hub = {}
+				for x in range(len(articles_only)):
+					
+					if articles_only[x] not in final_hub:
+						final_hub[articles_only[x]] = [dates_only[x]]
+					else:
+						old = final_hub[articles_only[x]]
+						realm = dates_only[x]
+						old.append(realm)
+						old = list(set(old))
+						final_hub[articles_only[x]] = old
 
+				print('Final hub--- ', final_hub)
 
-			for x in range(len(articles_only)):
-				
-				if articles_only[x] not in final_hub:
-					final_hub[articles_only[x]] = [dates_only[x]]
-				else:
-					old = final_hub[articles_only[x]]
-					realm = dates_only[x]
-					old.append(realm)
-					old = list(set(old))
-					final_hub[articles_only[x]] = old
+				updated_saves = []
 
-			updated_saves = []
+				for each in final_hub:
+					for eaz in final_hub[each]:
+						updated_saves.append(eaz)
+						updated_saves.append(each)
 
-			for each in final_hub:
-				for eaz in final_hub[each]:
-					updated_saves.append(eaz)
-					updated_saves.append(each)
+				print('Updated saves ', updated_saves)
 
-			#self.create_digital_copy(group_name, updated_names, updated_days_of_life, updated_saves, password)
 			print(updated_names)
+
+			if len(updated_names) == 0:
+				updated_names = ''
+			if len(updated_days_of_life) == 0:
+				updated_days_of_life = ''
+			if len(updated_saves) == 0:
+				updated_saves = ''
+
+
 			with open("artname.txt", "w") as f:
 				for each in updated_names:
 					f.write(str(each + "$"))
@@ -2325,6 +2355,18 @@ class Core(BoxLayout):
 					f.write(str(each + "$"))
 
 			sync()
+			updated_names = '$'.join(updated_names)+'$'
+			updated_days_of_life = '$'.join(updated_days_of_life)+'$'
+			updated_saves = '$'.join(updated_saves)+'$'
+
+			if len(updated_names) == 1:
+				updated_saves = ''
+			if len(updated_days_of_life) == 1:
+				updated_days_of_life = ''
+			if len(updated_saves) == 1:
+				updated_saves = ''
+
+			self.create_digital_copy(group_name, updated_names, updated_days_of_life, updated_saves, password)
 
 ###########################---App_Classes---##################################
 class ProtoApp(App):
