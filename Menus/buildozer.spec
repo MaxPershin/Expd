@@ -36,7 +36,7 @@ version = 2.2.1
 
 # (list) Application requirements
 # comma seperated e.g. requirements = sqlite3,kivy
-requirements = kivy,dateutil
+requirements = kivy,dateutil,openssl,android,requests
 
 # (str) Custom source folders for requirements
 # Sets custom source for any requirements with recipes
@@ -82,10 +82,10 @@ fullscreen = 0
 # red, blue, green, black, white, gray, cyan, magenta, yellow, lightgray,
 # darkgray, grey, lightgrey, darkgrey, aqua, fuchsia, lime, maroon, navy,
 # olive, purple, silver, teal.
-android.presplash_color = black
+android.presplash_color = blue
 
 # (list) Permissions
-#android.permissions = INTERNET
+android.permissions = INTERNET,ACCESS_NETWORK_STATE,ACCESS_WIFI_STATE
 
 # (int) Android API to use
 #android.api = 19

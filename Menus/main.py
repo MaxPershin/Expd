@@ -1,6 +1,6 @@
-#import sys
-#reload(sys)
-#sys.setdefaultencoding("utf-8")
+import sys
+reload(sys)
+sys.setdefaultencoding("utf-8")
 
 from kivy.config import Config
 Config.set('graphics', 'resizable', False)
@@ -93,6 +93,7 @@ class Core(BoxLayout):
 
 	day_or_what = ObjectProperty('day')
 
+
 	ranger1 = ObjectProperty({"center_x":-5,"center_y":.795})
 	ranger2 = ObjectProperty({"center_x":-5,"center_y":.795})
 	ranger3 = ObjectProperty({"center_x":-5,"center_y":.795})
@@ -106,6 +107,13 @@ class Core(BoxLayout):
 	prosrochka_button = ObjectProperty({"center_x": -5,"center_y":.9625})
 
 	current_year = str(datetime.now().year)
+
+	current_data = None
+	current_user = None
+	current_group = None
+	current_password = None
+	current_users_and_values = {}
+	new_users = ''
 
 	def show_prosrok(self, data):
 		if data:
@@ -2168,37 +2176,86 @@ class Core(BoxLayout):
 
 	url = "https://avocado-a066c.firebaseio.com/.json"
 
-	def try_to_log_in(self, group_name, password):
-		print('Group - ', group_name, 'Pass = ', password)
-		if self.read_from_base(group_name):
-			if self.check_password(group_name, password):
-				self.internet_sync(group_name, password)
+	def create_new_user(self, user):
+		
+		self.read_from_base()
+
+		self.new_users = ''
+
+		self.current_users_and_values[user] = ''
+
+		result = ''
+
+		for each in self.current_users_and_values:
+			result = result+'"'+each+'": '+'"'+self.current_users_and_values[each]+'",'
+
+		result = '{' + result[:-1] + '}'
+
+		self.new_users = result
+
+		self.internet_sync()
+
+	def users_update(self):
+
+		result = ''
+
+		for each in self.current_users_and_values:
+			result = result+'"'+each+'": '+'"'+self.current_users_and_values[each]+'",'
+
+		result = '{' + result[:-1] + '}'
+
+		self.new_users = result
+
+	def try_to_log_in(self, group_name, password, user):
+
+		self.current_group = group_name
+		self.current_user = user
+		self.current_password = password
+
+		if self.read_from_base():
+			if self.check_password():
+				if self.check_user_name():
+					self.users_update()
+					self.internet_sync()
 		
 
+	def check_user_name(self):
+		for each in self.current_data['Users']:
+			if self.current_user == each:
+				return True
 
-	def check_password(self, group_name, password):
+		return False
+
+
+	def check_password(self):
 		auth_key = "HqpU7WbJBeA4wN058kf9nPo9PZAAiUiEBrC3ZvP5"
 
-		path = '{}/Password'.format(group_name)
+		path = '{}/Password'.format(self.current_group)
 
 		request = requests.get(self.url[:-5] + path + ".json" + "?auth=" + auth_key)
 		anwser = request.json()
 
 		if anwser == None:
 			return False
-		elif anwser == password:
+		elif anwser == self.current_password:
 			return True
 
-	def read_from_base(self, group_name):
+	def read_from_base(self):
 
 		auth_key = "HqpU7WbJBeA4wN058kf9nPo9PZAAiUiEBrC3ZvP5"
 
-		request = requests.get(self.url[:-5] + group_name + ".json" + "?auth=" + auth_key)
+		request = requests.get(self.url[:-5] + self.current_group + ".json" + "?auth=" + auth_key)
 		anwser = request.json()
 		raw = request.json()
 		if anwser == None:
 			return False
 		else:
+			self.new_users = ''
+			self.current_users_and_values = {}
+			self.current_data = anwser
+			for each in self.current_data['Users']:
+				self.current_users_and_values[each] = self.current_data['Users'][each]
+
 			return anwser
 
 	def write_to_base(self, text):
@@ -2207,14 +2264,14 @@ class Core(BoxLayout):
 
 		requests.patch(url=self.url, json=to_database)
 
-	def create_digital_copy(self, group, names, days_of_life, saver, password):
+	def create_digital_copy(self, names, days_of_life, saver):
 
-		first_phrase = '{' + '"{}"'.format(group) + ': {' + '"Names":' + '"{}"'.format(names)+ ', ' + '"DaysOfLife":' + '"{}"'.format(days_of_life) + ', ' + '"Saver":' + '"{}"'.format(saver) + ', ' + '"Password":' + '"{}"'.format(password) + '}}'
+		first_phrase = '{' + '"{}"'.format(self.current_group) + ': {' + '"Users": ' + self.new_users + ',' + '"Names":' + '"{}"'.format(names)+ ', ' + '"DaysOfLife":' + '"{}"'.format(days_of_life) + ', ' + '"Saver":' + '"{}"'.format(saver) + ', ' + '"Password":' + '"{}"'.format(self.current_password) + '}}'
 
 		self.write_to_base(first_phrase)
 
-	def internet_sync(self, group_name, password):
-		data = self.read_from_base(group_name)
+	def internet_sync(self):
+		data = self.current_data
 		print('THis is DATA ', data)
 		print()
 		print(data)
@@ -2366,7 +2423,7 @@ class Core(BoxLayout):
 			if len(updated_saves) == 1:
 				updated_saves = ''
 
-			self.create_digital_copy(group_name, updated_names, updated_days_of_life, updated_saves, password)
+			self.create_digital_copy(updated_names, updated_days_of_life, updated_saves)
 
 ###########################---App_Classes---##################################
 class ProtoApp(App):
@@ -3198,11 +3255,20 @@ Builder.load_string("""
 
 				TextInput:
 					font_size: sp(24)
+					id: group_user_name
+					hint_text: 'Имя пользователя'
+					multiline: False
+					size_hint: (.8, .08)
+					pos_hint: {'center_x': .5, 'center_y': .85}
+					on_text: root.extra_checker2('1dd')
+
+				TextInput:
+					font_size: sp(24)
 					id: group_name
 					hint_text: 'Имя группы'
 					multiline: False
 					size_hint: (.8, .08)
-					pos_hint: {'center_x': .5, 'center_y': .85}
+					pos_hint: {'center_x': .5, 'center_y': .75}
 					on_text: root.extra_checker2('1dd')
 
 				TextInput:
@@ -3212,33 +3278,35 @@ Builder.load_string("""
 					hint_text: 'Пароль'
 					multiline: False
 					size_hint: (.8, .08)
-					pos_hint: {'center_x': .5, 'center_y': .75}
+					pos_hint: {'center_x': .5, 'center_y': .65}
 					on_text: root.extra_checker2('1dd')
 
 				Button:
-					text: "Обновить"
-					font_size: sp(22)
-					pos_hint: {'center_x': .5, 'center_y': .6}
-					size_hint: (.65, .12)
-					background_normal: "but.png"
-					background_down: "butp.png"
-					on_release:
-						root.try_to_log_in(group_name.text, group_password.text)
-
-				Button:
-					text: "Очистить поля"
+					text: "Войти"
 					font_size: sp(22)
 					pos_hint: {'center_x': .5, 'center_y': .5}
 					size_hint: (.65, .12)
 					background_normal: "but.png"
 					background_down: "butp.png"
 					on_release:
-						root.ids.mana.current = "sync_data"
+						root.try_to_log_in(group_name.text, group_password.text, group_user_name.text)
+
+				Button:
+					text: "Создать пользователя"
+					disabled: True
+					font_size: sp(22)
+					pos_hint: {'center_x': .5, 'center_y': .4}
+					size_hint: (.65, .12)
+					background_normal: "but.png"
+					background_down: "butp.png"
+					on_release:
+						root.create_new_user(group_user_name.text)
 
 				Button:
 					text: "Создать группу"
+					disabled: True
 					font_size: sp(22)
-					pos_hint: {'center_x': .5, 'center_y': .4}
+					pos_hint: {'center_x': .5, 'center_y': .3}
 					size_hint: (.65, .12)
 					background_normal: "but.png"
 					background_down: "butp.png"
