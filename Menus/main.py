@@ -1,6 +1,6 @@
-import sys
-reload(sys)
-sys.setdefaultencoding("utf-8")
+#import sys
+#reload(sys)
+#sys.setdefaultencoding("utf-8")
 
 from kivy.config import Config
 Config.set('graphics', 'resizable', False)
@@ -110,7 +110,7 @@ class Core(BoxLayout):
 
 	current_data = None
 	current_user = None
-	current_group = None
+	current_group = ''
 	current_password = None
 	current_users_and_values = {}
 	new_users = ''
@@ -2176,6 +2176,27 @@ class Core(BoxLayout):
 
 	url = "https://avocado-a066c.firebaseio.com/.json"
 
+	def read_from_base_new_group(self):
+
+		auth_key = "HqpU7WbJBeA4wN058kf9nPo9PZAAiUiEBrC3ZvP5"
+
+		request = requests.get(self.url + "?auth=" + auth_key)
+		anwser = request.json()
+
+		return anwser
+
+	def create_new_group(self, group_name, group_password):
+		anwser = self.read_from_base_new_group()
+
+		for each in anwser:
+			if each == group_name:
+				popup('Внимание', 'Данная группа уже существует!')
+				return
+
+		first_phrase = '{' + '"{}"'.format(group_name) + ': {' + '"Users": ' + '""' + ',' + '"Names":' + '""' + ', ' + '"DaysOfLife":' + '""' + ', ' + '"Saver":' + '""' + ', ' + '"Password":' + '"{}"'.format(group_password) + '}}'
+
+		self.write_to_base(first_phrase)
+
 	def create_new_user(self, user):
 		
 		self.read_from_base()
@@ -3253,14 +3274,6 @@ Builder.load_string("""
 						pos: self.pos
 						source: 'back.png'
 
-				TextInput:
-					font_size: sp(24)
-					id: group_user_name
-					hint_text: 'Имя пользователя'
-					multiline: False
-					size_hint: (.8, .08)
-					pos_hint: {'center_x': .5, 'center_y': .85}
-					on_text: root.extra_checker2('1dd')
 
 				TextInput:
 					font_size: sp(24)
@@ -3292,28 +3305,14 @@ Builder.load_string("""
 						root.try_to_log_in(group_name.text, group_password.text, group_user_name.text)
 
 				Button:
-					text: "Создать пользователя"
-					disabled: True
+					text: "Создать группу"
 					font_size: sp(22)
 					pos_hint: {'center_x': .5, 'center_y': .4}
 					size_hint: (.65, .12)
 					background_normal: "but.png"
 					background_down: "butp.png"
 					on_release:
-						root.create_new_user(group_user_name.text)
-
-				Button:
-					text: "Создать группу"
-					disabled: True
-					font_size: sp(22)
-					pos_hint: {'center_x': .5, 'center_y': .3}
-					size_hint: (.65, .12)
-					background_normal: "but.png"
-					background_down: "butp.png"
-					on_release:
-						root.ids.mana.current = "sync_data"
-
-
+						root.create_new_group(group_name.text, group_password.text)
 
 
 
