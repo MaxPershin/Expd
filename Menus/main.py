@@ -109,11 +109,13 @@ class Core(BoxLayout):
 	current_year = str(datetime.now().year)
 
 	current_data = None
-	current_user = None
-	current_group = ''
+	current_user = ObjectProperty('')
+	current_group = ObjectProperty('')
 	current_password = None
 	current_users_and_values = {}
 	new_users = ''
+	auth_key = "HqpU7WbJBeA4wN058kf9nPo9PZAAiUiEBrC3ZvP5"
+	url = 'https://avocado-a066c.firebaseio.com/'
 
 	def show_prosrok(self, data):
 		if data:
@@ -2186,6 +2188,10 @@ class Core(BoxLayout):
 		return anwser
 
 	def create_new_group(self, group_name, group_password):
+		if not group_name or not group_password:
+			popup('Внимание!', 'Все поля обязательны к заполнению!')
+			return
+
 		anwser = self.read_from_base_new_group()
 
 		for each in anwser:
@@ -2196,25 +2202,42 @@ class Core(BoxLayout):
 		first_phrase = '{' + '"{}"'.format(group_name) + ': {' + '"Users": ' + '""' + ',' + '"Names":' + '""' + ', ' + '"DaysOfLife":' + '""' + ', ' + '"Saver":' + '""' + ', ' + '"Password":' + '"{}"'.format(group_password) + '}}'
 
 		self.write_to_base(first_phrase)
+		self.ids.mana.current = 'new_group_nickname'
+		self.current_group = group_name
+		self.current_password = group_password
 
-	def create_new_user(self, user):
-		
-		self.read_from_base()
+	def new_group_new_user(self, name):
+		if self.create_user(name):
+			self.ids.mana.current = 'group_home'
 
-		self.new_users = ''
+	def create_user(self, name):
+		try:
+			request = requests.get(self.url + '{}/Users.json'.format(self.current_group) +"?auth=" + self.auth_key)
+			anwser = request.json()
+			for each in anwser:
+				print()
 
-		self.current_users_and_values[user] = ''
+			text = '{'+ '"{}"'.format(name) + ': ""' + '}'
 
-		result = ''
+			to_database = json.loads(text)
 
-		for each in self.current_users_and_values:
-			result = result+'"'+each+'": '+'"'+self.current_users_and_values[each]+'",'
 
-		result = '{' + result[:-1] + '}'
+			url = "https://avocado-a066c.firebaseio.com/{}/Users.json".format(self.current_group)
 
-		self.new_users = result
+			requests.patch(url=url, json=to_database)
+		except:
+			return False
 
-		self.internet_sync()
+
+		return True
+
+	def is_user_here(self, name):
+		for each in self.current_data['Users']:
+			if name == each:
+				self.ids.mana.current = 'group_home'
+				return
+
+		return False
 
 	def users_update(self):
 
@@ -2227,17 +2250,19 @@ class Core(BoxLayout):
 
 		self.new_users = result
 
-	def try_to_log_in(self, group_name, password, user):
+	def try_to_log_in(self, group_name, password):
+
+		if not group_name or not password:
+			popup('Внимание!', 'Все поля обязательны к заполнению!')
+			return
 
 		self.current_group = group_name
-		self.current_user = user
 		self.current_password = password
 
 		if self.read_from_base():
 			if self.check_password():
-				if self.check_user_name():
-					self.users_update()
-					self.internet_sync()
+				if not self.current_user:
+					self.ids.mana.current = 'ask_nickname'
 		
 
 	def check_user_name(self):
@@ -2249,17 +2274,11 @@ class Core(BoxLayout):
 
 
 	def check_password(self):
-		auth_key = "HqpU7WbJBeA4wN058kf9nPo9PZAAiUiEBrC3ZvP5"
-
-		path = '{}/Password'.format(self.current_group)
-
-		request = requests.get(self.url[:-5] + path + ".json" + "?auth=" + auth_key)
-		anwser = request.json()
-
-		if anwser == None:
-			return False
-		elif anwser == self.current_password:
+		
+		if self.current_data['Password'] == self.current_password:
 			return True
+		else:
+			popup('Внимание', 'Неверный пароль!')
 
 	def read_from_base(self):
 
@@ -2268,16 +2287,13 @@ class Core(BoxLayout):
 		request = requests.get(self.url[:-5] + self.current_group + ".json" + "?auth=" + auth_key)
 		anwser = request.json()
 		raw = request.json()
+		self.current_data = raw
 		if anwser == None:
+			popup('Внимание!', 'Данной группы не существует!')
 			return False
-		else:
-			self.new_users = ''
-			self.current_users_and_values = {}
-			self.current_data = anwser
-			for each in self.current_data['Users']:
-				self.current_users_and_values[each] = self.current_data['Users'][each]
+		
 
-			return anwser
+		return anwser
 
 	def write_to_base(self, text):
 
@@ -2446,6 +2462,9 @@ class Core(BoxLayout):
 
 			self.create_digital_copy(updated_names, updated_days_of_life, updated_saves)
 
+	def get_settings(self, *args):
+		pass
+
 ###########################---App_Classes---##################################
 class ProtoApp(App):
 	def on_start(self):
@@ -2456,6 +2475,7 @@ class ProtoApp(App):
 				break
 
 		Clock.schedule_once(mine.alarm, 2)
+		#Clock.schedule_once(mine.get_settings, 1)
 
 	def build(self):
 		return Core()
@@ -2542,6 +2562,7 @@ Builder.load_string("""
 
 		Button:
 			id: warner
+			border: 0,0,0,0
 			background_normal: ''
 			background_color: 1, .35, .35, 1
 			halign: 'center'
@@ -2568,6 +2589,7 @@ Builder.load_string("""
 					width: 2
 					rectangle: self.x, self.y, 0, self.height
 			id: warner2
+			border: 0,0,0,0
 			background_normal: ''
 			background_color: 1, .35, .35, 1
 			halign: 'center'
@@ -2689,6 +2711,7 @@ Builder.load_string("""
 
 
 				Button:
+					border: 0,0,0,0
 					pos_hint: {'center_x': .72, 'center_y': .53}
 					size_hint: (.24, .15)
 					background_normal: "arrow_next.png"
@@ -2699,6 +2722,7 @@ Builder.load_string("""
 
 
 				Button:
+					border: 0,0,0,0
 					pos_hint: {'center_x': .5, 'center_y': .53}
 					size_hint: (.24, .15)
 					background_normal: "arrow_repeat.png"
@@ -2709,6 +2733,7 @@ Builder.load_string("""
 
 				Button:
 					pos_hint: {'center_x': .28, 'center_y': .53}
+					border: 0,0,0,0
 					size_hint: (.24, .15)
 					background_normal: "arrow_previous.png"
 					background_down: "butp.png"
@@ -2779,6 +2804,7 @@ Builder.load_string("""
 						source: 'back.png'
 
 			Button:
+				border: 0,0,0,0
 				pos_hint: {'center_x': .5, 'center_y': .1}
 				size_hint: (.24, .15)
 				background_normal: "plus.png"
@@ -2787,6 +2813,7 @@ Builder.load_string("""
 					root.create_new()
 
 			Button:
+				border: 0,0,0,0
 				pos_hint: {'center_x': .85, 'center_y': .9}
 				size_hint: (.24, .15)
 				background_normal: "find.png"
@@ -2828,6 +2855,7 @@ Builder.load_string("""
 
 				Button:
 					id: posrok_button
+					border: 0,0,0,0
 					text: "Просрок"
 					size_hint: (.3, .06)
 					background_normal: ''
@@ -2842,6 +2870,7 @@ Builder.load_string("""
 					on_press: root.put_trash()
 
 				ToggleButton:
+					border: 0,0,0,0
 					id: bom_bom_bom
 					allow_no_selection: False
 					state: 'down'
@@ -2855,6 +2884,7 @@ Builder.load_string("""
 					on_press: root.define_today_art('today')
 
 				ToggleButton:
+					border: 0,0,0,0
 					id: bom_bom_bom2
 					allow_no_selection: False
 					group: 'which_trash'
@@ -2866,6 +2896,7 @@ Builder.load_string("""
 					on_press: root.define_today_art('another')
 
 				ToggleButton:
+					border: 0,0,0,0
 					id: bom_bom_bom3
 					allow_no_selection: False
 					group: 'which_trash'
@@ -2958,6 +2989,7 @@ Builder.load_string("""
 					on_text: root.extra_checker2('2yy')
 
 				Button:
+					border: 0,0,0,0
 					font_size: 28
 					text: "Найти"
 					size_hint: (.31, .11)
@@ -2991,6 +3023,7 @@ Builder.load_string("""
 					pos_hint: root.ranger9
 
 				Button:
+					border: 0,0,0,0
 					text: "Найти"
 					size_hint: (.3, .08)
 					pos_hint: root.pos_el4
@@ -3026,6 +3059,7 @@ Builder.load_string("""
 							size: self.size
 
 				Button:
+					border: 0,0,0,0
 					pos_hint: root.pos_el5
 					size_hint: (.25, .2)
 					background_normal: "trash.png"
@@ -3080,6 +3114,7 @@ Builder.load_string("""
 						height: 0
 
 				Button:
+					border: 0,0,0,0
 					pos_hint: {'center_x': .8, 'center_y': .1}
 					size_hint: (.24, .15)
 					background_normal: "edit.png"
@@ -3088,6 +3123,7 @@ Builder.load_string("""
 						root.init_edit()
 
 				Button:
+					border: 0,0,0,0
 					pos_hint: {'center_x': .2, 'center_y': .1}
 					size_hint: (.24, .15)
 					background_normal: "arrow_previous.png"
@@ -3132,6 +3168,7 @@ Builder.load_string("""
 					pos_hint:{"center_x":.3,"center_y":.6}
 
 				Button:
+					border: 0,0,0,0
 					text: "Сохранить"
 					font_size: sp(22)
 					pos_hint: {'center_x': .75, 'center_y': .7}
@@ -3141,6 +3178,7 @@ Builder.load_string("""
 					on_release:
 						root.change_popup_name()
 				Button:
+					border: 0,0,0,0
 					text: "Добавить дату"
 					font_size: sp(16)
 					pos_hint: {'center_x': .75, 'center_y': .6}
@@ -3151,6 +3189,7 @@ Builder.load_string("""
 						root.add_entry()
 
 				Button:
+					border: 0,0,0,0
 					text: "Удалить артикул"
 					font_size: sp(18)
 					pos_hint: {'center_x': .75, 'center_y': .1}
@@ -3177,6 +3216,7 @@ Builder.load_string("""
 						height: 0
 
 				Button:
+					border: 0,0,0,0
 					pos_hint: {'center_x': .2, 'center_y': .1}
 					size_hint: (.24, .15)
 					background_normal: "arrow_previous.png"
@@ -3198,6 +3238,7 @@ Builder.load_string("""
 						source: 'back.png'
 
 				Button:
+					border: 0,0,0,0
 					text: "Язык"
 					font_size: sp(22)
 					pos_hint: {'center_x': .5, 'center_y': .8}
@@ -3206,6 +3247,7 @@ Builder.load_string("""
 					background_down: "butp.png"
 
 				Button:
+					border: 0,0,0,0
 					text: "Синхронизировать"
 					font_size: sp(22)
 					pos_hint: {'center_x': .5, 'center_y': .7}
@@ -3216,6 +3258,7 @@ Builder.load_string("""
 						root.ids.mana.current = "sync_data"
 
 				Button:
+					border: 0,0,0,0
 					text: "Удалить базу данных"
 					font_size: sp(22)
 					pos_hint: {'center_x': .5, 'center_y': .6}
@@ -3256,6 +3299,7 @@ Builder.load_string("""
 
 
 				Button:
+					border: 0,0,0,0
 					pos_hint: {'center_x':.5, 'center_y': .1}
 					size_hint: (.25, .2)
 					background_normal: "trash.png"
@@ -3282,7 +3326,6 @@ Builder.load_string("""
 					multiline: False
 					size_hint: (.8, .08)
 					pos_hint: {'center_x': .5, 'center_y': .75}
-					on_text: root.extra_checker2('1dd')
 
 				TextInput:
 					font_size: sp(24)
@@ -3292,27 +3335,121 @@ Builder.load_string("""
 					multiline: False
 					size_hint: (.8, .08)
 					pos_hint: {'center_x': .5, 'center_y': .65}
-					on_text: root.extra_checker2('1dd')
 
 				Button:
+					border: 0,0,0,0
 					text: "Войти"
 					font_size: sp(22)
 					pos_hint: {'center_x': .5, 'center_y': .5}
-					size_hint: (.65, .12)
+					size_hint: (.65, .1)
 					background_normal: "but.png"
 					background_down: "butp.png"
 					on_release:
-						root.try_to_log_in(group_name.text, group_password.text, group_user_name.text)
+						root.try_to_log_in(group_name.text, group_password.text)
 
 				Button:
+					border: 0,0,0,0
 					text: "Создать группу"
 					font_size: sp(22)
 					pos_hint: {'center_x': .5, 'center_y': .4}
-					size_hint: (.65, .12)
+					size_hint: (.65, .1)
 					background_normal: "but.png"
 					background_down: "butp.png"
 					on_release:
 						root.create_new_group(group_name.text, group_password.text)
+
+		Screen:
+			name: 'new_group_nickname'
+
+			FloatLayout:
+				id: canvas
+				canvas:
+					Rectangle:
+						size: self.size
+						pos: self.pos
+						source: 'back.png'
+
+			TextInput:
+
+				font_size: sp(24)
+				id: new_nickname
+				hint_text: 'Создать пользоваля'
+				multiline: False
+				size_hint: (.8, .08)
+				pos_hint: {'center_x': .5, 'center_y': .75}
+
+			Button:
+
+				text: "Создать"
+				border: 0,0,0,0
+				font_size: sp(22)
+				pos_hint: {'center_x': .5, 'center_y': .65}
+				size_hint: (.65, .1)
+				background_normal: "but.png"
+				background_down: "butp.png"
+				on_release:
+					root.new_group_new_user(new_nickname.text)
+
+		Screen:
+			name: 'ask_nickname'
+
+			FloatLayout:
+				id: canvas
+				canvas:
+					Rectangle:
+						size: self.size
+						pos: self.pos
+						source: 'back.png'
+
+			TextInput:
+
+				font_size: sp(24)
+				id: nickname
+				hint_text: 'Имя пользователя'
+				multiline: False
+				size_hint: (.8, .08)
+				pos_hint: {'center_x': .5, 'center_y': .75}
+
+			Button:
+
+				text: "Войти"
+				border: 0,0,0,0
+				font_size: sp(22)
+				pos_hint: {'center_x': .5, 'center_y': .65}
+				size_hint: (.65, .1)
+				background_normal: "but.png"
+				background_down: "butp.png"
+				on_release:
+					root.is_user_here(nickname.text)
+
+			Button:
+
+				text: "Создать"
+				border: 0,0,0,0
+				font_size: sp(22)
+				pos_hint: {'center_x': .5, 'center_y': .55}
+				size_hint: (.65, .1)
+				background_normal: "but.png"
+				background_down: "butp.png"
+				on_release:
+					root.new_group_new_user(nickname.text)
+
+		Screen:
+			name: 'group_home'
+
+			FloatLayout:
+				id: canvas
+				canvas:
+					Rectangle:
+						size: self.size
+						pos: self.pos
+						source: 'back.png'
+
+				Label:
+					size: self.texture_size
+					text: root.current_group
+					font_size: sp(40)
+					pos_hint:{"center_x":.5,"center_y":.9}
 
 
 
