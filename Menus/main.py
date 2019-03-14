@@ -2178,6 +2178,24 @@ class Core(BoxLayout):
 
 	url = "https://avocado-a066c.firebaseio.com/.json"
 
+	def exit_group(self):
+		self.current_user = ''
+		self.current_group = ''
+		self.current_password = ''
+		self.current_data = ''
+
+		self.is_user_already_logged()
+
+		with open('data.json', 'w') as outfile:
+			json.dump('', outfile)
+
+	def is_user_already_logged(self):
+	
+		if self.current_user:
+			self.ids.mana.current = "group_home"
+		else:
+			self.ids.mana.current = "sync_data"
+
 	def read_from_base_new_group(self):
 
 		auth_key = "HqpU7WbJBeA4wN058kf9nPo9PZAAiUiEBrC3ZvP5"
@@ -2208,6 +2226,9 @@ class Core(BoxLayout):
 
 	def new_group_new_user(self, name):
 		if self.create_user(name):
+			self.current_user = name
+			settings_data = {'group': self.current_group, 'user': name}
+			self.set_settings(settings_data)
 			self.ids.mana.current = 'group_home'
 
 	def create_user(self, name):
@@ -2234,6 +2255,8 @@ class Core(BoxLayout):
 	def is_user_here(self, name):
 		for each in self.current_data['Users']:
 			if name == each:
+				settings_data = {'group': self.current_group, 'user': name}
+				self.set_settings(settings_data)
 				self.ids.mana.current = 'group_home'
 				return
 
@@ -2262,6 +2285,8 @@ class Core(BoxLayout):
 		if self.read_from_base():
 			if self.check_password():
 				if not self.current_user:
+					self.ids.group_password.text = ''
+					self.ids.group_name.text = ''
 					self.ids.mana.current = 'ask_nickname'
 		
 
@@ -2303,16 +2328,25 @@ class Core(BoxLayout):
 
 	def create_digital_copy(self, names, days_of_life, saver):
 
-		first_phrase = '{' + '"{}"'.format(self.current_group) + ': {' + '"Users": ' + self.new_users + ',' + '"Names":' + '"{}"'.format(names)+ ', ' + '"DaysOfLife":' + '"{}"'.format(days_of_life) + ', ' + '"Saver":' + '"{}"'.format(saver) + ', ' + '"Password":' + '"{}"'.format(self.current_password) + '}}'
+		sent = '{"DaysOfLife": ' + '"{}"'.format(days_of_life) + '}'
+		print(sent)
+		days_of_life = json.loads(sent)
+		url = "https://avocado-a066c.firebaseio.com/{}.json".format(self.current_group)
+		requests.patch(url=url, json=days_of_life)
 
-		self.write_to_base(first_phrase)
+		sent = '{"Names": ' + '"{}"'.format(names) + '}'
+		names = json.loads(sent)
+		url = "https://avocado-a066c.firebaseio.com/{}.json".format(self.current_group)
+		requests.patch(url=url, json=names)
+
+		sent = '{"Saver": ' + '"{}"'.format(saver) + '}'
+		saver = json.loads(sent)
+		url = "https://avocado-a066c.firebaseio.com/{}.json".format(self.current_group)
+		requests.patch(url=url, json=saver)
 
 	def internet_sync(self):
-		data = self.current_data
-		print('THis is DATA ', data)
-		print()
-		print(data)
-		print('__________________________________________________')
+
+		data = self.read_from_base()
 
 		if data != None:
 			days_of_life_from_server = data['DaysOfLife'].split('$')[:-1]
@@ -2462,8 +2496,22 @@ class Core(BoxLayout):
 
 			self.create_digital_copy(updated_names, updated_days_of_life, updated_saves)
 
+	def set_settings(self, data):
+
+		with open('data.json', 'w') as outfile:
+			json.dump(data, outfile)
+
 	def get_settings(self, *args):
-		pass
+
+		try:
+			with open('data.json', encoding='utf-8') as data_file:
+
+				data = json.loads(data_file.read())
+				self.current_group = data['group']
+				self.current_user = data['user']
+		except:
+			pass
+
 
 ###########################---App_Classes---##################################
 class ProtoApp(App):
@@ -2475,7 +2523,7 @@ class ProtoApp(App):
 				break
 
 		Clock.schedule_once(mine.alarm, 2)
-		#Clock.schedule_once(mine.get_settings, 1)
+		Clock.schedule_once(mine.get_settings, 1)
 
 	def build(self):
 		return Core()
@@ -3255,7 +3303,7 @@ Builder.load_string("""
 					background_normal: "but.png"
 					background_down: "butp.png"
 					on_release:
-						root.ids.mana.current = "sync_data"
+						root.is_user_already_logged()
 
 				Button:
 					border: 0,0,0,0
@@ -3446,10 +3494,56 @@ Builder.load_string("""
 						source: 'back.png'
 
 				Label:
+					canvas.before:
+						Color: 
+							rgba: .53, .70, .18, .3 
+						Rectangle:
+							pos: self.pos 
+							size: self.size
+
+					size_hint: (1, .15)
+					pos_hint:{"center_x":.5,"center_y":.9}
+
+				Label:
 					size: self.texture_size
 					text: root.current_group
 					font_size: sp(40)
 					pos_hint:{"center_x":.5,"center_y":.9}
+
+				Label:
+					size: self.texture_size
+					text: 'группа'
+					color: 1,0,1,1
+					font_size: sp(25)
+					pos_hint:{"center_x":.5,"center_y":.95}
+
+				Label:
+					size: self.texture_size
+					text: root.current_user
+					color: 1,0,1,1
+					font_size: sp(21)
+					pos_hint:{"center_x":.5,"center_y":.85}
+
+				Button:
+					text: "Синхронизировать"
+					border: 0,0,0,0
+					font_size: sp(22)
+					pos_hint: {'center_x': .5, 'center_y': .65}
+					size_hint: (.65, .1)
+					background_normal: "but.png"
+					background_down: "butp.png"
+					on_release:
+						root.internet_sync()
+
+				Button:
+					text: "Выйти"
+					border: 0,0,0,0
+					font_size: sp(22)
+					pos_hint: {'center_x': .5, 'center_y': .55}
+					size_hint: (.65, .1)
+					background_normal: "but.png"
+					background_down: "butp.png"
+					on_release: root.exit_group()
 
 
 
