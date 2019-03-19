@@ -1907,7 +1907,19 @@ class Core(BoxLayout):
 		for each in index_list:
 			entries_copy[each] = article
 
-		#[0101, 93999, '0101', 666]
+		hub = []
+
+		for x in range(0, len(entries_copy)-1, 2):
+			hub.append((entries_copy[x], entries_copy[x+1]))
+
+		entry = list(set(hub))
+
+		entries_copy = []
+
+		for each in entry:
+			for eaz in each:
+				entries_copy.append(eaz)
+
 
 		with open("saver.txt", "w") as f:
 			for each in entries_copy:
