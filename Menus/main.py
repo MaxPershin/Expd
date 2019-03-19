@@ -93,7 +93,7 @@ class Core(BoxLayout):
 
 	day_or_what = ObjectProperty('day')
 
-	stop_list =ObjectProperty({})
+	stop_list =ObjectProperty([])
 
 
 	ranger1 = ObjectProperty({"center_x":-5,"center_y":.795})
@@ -165,9 +165,9 @@ class Core(BoxLayout):
 				resulter = each[0]+each[1]
 				superb.append(resulter)
 
-
 			for each in master:
 				if each in superb:
+					self.stop_list.append((each[8:], 'deleteDate', each[:8]))
 					superb.remove(each)
 
 			soviet = []
@@ -660,6 +660,11 @@ class Core(BoxLayout):
 			month = str(tommorow.month)
 			year = str(tommorow.year)
 
+			if len(day) < 2:
+				day = '0'+day
+			if len(month) < 2:
+				month = '0'+month 
+
 			tommorow = '{}{}{}'.format(day, month, year)
 
 			f = open("saver.txt", "r+")
@@ -677,7 +682,14 @@ class Core(BoxLayout):
 			hound.sort()
 			hound = hound[::-1]
 
+			temp = []
+
 			for each in hound:
+				temp.append(dawread[each])
+				if len(temp) == 2:
+					self.stop_list.append((temp[0], 'deleteDate', temp[1]))
+					temp = []
+
 				del dawread[each]
 
 			with open("saver.txt", "w") as f:
@@ -688,7 +700,7 @@ class Core(BoxLayout):
 
 			self.ids.griddy4.clear_widgets()
 
-			self.define_today_art()
+			self.define_today_art('today')
 
 			self.found_arts = []
 
@@ -1512,6 +1524,8 @@ class Core(BoxLayout):
 
 		sync()
 
+		self.stop_list.append((inf_art, 'deleteART', None))
+
 		self.show_prosrok(False)
 		self.alarm()
 
@@ -1852,6 +1866,8 @@ class Core(BoxLayout):
 			for each in dawread:
 				f.write(str(each + "$"))
 
+		self.stop_list.append((inf_art, 'changeSTD', st_date))
+
 		sync()
 
 	def work_out_name(self, name):
@@ -1959,6 +1975,8 @@ class Core(BoxLayout):
 		self.clean()
 		self.get_them(0)
 		self.ids.mana.current = "database"
+
+		self.stop_list.append((inf_art, 'deleteART', None))
 
 		text = 'Миграция артикула {} в {} успешно!'.format(inf_art, article)
 
@@ -2096,6 +2114,8 @@ class Core(BoxLayout):
 			for each in dawread:
 				f.write(str(each + "$"))
 
+		self.stop_list.append((inf_art, 'deleteDate', self.date))
+
 		sync()
 		self.show_prosrok(False)
 		self.alarm()
@@ -2204,6 +2224,8 @@ class Core(BoxLayout):
 					for each in dawread:
 						f.write(str(each + "$"))
 
+				self.stop_list.append((inf_art, 'deleteDate', self.date))
+
 				sync()
 
 				self.show_prosrok(False)
@@ -2300,37 +2322,7 @@ class Core(BoxLayout):
 
 	#______________STOP_LIST_CODE________________#
 
-	def add_to_stop_list(what, value):
-		if value not in self.stop_list[what]:
-			self.stop_list[what].append(value)
 
-	def convert_stop_list_to_string():
-		all_articles = '$'.join(self.stop_list['arts'])
-		all_dates = '$'.join(self.stop_list['dates'])
-		result = all_articles + ':' + all_dates
-
-		return result
-
-	def convert_string_to_stop_list(stop_string):
-		stop_string = stop_string.split(':')
-		arts = stop_string[0]
-		dates = stop_string[1]
-
-		arts = arts.split('$')
-		dates = dates.split('$')
-
-		dates = [i for i in dates if i]
-
-		n_dates = []
-
-		for x in range(0, len(dates), 2):
-			n_dates.append(dates[x]+ '$' + dates[x+1])
-
-		for each in arts:
-			self.stop_list['arts'].append(each)
-
-		for each in n_dates:
-			self.stop_list['dates'].append(each)
 
 	#______________HERE IS THE INTERNET SYNC CODE____________________#
 
@@ -2491,7 +2483,6 @@ class Core(BoxLayout):
 	def create_digital_copy(self, names, days_of_life, saver):
 
 		sent = '{"DaysOfLife": ' + '"{}"'.format(days_of_life) + '}'
-		print(sent)
 		days_of_life = json.loads(sent)
 		url = "https://avocado-a066c.firebaseio.com/{}.json".format(self.current_group)
 		requests.patch(url=url, json=days_of_life)
@@ -2577,7 +2568,6 @@ class Core(BoxLayout):
 			f.close()
 
 			saves_local = rawread.split('$')[:-1]
-			print("LOCAL SAVE ", saves_local)
 
 			if len(saves_from_server) == 0:
 				updated_saves = saves_local
@@ -2587,9 +2577,6 @@ class Core(BoxLayout):
 
 				saves_local += saves_from_server
 
-				print()
-				print('BOTH SERVER AND LOCAL ', saves_local, 'on serv -', saves_from_server)
-
 				articles_only = []
 				dates_only = []
 
@@ -2598,8 +2585,6 @@ class Core(BoxLayout):
 						articles_only.append(saves_local[x])
 					else:
 						dates_only.append(saves_local[x])
-
-				print('Articles only --- ', articles_only)
 
 				final_hub = {}
 
@@ -2615,18 +2600,12 @@ class Core(BoxLayout):
 						old = list(set(old))
 						final_hub[articles_only[x]] = old
 
-				print('Final hub--- ', final_hub)
-
 				updated_saves = []
 
 				for each in final_hub:
 					for eaz in final_hub[each]:
 						updated_saves.append(eaz)
 						updated_saves.append(each)
-
-				print('Updated saves ', updated_saves)
-
-			print(updated_names)
 
 			if len(updated_names) == 0:
 				updated_names = ''
