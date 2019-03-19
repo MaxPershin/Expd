@@ -2212,10 +2212,13 @@ class Core(BoxLayout):
 
 		anwser = self.read_from_base_new_group()
 
-		for each in anwser:
-			if each == group_name:
-				popup('Внимание', 'Данная группа уже существует!')
-				return
+		try:
+			for each in anwser:
+				if each == group_name:
+					popup('Внимание', 'Данная группа уже существует!')
+					return
+		except:
+			pass
 
 		first_phrase = '{' + '"{}"'.format(group_name) + ': {' + '"Users": ' + '""' + ',' + '"Names":' + '""' + ', ' + '"DaysOfLife":' + '""' + ', ' + '"Saver":' + '""' + ', ' + '"Password":' + '"{}"'.format(group_password) + '}}'
 
@@ -2257,6 +2260,7 @@ class Core(BoxLayout):
 			if name == each:
 				settings_data = {'group': self.current_group, 'user': name}
 				self.set_settings(settings_data)
+				self.current_user = name
 				self.ids.mana.current = 'group_home'
 				return
 
@@ -2386,7 +2390,6 @@ class Core(BoxLayout):
 
 			names_local = rawread.split('$')[:-1]
 
-
 			if (len(names_local)) == 0:
 				updated_names = names_from_server
 			elif len(names_from_server) == 0:
@@ -2395,7 +2398,6 @@ class Core(BoxLayout):
 				articles_only = [i for i in names_local if names_local.index(i) % 2 == 0]
 
 				updated_names = names_from_server
-				print(updated_names)
 
 
 				for each in articles_only:
@@ -2403,6 +2405,12 @@ class Core(BoxLayout):
 						updated_names.append(each)
 						updated_names.append(names_local[names_local.index(each)+1])
 
+			alias = names_local[:]
+			updated_names_to_phone = updated_names[:]
+
+			for x in range(len(alias)-1):
+				if x % 2 == 0 or x == 0:
+					updated_names_to_phone[updated_names_to_phone.index(alias[x])+1] = alias[alias.index(alias[x])+1]
 
 			#______--We update dates--________________#
 
@@ -2471,7 +2479,7 @@ class Core(BoxLayout):
 
 
 			with open("artname.txt", "w") as f:
-				for each in updated_names:
+				for each in updated_names_to_phone:
 					f.write(str(each + "$"))
 
 			with open("daysoflife.txt", "w") as f:
@@ -2495,6 +2503,7 @@ class Core(BoxLayout):
 				updated_saves = ''
 
 			self.create_digital_copy(updated_names, updated_days_of_life, updated_saves)
+			self.alarm()
 
 	def set_settings(self, data):
 
@@ -2504,7 +2513,7 @@ class Core(BoxLayout):
 	def get_settings(self, *args):
 
 		try:
-			with open('data.json', encoding='utf-8') as data_file:
+			with open('data.json') as data_file:
 
 				data = json.loads(data_file.read())
 				self.current_group = data['group']
