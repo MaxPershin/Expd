@@ -1748,8 +1748,6 @@ class Core(BoxLayout):
 		layout.add_widget(lbl)
 		layout.add_widget(btn1)
 
-
-
 		if closer == False:
 			self.popup = Popup(title="Внимание!",
 			content=layout,
@@ -1763,6 +1761,8 @@ class Core(BoxLayout):
 				self.get_them(0)
 			elif flag == None:
 				popup("Внимание", "Вы не ввели новых данных")
+			elif flag == 'merge':
+				pass
 			else:
 				popup("Внимание", "Вы ввели некорректные данные")
 
@@ -1783,7 +1783,12 @@ class Core(BoxLayout):
 			return
 		
 		if article != inf_art:
-			self.work_out_article(article)
+			if article in art_names:
+				self.popup.dismiss()
+				self.merge_arts(article)
+				return
+			else:
+				self.work_out_article(article)
 
 		if name != art_names[inf_art]:
 			self.work_out_name(name)
@@ -1865,6 +1870,87 @@ class Core(BoxLayout):
 				f.write(str(each + "$"))
 
 		sync()
+
+	def merge_arts(self, article):
+
+		title = 'Внимание!'
+		label = Label(text='Артикул {} уже существует,\n объединить?'.format(article))
+		btn1 = Button(text='Да', on_release=lambda x: self.do_merge(article))
+		btn2 = Button(text='Нет', on_release=lambda x: self.dis_my_pop())
+
+		fl = BoxLayout(orientation='vertical')
+		fl.add_widget(label)
+		bx = BoxLayout(orientation='horizontal')
+		bx.add_widget(btn1)
+		bx.add_widget(btn2)
+
+		fl.add_widget(bx)
+
+		self.my_pop = Popup(title=title,
+		content=fl,
+		size_hint=(0.65, 0.5))
+		self.my_pop.open()
+
+	def dis_my_pop(self):
+		self.my_pop.dismiss()
+
+	def do_merge(self, article):
+		
+		self.my_pop.dismiss()
+
+		entries_copy = entries[:]
+
+		del entries_copy[-1]
+
+		index_list = [i for i,x in enumerate(entries_copy) if x == inf_art]
+
+		for each in index_list:
+			entries_copy[each] = article
+
+		#[0101, 93999, '0101', 666]
+
+		with open("saver.txt", "w") as f:
+			for each in entries_copy:
+				f.write(str(each + "$"))
+
+		f = open("artname.txt", "r+")
+		dawread = f.read()
+		f.close()
+		dawread = dawread.split("$")
+		del dawread[-1]
+		worker = dawread.index(inf_art)
+		del dawread[worker]
+		del dawread[worker]
+
+		with open("artname.txt", "w") as f:
+			for each in dawread:
+				f.write(str(each + "$"))
+
+		f = open("daysoflife.txt", "r+")
+		dawread = f.read()
+		f.close()
+		dawread = dawread.split("$")
+		del dawread[-1]
+		worker = dawread.index(inf_art)
+		del dawread[worker]
+		del dawread[worker]
+
+		with open("daysoflife.txt", "w") as f:
+			for each in dawread:
+				f.write(str(each + "$"))
+
+		sync()
+
+		self.show_prosrok(False)
+		self.alarm()
+
+		self.clean()
+		self.get_them(0)
+		self.ids.mana.current = "database"
+
+		text = 'Миграция артикула {} в {} успешно!'.format(inf_art, article)
+
+		popup('Внимание!', text)
 
 	def work_out_article(self, article):
 		global inf_art
