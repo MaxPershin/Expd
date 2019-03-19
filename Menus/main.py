@@ -93,6 +93,8 @@ class Core(BoxLayout):
 
 	day_or_what = ObjectProperty('day')
 
+	stop_list =ObjectProperty({})
+
 
 	ranger1 = ObjectProperty({"center_x":-5,"center_y":.795})
 	ranger2 = ObjectProperty({"center_x":-5,"center_y":.795})
@@ -287,9 +289,6 @@ class Core(BoxLayout):
 			self.grid.add_widget(self.btn)
 			self.btn.bind(on_press=self.check_status2)
 
-
-
-
 	def check_status2(self, button):
 
 		if button.state == 'down':
@@ -323,7 +322,6 @@ class Core(BoxLayout):
 
 			searching_for = '{}.{}.{}'.format(article, name, mem_date)
 			self.arch.remove(searching_for)
-
 
 	memory = []
 	arch = []
@@ -1737,14 +1735,14 @@ class Core(BoxLayout):
 		self.ids.standartdate.text = ""
 		self.ids.griddy.clear_widgets()
 
-	def change_popup_name(self):
+	def change_popup_name(self, flag):
 		name = art_names[inf_art]
 		ask = self.ids.name.text
 		sentence = "Вы уверены что хотите внести изменения\n в артикул {}?".format(name)
 
 
 		layout = FloatLayout(size=(self.width, self.height))
-		btn1 = Button(id="one", text="Изменить", size_hint_y=None, size_hint_x=None, height=0.06*self.height, width=0.6*self.width, font_size=0.035*self.height, pos_hint={"center_x":.5,"center_y":.45}, on_release=lambda x:self.close_n_save_name())
+		btn1 = Button(id="one", text="Изменить", size_hint_y=None, size_hint_x=None, height=0.06*self.height, width=0.6*self.width, font_size=0.035*self.height, pos_hint={"center_x":.5,"center_y":.45}, on_release=lambda x:self.changes_selector())
 		lbl = Label(text=sentence, font_size=0.025*self.height, pos_hint={"center_x":.5,"center_y":.82})
 
 		layout.add_widget(lbl)
@@ -1760,90 +1758,45 @@ class Core(BoxLayout):
 		else:
 			self.popup.dismiss()
 			ch_closer()
-			popup("Выполнено", "Изменения сохранены")
-			self.get_them(0)
+			if flag:
+				popup("Выполнено", "Изменения сохранены")
+				self.get_them(0)
+			elif flag == None:
+				popup("Внимание", "Вы не ввели новых данных")
+			else:
+				popup("Внимание", "Вы ввели некорректные данные")
 
-	def close_n_save_name(self):
-		global inf_art
+	def changes_selector(self):
 
-		name = art_names[inf_art]
-		new_name = self.ids.name.text
-		new_art = self.ids.article.text
-		new_standartdate = self.ids.standartdate.text
+		name = self.ids.name.text
+		article = self.ids.article.text
+		st_date = self.ids.standartdate.text
 
-		if new_name[0] == " ":
-			new_name = new_name[1:]
+		if name == art_names[inf_art] and article == inf_art and st_date == days_of_life[inf_art]:
+			ch_closer()
+			self.change_popup_name(None)
+			return
 
-		#Lets update name... And article in one place
+		if not article.isdigit() or not st_date.isdigit():
+			ch_closer()
+			self.change_popup_name(False)
+			return
+		
+		if article != inf_art:
+			self.work_out_article(article)
 
-		f = open("artname.txt", "r+")
-		dawread = f.read()
-		f.close()
-		dawread = dawread.split("$")
-		del dawread[-1]
-		worker = dawread.index(inf_art)
-		worker += 1
-		dawread[worker] = new_name
+		if name != art_names[inf_art]:
+			self.work_out_name(name)
 
-		with open("artname.txt", "w") as f:
-			for each in dawread:
-				f.write(str(each + "$"))
+		if st_date != days_of_life[inf_art]:
+			self.work_out_st_date(st_date)
 
-		f = open("artname.txt", "r+")
-		dawread = f.read()
-		f.close()
-		dawread = dawread.split("$")
-		del dawread[-1]
-		worker = dawread.index(inf_art)
-		dawread[worker] = new_art
+		self.do_clean_stuff(article)
 
-		with open("artname.txt", "w") as f:
-			for each in dawread:
-				f.write(str(each + "$"))
+		ch_closer()
+		self.change_popup_name(True)
 
-		# Now lets try to update DAYS of Life and art in one place ;)
-
-		f = open("daysoflife.txt", "r+")
-		dawread = f.read()
-		f.close()
-		dawread = dawread.split("$")
-		del dawread[-1]
-		worker = dawread.index(inf_art)
-		worker += 1
-		dawread[worker] = new_standartdate
-
-		with open("daysoflife.txt", "w") as f:
-			for each in dawread:
-				f.write(str(each + "$"))
-
-		if inf_art in days_of_life:
-			f = open("daysoflife.txt", "r+")
-			dawread = f.read()
-			f.close()
-			dawread = dawread.split("$")
-			del dawread[-1]
-			worker = dawread.index(inf_art)
-			dawread[worker] = new_art
-
-			with open("daysoflife.txt", "w") as f:
-				for each in dawread:
-					f.write(str(each + "$"))
-
-		#Lets Update entries also...
-
-		if inf_art in entries:
-			f = open("saver.txt", "r+")
-			dawread = f.read()
-			f.close()
-			dawread = dawread.split("$")
-			del dawread[-1]
-			worker = [i for i,x in enumerate(dawread) if x==inf_art]
-			for each in worker:
-				dawread[each] = new_art
-
-			with open("saver.txt", "w") as f:
-				for each in dawread:
-					f.write(str(each + "$"))
+	def do_clean_stuff(self, new_art):
 
 		#Lets kill copies in NAMES if they are here
 		f = open("artname.txt", "r+")
@@ -1879,10 +1832,83 @@ class Core(BoxLayout):
 
 		sync()
 
-		inf_art = new_art
+	def work_out_st_date(self, st_date):
 
-		ch_closer()
-		self.change_popup_name()
+		f = open("daysoflife.txt", "r+")
+		dawread = f.read()
+		f.close()
+		dawread = dawread.split("$")
+		del dawread[-1]
+		worker = dawread.index(inf_art)
+		worker += 1
+		dawread[worker] = st_date
+
+		with open("daysoflife.txt", "w") as f:
+			for each in dawread:
+				f.write(str(each + "$"))
+
+		sync()
+
+	def work_out_name(self, name):
+
+		f = open("artname.txt", "r+")
+		dawread = f.read()
+		f.close()
+		dawread = dawread.split("$")
+		del dawread[-1]
+		worker = dawread.index(inf_art)
+		worker += 1
+		dawread[worker] = name
+
+		with open("artname.txt", "w") as f:
+			for each in dawread:
+				f.write(str(each + "$"))
+
+		sync()
+
+	def work_out_article(self, article):
+		global inf_art
+
+		f = open("artname.txt", "r+")
+		dawread = f.read()
+		f.close()
+		dawread = dawread.split("$")
+		del dawread[-1]
+		worker = dawread.index(inf_art)
+		dawread[worker] = article
+
+		with open("artname.txt", "w") as f:
+			for each in dawread:
+				f.write(str(each + "$"))
+
+		f = open("daysoflife.txt", "r+")
+		dawread = f.read()
+		f.close()
+		dawread = dawread.split("$")
+		del dawread[-1]
+		worker = dawread.index(inf_art)
+		dawread[worker] = article
+
+		with open("daysoflife.txt", "w") as f:
+			for each in dawread:
+				f.write(str(each + "$"))
+
+		f = open("saver.txt", "r+")
+		dawread = f.read()
+		f.close()
+		dawread = dawread.split("$")
+		del dawread[-1]
+		worker = [i for i,x in enumerate(dawread) if x==inf_art]
+		for each in worker:
+			dawread[each] = article
+
+		with open("saver.txt", "w") as f:
+			for each in dawread:
+				f.write(str(each + "$"))
+
+		sync()
+
+		inf_art = article
 
 	def entry_change(self, button):
 		cont = []
@@ -2173,6 +2199,40 @@ class Core(BoxLayout):
 		self.alarm()
 		self.ids.griddy.clear_widgets()
 		self.ids.griddy4.clear_widgets()
+
+	#______________STOP_LIST_CODE________________#
+
+	def add_to_stop_list(what, value):
+		if value not in self.stop_list[what]:
+			self.stop_list[what].append(value)
+
+	def convert_stop_list_to_string():
+		all_articles = '$'.join(self.stop_list['arts'])
+		all_dates = '$'.join(self.stop_list['dates'])
+		result = all_articles + ':' + all_dates
+
+		return result
+
+	def convert_string_to_stop_list(stop_string):
+		stop_string = stop_string.split(':')
+		arts = stop_string[0]
+		dates = stop_string[1]
+
+		arts = arts.split('$')
+		dates = dates.split('$')
+
+		dates = [i for i in dates if i]
+
+		n_dates = []
+
+		for x in range(0, len(dates), 2):
+			n_dates.append(dates[x]+ '$' + dates[x+1])
+
+		for each in arts:
+			self.stop_list['arts'].append(each)
+
+		for each in n_dates:
+			self.stop_list['dates'].append(each)
 
 	#______________HERE IS THE INTERNET SYNC CODE____________________#
 
@@ -3233,7 +3293,7 @@ Builder.load_string("""
 					background_normal: "but.png"
 					background_down: "butp.png"
 					on_release:
-						root.change_popup_name()
+						root.change_popup_name(True)
 				Button:
 					border: 0,0,0,0
 					text: "Добавить дату"
