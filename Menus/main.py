@@ -168,6 +168,7 @@ class Core(BoxLayout):
 			for each in master:
 				if each in superb:
 					self.stop_list.append((each[8:], 'deleteDate', each[:8]))
+					self.set_stop_list()
 					superb.remove(each)
 
 			soviet = []
@@ -688,6 +689,7 @@ class Core(BoxLayout):
 				temp.append(dawread[each])
 				if len(temp) == 2:
 					self.stop_list.append((temp[0], 'deleteDate', temp[1]))
+					self.set_stop_list()
 					temp = []
 
 				del dawread[each]
@@ -1318,6 +1320,9 @@ class Core(BoxLayout):
 					popup("Внимание!", "Этот артикул уже есть в базе данных")
 					return
 				else:
+					
+					self.if_recreated(self.inputi.text, 'deleteART', None)
+
 					f = open("artname.txt", "a")
 					f.write(str((self.inputi.text + "$" + self.inputi2.text + "$")))
 					f.close()
@@ -1335,6 +1340,27 @@ class Core(BoxLayout):
 		else:
 			popup("Внимание!", "Введите данные корректно")
 			return
+
+	def if_recreated(self, article, typer, value):
+		if typer == 'deleteART':
+			self.deleteART_check(article)
+
+		elif typer == 'deleteDate':
+			self.deleteDate_check(article, value)
+
+	def deleteDate_check(self, article, value):
+		tester = (article, 'deleteDate', value)
+		
+		if tester in self.stop_list:
+			self.stop_list.remove(tester)
+			self.set_stop_list()
+
+	def deleteART_check(self, article):
+		tester = (article, 'deleteART', None)
+
+		if tester in self.stop_list:
+			self.stop_list.remove(tester)
+			self.set_stop_list()
 
 	def get_them(self, code):
 			search = self.ids.searcher.text
@@ -1525,6 +1551,7 @@ class Core(BoxLayout):
 		sync()
 
 		self.stop_list.append((inf_art, 'deleteART', None))
+		self.set_stop_list()
 
 		self.show_prosrok(False)
 		self.alarm()
@@ -1674,6 +1701,9 @@ class Core(BoxLayout):
 					self.enter_prosrok2(boomb)
 					return
 				else:
+
+					self.if_recreated(inf_art, 'deleteDate', boomb)
+
 					f = open("saver.txt", "a")
 					f.write(str((boomb + "$" + inf_art + "$")))
 					f.close()
@@ -1867,6 +1897,7 @@ class Core(BoxLayout):
 				f.write(str(each + "$"))
 
 		self.stop_list.append((inf_art, 'changeSTD', st_date))
+		self.set_stop_list()
 
 		sync()
 
@@ -1977,6 +2008,7 @@ class Core(BoxLayout):
 		self.ids.mana.current = "database"
 
 		self.stop_list.append((inf_art, 'deleteART', None))
+		self.set_stop_list()
 
 		text = 'Миграция артикула {} в {} успешно!'.format(inf_art, article)
 
@@ -2115,6 +2147,7 @@ class Core(BoxLayout):
 				f.write(str(each + "$"))
 
 		self.stop_list.append((inf_art, 'deleteDate', self.date))
+		self.set_stop_list()
 
 		sync()
 		self.show_prosrok(False)
@@ -2225,6 +2258,7 @@ class Core(BoxLayout):
 						f.write(str(each + "$"))
 
 				self.stop_list.append((inf_art, 'deleteDate', self.date))
+				self.set_stop_list()
 
 				sync()
 
@@ -2657,6 +2691,33 @@ class Core(BoxLayout):
 				self.current_user = data['user']
 		except:
 			pass
+
+		self.get_stop_list()
+
+	def get_stop_list(self):
+		try:
+			with open('stop_list.txt', 'r') as f:
+				data = f.read()
+				data = data.split('$')
+				del data[-1]
+				
+				for each in data:
+					first,second,third = each.split(',')
+					self.stop_list.append((first, second, third))
+					
+
+		except:
+			f = open("stop_list.txt", "w+")
+			f.close()
+
+		print(self.stop_list)
+
+	def set_stop_list(self):
+		print(self.stop_list)
+		with open("stop_list.txt", "w") as f:
+				for each in self.stop_list:
+					f.write(str(each[0])+','+str(each[1])+ ','+ str(each[2]) + '$')
+
 
 
 ###########################---App_Classes---##################################
