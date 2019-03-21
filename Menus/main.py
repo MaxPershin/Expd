@@ -32,6 +32,7 @@ from dateutil.relativedelta import relativedelta
 import gc
 from kivy.animation import Animation
 from kivy.clock import Clock
+import threading
 
 import json
 import requests
@@ -105,6 +106,9 @@ class Core(BoxLayout):
 	ranger7 = ObjectProperty({"center_x":-5,"center_y":.795})
 	ranger8 = ObjectProperty({"center_x":-5,"center_y":.795})
 	ranger9 = ObjectProperty({"center_x":-5,"center_y":.795})
+
+	loading_gif_pos = ObjectProperty({"center_x": 1.5,"center_y": .9})
+	finished_gif_pos = ObjectProperty({"center_x": 1.5,"center_y": .9})
 
 	prosrochka_button = ObjectProperty({"center_x": -5,"center_y":.9625})
 
@@ -199,8 +203,6 @@ class Core(BoxLayout):
 			self.show_prosrok(False)
 
 			self.alarm()
-
-
 
 	def put_trash(self):
 
@@ -2686,8 +2688,12 @@ class Core(BoxLayout):
 
 		sync()
 		
+	def prepare_to_internet_sync(self):
 
+		self.loading_gif_pos = {"center_x": .9,"center_y": .9}
 
+		my_thread = threading.Thread(target=self.internet_sync)
+		my_thread.start()
 
 	def internet_sync(self):
 
@@ -2839,6 +2845,15 @@ class Core(BoxLayout):
 
 			self.create_digital_copy(updated_names, updated_days_of_life, updated_saves)
 			self.alarm()
+
+			self.loading_animation_end()
+		
+
+	def loading_animation_end(self):
+	
+		self.finished_gif_pos = {"center_x": .9,"center_y": .9}
+		self.ids.finished_gif._coreimage.anim_reset(True)
+		self.ids.finished_gif.anim_delay = 0.02
 
 	def set_settings(self, data):
 
@@ -3864,6 +3879,22 @@ Builder.load_string("""
 						pos: self.pos
 						source: 'back.png'
 
+
+				Image:
+					id: loading_gif
+					source: 'loading.gif'
+					size_hint: (0.3, 0.3)
+					pos_hint: root.loading_gif_pos
+					anim_delay: 0.03
+
+				Image:
+					id: finished_gif
+					source: 'test.gif'
+					size_hint: (0.3, 0.3)
+					pos_hint: root.finished_gif_pos
+					anim_delay: -1
+					anim_loop: 1
+
 				Label:
 					canvas.before:
 						Color: 
@@ -3899,18 +3930,18 @@ Builder.load_string("""
 					text: "Синхронизировать"
 					border: 0,0,0,0
 					font_size: sp(22)
-					pos_hint: {'center_x': .5, 'center_y': .65}
+					pos_hint: {'center_x': .5, 'center_y': .3}
 					size_hint: (.65, .1)
 					background_normal: "but.png"
 					background_down: "butp.png"
 					on_release:
-						root.internet_sync()
+						root.prepare_to_internet_sync()
 
 				Button:
 					text: "Выйти"
 					border: 0,0,0,0
 					font_size: sp(22)
-					pos_hint: {'center_x': .5, 'center_y': .55}
+					pos_hint: {'center_x': .5, 'center_y': .2}
 					size_hint: (.65, .1)
 					background_normal: "but.png"
 					background_down: "butp.png"
