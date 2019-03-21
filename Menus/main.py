@@ -2554,6 +2554,25 @@ class Core(BoxLayout):
 		url = "https://avocado-a066c.firebaseio.com/{}.json".format(self.current_group)
 		requests.patch(url=url, json=saver)
 
+	def stop_list_activity(self, days_server, names_server, saves_server):
+		
+		for each in self.stop_list:
+
+			if each[1] == 'deleteART':
+				if each[0] in names_server:
+					del names_server[names_server.index(each[0])+1]
+					names_server.remove(each[0])
+					if each[0] in saves_server:
+						hound = [i for i, x in enumerate(saves_server) if x == each[0]]
+						for each in hound:
+							del saves_server[each-1]
+							del saves_server[each]
+
+		# ЗАТЕСТИТЬ КАК РАБОТАЕТ УДАЛЕНИЕ СЕТЕВОЙ ИНФОРМАЦИИ О ДАТЕ ПРИ УДАЛЕНИИ АРТИКУЛА
+
+
+		print(saves_server)
+
 	def internet_sync(self):
 
 		data = self.read_from_base()
@@ -2562,6 +2581,8 @@ class Core(BoxLayout):
 			days_of_life_from_server = data['DaysOfLife'].split('$')[:-1]
 			names_from_server = data['Names'].split('$')[:-1]
 			saves_from_server = data['Saver'].split('$')[:-1]
+
+			self.stop_list_activity(days_of_life_from_server, names_from_server, saves_from_server)
 
 
 			f = open("daysoflife.txt", "r+")
