@@ -1090,6 +1090,10 @@ class Core(BoxLayout):
 
 	def save_anyway(self, final):
 		self.popup.dismiss()
+
+		self.if_recreated(self.cuart, 'deleteART', None)
+		self.if_recreated(self.cuart, 'deleteDate', final)
+
 		self.save(final, self.cuart)
 		sell = "Срок годности до {}".format(final)
 		popup("Сохранено", sell)
@@ -1157,6 +1161,10 @@ class Core(BoxLayout):
 			if c <= todayer:
 				self.enter_prosrok(final)
 			else:
+
+				self.if_recreated(self.cuart, 'deleteART', None)
+				self.if_recreated(self.cuart, 'deleteDate', final)
+
 				self.save(final, self.cuart)
 				sell = "Срок годности до {}".format(repres)
 				popup("Сохранено", sell)
@@ -1188,6 +1196,10 @@ class Core(BoxLayout):
 			if c <= todayer:
 				self.enter_prosrok(final)
 			else:
+
+				self.if_recreated(self.cuart, 'deleteART', None)
+				self.if_recreated(self.cuart, 'deleteDate', final)
+
 				self.save(final, self.cuart)
 				sell = "Срок годности до {}".format(repres)
 				popup("Сохранено", sell)
@@ -1216,6 +1228,10 @@ class Core(BoxLayout):
 			if c <= todayer:
 				self.enter_prosrok(ent)
 			else:
+
+				self.if_recreated(self.cuart, 'deleteART', None)
+				self.if_recreated(self.cuart, 'deleteDate', ent)
+
 				self.save(ent, self.cuart)
 				popup("Сохранено", sell)
 				self.worktext = "Введите артикул"
@@ -1616,6 +1632,10 @@ class Core(BoxLayout):
 
 	def save_anyway2(self, boomb):
 		self.popup.dismiss()
+
+		self.if_recreated(inf_art, 'deleteART', None)
+		self.if_recreated(inf_art, 'deleteDate', boomb)
+
 		f = open("saver.txt", "a")
 		f.write(str((boomb + "$" + inf_art + "$")))
 		f.close()
@@ -2163,6 +2183,9 @@ class Core(BoxLayout):
 		dawread = dawread.split("$")
 		del dawread[-1]
 		worker = [i for i,x in enumerate(dawread) if x==inf_art]
+
+		self.if_recreated(inf_art, 'deleteART', None)
+		self.if_recreated(inf_art, 'deleteDate', self.date)
 
 		for each in worker:
 			if dawread[each-1] == self.date:
