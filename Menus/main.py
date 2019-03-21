@@ -2544,6 +2544,7 @@ class Core(BoxLayout):
 		url = "https://avocado-a066c.firebaseio.com/{}.json".format(self.current_group)
 		requests.patch(url=url, json=days_of_life)
 
+
 		sent = '{"Names": ' + '"{}"'.format(names) + '}'
 		names = json.loads(sent)
 		url = "https://avocado-a066c.firebaseio.com/{}.json".format(self.current_group)
@@ -2562,16 +2563,131 @@ class Core(BoxLayout):
 				if each[0] in names_server:
 					del names_server[names_server.index(each[0])+1]
 					names_server.remove(each[0])
+					del days_server[days_server.index(each[0])+1]
+					del days_server[days_server.index(each[0])]
+
 					if each[0] in saves_server:
 						hound = [i for i, x in enumerate(saves_server) if x == each[0]]
-						for each in hound:
-							del saves_server[each-1]
-							del saves_server[each]
+						hound.reverse()
+						for eaz in hound:
+							del saves_server[eaz-1]
+							del saves_server[eaz-1]
 
-		# ЗАТЕСТИТЬ КАК РАБОТАЕТ УДАЛЕНИЕ СЕТЕВОЙ ИНФОРМАЦИИ О ДАТЕ ПРИ УДАЛЕНИИ АРТИКУЛА
+			if each[1] == 'deleteDate':
+				value = each[2]
+				art = each[0]
+
+				if art in saves_server:
+					hound = [i for i, x in enumerate(saves_server) if x == art]
+
+					for eaz in hound:
+						if saves_server[eaz-1] == value:
+							del saves_server[eaz-1]
+							del saves_server[eaz-1]
+							return
+
+	def send_stop_list(self, data):
+
+		for each in data['Users']:
+			if each == self.current_user:
+				continue
+			else:
+				text = '{'+ '"{}"'.format(each) + ': "{}"'.format(self.stop_list) + '}'
+
+				to_database = json.loads(text)
+				url = "https://avocado-a066c.firebaseio.com/{}/Users.json".format(self.current_group)
+				requests.patch(url=url, json=to_database)
+
+		self.stop_list = []
+
+	def read_my_stop_list(self, data):
+
+		subject = data['Users'][self.current_user]
+		test = [x for x, in subject if x.isalnum() or x == ',']
+		test = ''.join(test).split(',')
+
+		mozzie = []
+		temp = []
+		for each in test:
+			temp.append(each)
+			if len(temp) == 3:
+				mozzie.append((temp[0], temp[1], temp[2]))
+				temp = []
+
+		self.stop_my_data(mozzie)
+
+		text = '{'+ '"{}"'.format(self.current_user) + ': ""' + '}'
+
+		to_database = json.loads(text)
+		url = "https://avocado-a066c.firebaseio.com/{}/Users.json".format(self.current_group)
+		requests.patch(url=url, json=to_database)
+
+	def stop_my_data(self, mozzie):
+
+		f = open("daysoflife.txt", "r+")
+		rawread = f.read()
+		f.close()
+
+		days_to_stop = rawread.split('$')[:-1]
 
 
-		print(saves_server)
+		f = open("artname.txt", "r+")
+		rawread = f.read()
+		f.close()
+
+		names_to_stop = rawread.split('$')[:-1]
+
+		f = open("saver.txt", "r+")
+		rawread = f.read()
+		f.close()
+
+		saves_to_stop = rawread.split('$')[:-1]
+
+		for each in mozzie:
+
+			if each[1] == 'deleteART':
+				if each[0] in names_to_stop:
+					del names_to_stop[names_to_stop.index(each[0])+1]
+					names_to_stop.remove(each[0])
+					del days_to_stop[days_to_stop.index(each[0])+1]
+					del days_to_stop[days_to_stop.index(each[0])]
+
+					if each[0] in saves_to_stop:
+						hound = [i for i, x in enumerate(saves_to_stop) if x == each[0]]
+						hound.reverse()
+						for eaz in hound:
+							del saves_to_stop[eaz-1]
+							del saves_to_stop[eaz-1]
+
+			if each[1] == 'deleteDate':
+				value = each[2]
+				art = each[0]
+
+				if art in saves_to_stop:
+					hound = [i for i, x in enumerate(saves_to_stop) if x == art]
+
+					for eaz in hound:
+						if saves_to_stop[eaz-1] == value:
+							del saves_to_stop[eaz-1]
+							del saves_to_stop[eaz-1]
+
+
+		with open("artname.txt", "w+") as f:
+			for x in names_to_stop:
+				f.write(str(x + "$"))
+
+		with open("daysoflife.txt", "w+") as f:
+			for x in days_to_stop:
+				f.write(str(x + "$"))
+
+		with open("saver.txt", "w+") as f:
+			for x in saves_to_stop:
+				f.write(str(x + "$"))
+
+		sync()
+		
+
+
 
 	def internet_sync(self):
 
@@ -2582,8 +2698,9 @@ class Core(BoxLayout):
 			names_from_server = data['Names'].split('$')[:-1]
 			saves_from_server = data['Saver'].split('$')[:-1]
 
+			self.read_my_stop_list(data)
 			self.stop_list_activity(days_of_life_from_server, names_from_server, saves_from_server)
-
+			self.send_stop_list(data)
 
 			f = open("daysoflife.txt", "r+")
 			rawread = f.read()
@@ -2716,6 +2833,9 @@ class Core(BoxLayout):
 				updated_days_of_life = ''
 			if len(updated_saves) == 1:
 				updated_saves = ''
+
+			if updated_names == '$':
+				updated_names = ''
 
 			self.create_digital_copy(updated_names, updated_days_of_life, updated_saves)
 			self.alarm()
