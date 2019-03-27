@@ -107,9 +107,6 @@ class Core(BoxLayout):
 	ranger8 = ObjectProperty({"center_x":-5,"center_y":.795})
 	ranger9 = ObjectProperty({"center_x":-5,"center_y":.795})
 
-	loading_gif_pos = ObjectProperty({"center_x": 1.5,"center_y": .9})
-	finished_gif_pos = ObjectProperty({"center_x": 1.5,"center_y": .9})
-
 	prosrochka_button = ObjectProperty({"center_x": -5,"center_y":.9625})
 
 	current_year = str(datetime.now().year)
@@ -1361,10 +1358,10 @@ class Core(BoxLayout):
 
 	def if_recreated(self, article, typer, value):
 		if typer == 'deleteART':
-			self.deleteART_check(article)
+			return self.deleteART_check(article)
 
 		elif typer == 'deleteDate':
-			self.deleteDate_check(article, value)
+			return self.deleteDate_check(article, value)
 
 	def deleteDate_check(self, article, value):
 		tester = (article, 'deleteDate', value)
@@ -1372,6 +1369,7 @@ class Core(BoxLayout):
 		if tester in self.stop_list:
 			self.stop_list.remove(tester)
 			self.set_stop_list()
+			return True
 
 	def deleteART_check(self, article):
 		tester = (article, 'deleteART', None)
@@ -1379,6 +1377,7 @@ class Core(BoxLayout):
 		if tester in self.stop_list:
 			self.stop_list.remove(tester)
 			self.set_stop_list()
+			return True
 
 	def get_them(self, code):
 			search = self.ids.searcher.text
@@ -1498,11 +1497,14 @@ class Core(BoxLayout):
 		sentence = "Вы уверены что хотите безвозвратно\n удалить артикул {} ?".format(inf_art)
 
 		self.layout = FloatLayout(size=(self.width, self.height))
-		self.btn1 = Button(text="Удалить", size_hint_y=None, size_hint_x=None, height=0.06*self.height, width=0.6*self.width, font_size=0.035*self.height, pos_hint={"center_x":.5,"center_y":.34}, on_release=lambda x:self.art_delete())
+		self.btn1 = Button(text="Удалить", size_hint_y=None, size_hint_x=None, height=0.06*self.height, width=0.6*self.width, font_size=0.035*self.height, pos_hint={"center_x":.5,"center_y":.45}, on_release=lambda x:self.art_delete())
+		self.btn2 = Button(text="Удалить для всех", size_hint_y=None, size_hint_x=None, height=0.06*self.height, width=0.6*self.width, font_size=0.035*self.height, pos_hint={"center_x":.5,"center_y":.15}, on_release=lambda x:self.art_delete(True))
 		self.lbl = Label(text=sentence, font_size=0.025*self.height, pos_hint={"center_x":.5,"center_y":.86})
 
 		self.layout.add_widget(self.lbl)
 		self.layout.add_widget(self.btn1)
+		if self.current_user:
+			self.layout.add_widget(self.btn2)
 
 		self.popup = Popup(title="Удаление",
 		content=self.layout,
@@ -1510,7 +1512,7 @@ class Core(BoxLayout):
 		self.popup.open()
 		self.get_them(0)
 
-	def art_delete(self):
+	def art_delete(self, *args):
 		self.popup.dismiss()
 
 		# Lets delete from names
@@ -1568,8 +1570,9 @@ class Core(BoxLayout):
 
 		sync()
 
-		self.stop_list.append((inf_art, 'deleteART', None))
-		self.set_stop_list()
+		if args:
+			self.stop_list.append((inf_art, 'deleteART', None))
+			self.set_stop_list()
 
 		self.show_prosrok(False)
 		self.alarm()
@@ -1809,10 +1812,13 @@ class Core(BoxLayout):
 
 		layout = FloatLayout(size=(self.width, self.height))
 		btn1 = Button(id="one", text="Изменить", size_hint_y=None, size_hint_x=None, height=0.06*self.height, width=0.6*self.width, font_size=0.035*self.height, pos_hint={"center_x":.5,"center_y":.45}, on_release=lambda x:self.changes_selector())
+		btn2 = Button(id="one", text="Изменить для всех", size_hint_y=None, size_hint_x=None, height=0.06*self.height, width=0.6*self.width, font_size=0.035*self.height, pos_hint={"center_x":.5,"center_y":.15}, on_release=lambda x:self.changes_selector(True))
 		lbl = Label(text=sentence, font_size=0.025*self.height, pos_hint={"center_x":.5,"center_y":.82})
 
 		layout.add_widget(lbl)
 		layout.add_widget(btn1)
+		if self.current_user:
+			layout.add_widget(btn2)
 
 		if closer == False:
 			self.popup = Popup(title="Внимание!",
@@ -1832,7 +1838,7 @@ class Core(BoxLayout):
 			else:
 				popup("Внимание", "Вы ввели некорректные данные")
 
-	def changes_selector(self):
+	def changes_selector(self, *args):
 
 		name = self.ids.name.text
 		article = self.ids.article.text
@@ -1854,13 +1860,13 @@ class Core(BoxLayout):
 				self.merge_arts(article)
 				return
 			else:
-				self.work_out_article(article)
+				self.work_out_article(article, args)
 
 		if name != art_names[inf_art]:
 			self.work_out_name(name)
 
 		if st_date != days_of_life[inf_art]:
-			self.work_out_st_date(st_date)
+			self.work_out_st_date(st_date, args)
 
 		self.do_clean_stuff(article)
 
@@ -1903,7 +1909,7 @@ class Core(BoxLayout):
 
 		sync()
 
-	def work_out_st_date(self, st_date):
+	def work_out_st_date(self, st_date, *args):
 
 		f = open("daysoflife.txt", "r+")
 		dawread = f.read()
@@ -1918,8 +1924,9 @@ class Core(BoxLayout):
 			for each in dawread:
 				f.write(str(each + "$"))
 
-		self.stop_list.append((inf_art, 'changeSTD', st_date))
-		self.set_stop_list()
+		if args:
+			self.stop_list.append((inf_art, 'changeSTD', st_date))
+			self.set_stop_list()
 
 		sync()
 
@@ -2029,14 +2036,16 @@ class Core(BoxLayout):
 		self.get_them(0)
 		self.ids.mana.current = "database"
 
-		self.stop_list.append((inf_art, 'deleteART', None))
-		self.set_stop_list()
+
+		if self.current_user:
+			self.stop_list.append((inf_art, 'deleteART', None))
+			self.set_stop_list()
 
 		text = 'Миграция артикула {} в {} успешно!'.format(inf_art, article)
 
 		popup('Внимание!', text)
 
-	def work_out_article(self, article):
+	def work_out_article(self, article, *args):
 		global inf_art
 
 		f = open("artname.txt", "r+")
@@ -2076,6 +2085,10 @@ class Core(BoxLayout):
 			for each in dawread:
 				f.write(str(each + "$"))
 
+		if args:
+			self.stop_list.append((inf_art, 'deleteART', None))
+			self.set_stop_list()
+
 		sync()
 
 		inf_art = article
@@ -2095,14 +2108,24 @@ class Core(BoxLayout):
 
 		sentence = "Вы можете изменить дату"
 		
-		self.layout = FloatLayout(size=(self.width, self.height))
-		self.inputi_4 = TextInput(text=day, multiline=False, size_hint_x=.2, size_hint_y=0.13, pos_hint={"center_x":.2,"center_y":.63}, hint_text='День')
-		self.inputi_5 = TextInput(text=month, multiline=False, size_hint_x=.2, size_hint_y=0.13, pos_hint={"center_x":.4,"center_y":.63}, hint_text='Месяц')
-		self.inputi_6 = TextInput(text=year, multiline=False, size_hint_x=.4, size_hint_y=0.13, pos_hint={"center_x":.7,"center_y":.63}, hint_text='Год')
-		self.btn1 = Button(text="Изменить", size_hint_y=None, size_hint_x=None, height=0.06*self.height, width=0.6*self.width, font_size=0.035*self.height, pos_hint={"center_x":.5,"center_y":.45}, on_release=lambda x:self.save_entry())
-		self.btn2 = Button(text="Удалить", size_hint_y=None, size_hint_x=None, height=0.06*self.height, width=0.6*self.width, font_size=0.035*self.height, pos_hint={"center_x":.5,"center_y":.25}, on_release=lambda x:self.delete_entry())
-		self.lbl = Label(text=sentence, font_size=0.025*self.height, pos_hint={"center_x":.5,"center_y":.85})
-
+		if self.current_user:
+			self.layout = FloatLayout(size=(self.width, self.height))
+			self.inputi_4 = TextInput(text=day, multiline=False, size_hint_x=.2, size_hint_y=0.12, pos_hint={"center_x":.2,"center_y":.83}, hint_text='День')
+			self.inputi_5 = TextInput(text=month, multiline=False, size_hint_x=.2, size_hint_y=0.12, pos_hint={"center_x":.4,"center_y":.83}, hint_text='Месяц')
+			self.inputi_6 = TextInput(text=year, multiline=False, size_hint_x=.4, size_hint_y=0.12, pos_hint={"center_x":.7,"center_y":.83}, hint_text='Год')
+			self.btn1 = Button(text="Изменить", size_hint_y=None, size_hint_x=None, height=0.06*self.height, width=0.6*self.width, font_size=0.035*self.height, pos_hint={"center_x":.5,"center_y":.65}, on_release=lambda x:self.save_entry())
+			self.btn1_2 = Button(text="Изменить для всех", size_hint_y=None, size_hint_x=None, height=0.06*self.height, width=0.6*self.width, font_size=0.035*self.height, pos_hint={"center_x":.5,"center_y":.48}, on_release=lambda x:self.save_entry(True))
+			self.btn2 = Button(text="Удалить", size_hint_y=None, size_hint_x=None, height=0.06*self.height, width=0.6*self.width, font_size=0.035*self.height, pos_hint={"center_x":.5,"center_y":.31}, on_release=lambda x:self.delete_entry())
+			self.btn3 = Button(text="Удалить для всех", size_hint_y=None, size_hint_x=None, height=0.06*self.height, width=0.6*self.width, font_size=0.035*self.height, pos_hint={"center_x":.5,"center_y":.14}, on_release=lambda x:self.delete_entry(True))
+			self.lbl = Label(text=sentence, font_size=0.025*self.height, pos_hint={"center_x":.5,"center_y":.95})
+		else:
+			self.layout = FloatLayout(size=(self.width, self.height))
+			self.inputi_4 = TextInput(text=day, multiline=False, size_hint_x=.2, size_hint_y=0.15, pos_hint={"center_x":.2,"center_y":.63}, hint_text='День')
+			self.inputi_5 = TextInput(text=month, multiline=False, size_hint_x=.2, size_hint_y=0.15, pos_hint={"center_x":.4,"center_y":.63}, hint_text='Месяц')
+			self.inputi_6 = TextInput(text=year, multiline=False, size_hint_x=.4, size_hint_y=0.15, pos_hint={"center_x":.7,"center_y":.63}, hint_text='Год')
+			self.btn1 = Button(text="Изменить", size_hint_y=None, size_hint_x=None, height=0.06*self.height, width=0.6*self.width, font_size=0.035*self.height, pos_hint={"center_x":.5,"center_y":.40}, on_release=lambda x:self.save_entry())
+			self.btn2 = Button(text="Удалить", size_hint_y=None, size_hint_x=None, height=0.06*self.height, width=0.6*self.width, font_size=0.035*self.height, pos_hint={"center_x":.5,"center_y":.16}, on_release=lambda x:self.delete_entry())
+			self.lbl = Label(text=sentence, font_size=0.025*self.height, pos_hint={"center_x":.5,"center_y":.85})
 
 		self.layout.add_widget(self.lbl)
 		self.layout.add_widget(self.inputi_4)
@@ -2110,6 +2133,9 @@ class Core(BoxLayout):
 		self.layout.add_widget(self.inputi_6)
 		self.layout.add_widget(self.btn1)
 		self.layout.add_widget(self.btn2)
+		if self.current_user:
+			self.layout.add_widget(self.btn3)
+			self.layout.add_widget(self.btn1_2)
 
 		self.inputi_4.bind(focus=lambda x, y: self.clear_field2(1, y))
 		self.inputi_5.bind(focus=lambda x, y: self.clear_field2(2, y))
@@ -2119,10 +2145,16 @@ class Core(BoxLayout):
 		self.inputi_5.bind(text=lambda x, y: self.pass_it_up2(2, y))
 		self.inputi_6.bind(text=lambda x, y: self.pass_it_up2(3, y))
 
-		self.popup = Popup(title="Редактирование",
-		content=self.layout,
-		size_hint=(.8, .4))
-		self.popup.open()
+		if self.current_user:
+			self.popup = Popup(title="Редактирование",
+			content=self.layout,
+			size_hint=(.8, .45))
+			self.popup.open()
+		else:
+			self.popup = Popup(title="Редактирование",
+			content=self.layout,
+			size_hint=(.8, .35))
+			self.popup.open()
 
 	def pass_it_up2(self, *args):
 		number, text = args
@@ -2147,7 +2179,7 @@ class Core(BoxLayout):
 				if len(self.inputi_6.text) >= 4:
 					self.inputi_6.text = ''
 
-	def delete_entry(self):
+	def delete_entry(self, *args):
 		self.popup.dismiss()
 
 		f = open("saver.txt", "r+")
@@ -2168,8 +2200,10 @@ class Core(BoxLayout):
 			for each in dawread:
 				f.write(str(each + "$"))
 
-		self.stop_list.append((inf_art, 'deleteDate', self.date))
-		self.set_stop_list()
+
+		if args:
+			self.stop_list.append((inf_art, 'deleteDate', self.date))
+			self.set_stop_list()
 
 		sync()
 		self.show_prosrok(False)
@@ -2229,7 +2263,7 @@ class Core(BoxLayout):
 		self.popup2.open()
 #######################################################################################
 
-	def save_entry(self):
+	def save_entry(self, *args):
 
 		day = self.inputi_4.text
 		month = self.inputi_5.text
@@ -2282,8 +2316,10 @@ class Core(BoxLayout):
 					for each in dawread:
 						f.write(str(each + "$"))
 
-				self.stop_list.append((inf_art, 'deleteDate', self.date))
-				self.set_stop_list()
+
+				if args:
+					self.stop_list.append((inf_art, 'deleteDate', self.date))
+					self.set_stop_list()
 
 				sync()
 
@@ -2594,13 +2630,32 @@ class Core(BoxLayout):
 			if each == self.current_user:
 				continue
 			else:
-				text = '{'+ '"{}"'.format(each) + ': "{}"'.format(self.stop_list) + '}'
+				judge = data['Users'][each]
+				hell = self.just_read_stop_list(judge)
+				text = '{'+ '"{}"'.format(each) + ': "{}"'.format(self.stop_list + hell) + '}'
 
 				to_database = json.loads(text)
 				url = "https://avocado-a066c.firebaseio.com/{}/Users.json".format(self.current_group)
 				requests.patch(url=url, json=to_database)
 
 		self.stop_list = []
+		self.set_stop_list()
+
+	def just_read_stop_list(self, data):
+
+		subject = data
+		test = [x for x, in subject if x.isalnum() or x == ',']
+		test = ''.join(test).split(',')
+
+		mozzie = []
+		temp = []
+		for each in test:
+			temp.append(each)
+			if len(temp) == 3:
+				mozzie.append((temp[0], temp[1], temp[2]))
+				temp = []
+
+		return mozzie
 
 	def read_my_stop_list(self, data):
 
@@ -2689,8 +2744,6 @@ class Core(BoxLayout):
 		sync()
 		
 	def prepare_to_internet_sync(self):
-
-		self.loading_gif_pos = {"center_x": .9,"center_y": .9}
 
 		my_thread = threading.Thread(target=self.internet_sync)
 		my_thread.start()
@@ -2844,16 +2897,7 @@ class Core(BoxLayout):
 				updated_names = ''
 
 			self.create_digital_copy(updated_names, updated_days_of_life, updated_saves)
-			self.alarm()
-
-			self.loading_animation_end()
-		
-
-	def loading_animation_end(self):
-	
-		self.finished_gif_pos = {"center_x": .9,"center_y": .9}
-		self.ids.finished_gif._coreimage.anim_reset(True)
-		self.ids.finished_gif.anim_delay = 0.02
+			self.alarm()	
 
 	def set_settings(self, data):
 
@@ -3878,22 +3922,6 @@ Builder.load_string("""
 						size: self.size
 						pos: self.pos
 						source: 'back.png'
-
-
-				Image:
-					id: loading_gif
-					source: 'loading.gif'
-					size_hint: (0.3, 0.3)
-					pos_hint: root.loading_gif_pos
-					anim_delay: 0.03
-
-				Image:
-					id: finished_gif
-					source: 'test.gif'
-					size_hint: (0.3, 0.3)
-					pos_hint: root.finished_gif_pos
-					anim_delay: -1
-					anim_loop: 1
 
 				Label:
 					canvas.before:
