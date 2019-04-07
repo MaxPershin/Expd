@@ -106,6 +106,7 @@ class Core(BoxLayout):
 	ranger7 = ObjectProperty({"center_x":-5,"center_y":.795})
 	ranger8 = ObjectProperty({"center_x":-5,"center_y":.795})
 	ranger9 = ObjectProperty({"center_x":-5,"center_y":.795})
+	group_home_nothing_color = ObjectProperty((.1, .1, .1, .0))
 
 	prosrochka_button = ObjectProperty({"center_x": -5,"center_y":.9625})
 
@@ -2434,9 +2435,43 @@ class Core(BoxLayout):
 		with open('data.json', 'w') as outfile:
 			json.dump('', outfile)
 
+	def load_group_home(self):
+
+		self.grid = self.ids.grid_internet_change
+		self.grid.bind(minimum_height=self.grid.setter("height"))
+
+		if len(self.stop_list) == 0:
+			self.turn_on_nothing_group_home()
+		else:
+			self.group_home_nothing_color = (.1, .1, .1, .0)
+			self.ids.nothing_to_show.text = ''
+			self.grid.clear_widgets()
+			for each in self.stop_list:
+				if each[1] == 'deleteART':
+					self.texter = 'Удаление артикула [color=#04d3ff]{}[/color]'.format(each[0])
+				else:
+					self.texter = 'Удаление даты [color=#04d3ff]{}[/color] \nАртикула [color=#04d3ff]{}[/color]'.format(each[2], each[0])
+				self.btn = Button(markup=True, text=self.texter, size_hint_y=None, height=0.09*self.height, font_size=0.035*self.height)
+				self.grid.add_widget(self.btn)
+
+
+	def turn_on_nothing_group_home(self):
+		self.grid.clear_widgets()
+		self.group_home_nothing_color = (.1, .1, .1, .3)
+		self.ids.nothing_to_show.text = 'Нет эффектов для применения'
+
+	def while_loading(self):
+		self.loading = self.ids.float_group_home
+		self.loading_image = Image(source='load.png', size_hint=(1, 1))
+		self.loading.add_widget(self.loading_image)
+
+	def destroy_loading(self):
+		self.ids.float_group_home.remove_widget(self.loading_image)
+
 	def is_user_already_logged(self):
 	
 		if self.current_user:
+			self.load_group_home()
 			self.ids.mana.current = "group_home"
 		else:
 			self.ids.mana.current = "sync_data"
@@ -2897,7 +2932,9 @@ class Core(BoxLayout):
 				updated_names = ''
 
 			self.create_digital_copy(updated_names, updated_days_of_life, updated_saves)
-			self.alarm()	
+			self.alarm()
+			self.load_group_home()
+			self.destroy_loading()
 
 	def set_settings(self, data):
 
@@ -3916,12 +3953,25 @@ Builder.load_string("""
 			name: 'group_home'
 
 			FloatLayout:
-				id: canvas
+				id: float_group_home
 				canvas:
 					Rectangle:
 						size: self.size
 						pos: self.pos
 						source: 'back.png'
+
+				Label:
+					id: nothing_to_show
+					canvas.before:
+						Color: 
+							rgba: root.group_home_nothing_color 
+						Rectangle:
+							pos: self.pos 
+							size: self.size
+
+					size_hint: (.95, .5)
+					pos_hint:{"center_x":.5,"center_y":.5}
+					font_size: sp(25)
 
 				Label:
 					canvas.before:
@@ -3933,6 +3983,7 @@ Builder.load_string("""
 
 					size_hint: (1, .15)
 					pos_hint:{"center_x":.5,"center_y":.9}
+
 
 				Label:
 					canvas.before:
@@ -3950,8 +4001,8 @@ Builder.load_string("""
 
 				ScrollView:
 					size_hint_x: .95
-					size_hint_y: .8
-					pos_hint: {'center_x': .5, 'center_y': .35}
+					size_hint_y: .5
+					pos_hint: {'center_x': .5, 'center_y': .5}
 					BoxLayout:
 						orientation: "vertical"
 						id: grid_internet_change
@@ -3989,18 +4040,18 @@ Builder.load_string("""
 					text: "Синхронизировать"
 					border: 0,0,0,0
 					font_size: sp(22)
-					pos_hint: {'center_x': .5, 'center_y': .3}
+					pos_hint: {'center_x': .5, 'center_y': .19}
 					size_hint: (.65, .1)
 					background_normal: "but.png"
 					background_down: "butp.png"
-					on_release:
-						root.prepare_to_internet_sync()
+					on_release: root.prepare_to_internet_sync()
+					on_release: root.while_loading()
 
 				Button:
 					text: "Выйти"
 					border: 0,0,0,0
 					font_size: sp(22)
-					pos_hint: {'center_x': .5, 'center_y': .2}
+					pos_hint: {'center_x': .5, 'center_y': .09}
 					size_hint: (.65, .1)
 					background_normal: "but.png"
 					background_down: "butp.png"
