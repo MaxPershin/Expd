@@ -3935,6 +3935,37 @@ Builder.load_string("""
 					pos_hint:{"center_x":.5,"center_y":.9}
 
 				Label:
+					canvas.before:
+						Color: 
+							rgba: .53, .70, .18, .3 
+						Rectangle:
+							pos: self.pos 
+							size: self.size
+
+					size_hint: (1, .05)
+					pos_hint:{"center_x":.5,"center_y":.79}
+					text: "Ваши синхронизируемые изменения"
+					color: 1,0,1,1
+					font_size: sp(25)
+
+				ScrollView:
+					size_hint_x: .95
+					size_hint_y: .8
+					pos_hint: {'center_x': .5, 'center_y': .35}
+					BoxLayout:
+						orientation: "vertical"
+						id: grid_internet_change
+						canvas:
+							Rectangle:
+								pos: self.pos
+								size: self.size
+								source: "cleanbl.png"
+						spacing: 2
+						cols: 1
+						size_hint_y: None
+						height: 0
+
+				Label:
 					size: self.texture_size
 					text: root.current_group
 					font_size: sp(40)
