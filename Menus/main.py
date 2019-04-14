@@ -48,6 +48,7 @@ allmonth = {"01": 0, "02": 31, "03": 59+extra,
 "07": 181+extra, "08": 212+extra, "09": 243+extra,
 "10": 273+extra, "11": 304+extra, "12": 334+extra, "13": 365+extra}
 
+
 class SuppaLabel(Label):
 
 	container1 = ObjectProperty(10)
@@ -2375,6 +2376,26 @@ class Core(BoxLayout):
 
 ###########################---Settings---#####################################
 
+	def delete_effect(self):
+		title = "Внимание!!!"
+		text = "Нажав на кнопку УДАЛИТЬ вы уничтожите\nвсе эффекты!"
+		self.lay = FloatLayout(size=(self.width, self.height))
+		self.btn1 = Button(background_normal="but_red.png", text="УДАЛИТЬ", size_hint_y=None, size_hint_x=None, height=0.13*self.height, width=0.8*self.width, font_size=0.035*self.height, pos_hint={"center_x":.5,"center_y":.34}, on_release=lambda x:self.exterminate_effect())
+		self.lbl = Label(text=text, font_size=0.025*self.height, pos_hint={"center_x":.5,"center_y":.86})
+
+		self.lay.add_widget(self.lbl)
+		self.lay.add_widget(self.btn1)
+
+		self.popup = Popup(title=title,
+		content=self.lay,
+		size_hint=(.8, .3))
+		self.popup.open()
+
+	def exterminate_effect(self):
+		self.popup.dismiss()
+		self.stop_list = []
+		self.set_stop_list()
+
 	def are_you_sure(self):
 		title = "Внимание!!!"
 		text = "Нажав на кнопку УДАЛИТЬ вы уничтожите\nвсю базу данных безвозвратно!"
@@ -2451,8 +2472,49 @@ class Core(BoxLayout):
 					self.texter = 'Удаление артикула [color=#04d3ff]{}[/color]'.format(each[0])
 				else:
 					self.texter = 'Удаление даты [color=#04d3ff]{}[/color] \nАртикула [color=#04d3ff]{}[/color]'.format(each[2], each[0])
-				self.btn = Button(markup=True, text=self.texter, size_hint_y=None, height=0.09*self.height, font_size=0.035*self.height)
+				self.btn = Button(markup=True, text=self.texter, size_hint_y=None, height=0.09*self.height, font_size=0.035*self.height, on_release=lambda x: self.popup_del_item_from_stop_list(x.text))
 				self.grid.add_widget(self.btn)
+
+	def popup_del_item_from_stop_list(self, data):
+		title = 'Внимание!'
+		label = Label(text='Вы собираетесь удалить эффект,\nпродолжить?')
+		btn1 = Button(text='Да', on_release=lambda x: self.del_item_from_stop_list(data))
+		btn2 = Button(text='Нет', on_release=lambda x: self.close_this_one())
+
+		fl = BoxLayout(orientation='vertical')
+		fl.add_widget(label)
+		bx = BoxLayout(orientation='horizontal')
+		bx.add_widget(btn1)
+		bx.add_widget(btn2)
+
+		fl.add_widget(bx)
+
+		self.popup = Popup(title=title,
+		content=fl,
+		size_hint=(None, None), size=(300, 200))
+		self.popup.open()
+
+	def close_this_one(self):
+		self.popup.dismiss()
+
+	def del_item_from_stop_list(self, data):
+		self.close_this_one()
+		data = data.split()
+
+		if data[1] == "артикула":
+			article = (data[2].split("]")[1]).split('[')[0]
+
+			self.stop_list.remove((article, 'deleteART', None))
+			self.set_stop_list()
+			self.load_group_home()
+		else:
+			date = (data[2].split("]")[1]).split('[')[0]
+			article = (data[4].split(']')[1]).split('[')[0]
+
+			self.stop_list.remove((article, 'deleteDate', date))
+			self.set_stop_list()
+			self.load_group_home()
+
 
 
 	def turn_on_nothing_group_home(self):
@@ -2963,6 +3025,8 @@ class Core(BoxLayout):
 				
 				for each in data:
 					first,second,third = each.split(',')
+					if third == 'None':
+						third = None
 					self.stop_list.append((first, second, third))
 					
 
@@ -3338,6 +3402,7 @@ Builder.load_string("""
 
 			TextInput:
 				font_size: 28
+				hint_text: 'Поиск'
 				id: searcher
 				multiline: False
 				size_hint: (.7, .08)
@@ -3765,7 +3830,7 @@ Builder.load_string("""
 					border: 0,0,0,0
 					text: "Синхронизировать"
 					font_size: sp(22)
-					pos_hint: {'center_x': .5, 'center_y': .7}
+					pos_hint: {'center_x': .5, 'center_y': .68}
 					size_hint: (.65, .12)
 					background_normal: "but.png"
 					background_down: "butp.png"
@@ -3776,12 +3841,23 @@ Builder.load_string("""
 					border: 0,0,0,0
 					text: "Удалить базу данных"
 					font_size: sp(22)
-					pos_hint: {'center_x': .5, 'center_y': .6}
+					pos_hint: {'center_x': .5, 'center_y': .56}
 					size_hint: (.65, .12)
 					background_normal: "but.png"
 					background_down: "butp.png"
 					on_release:
 						root.are_you_sure()
+
+				Button:
+					border: 0,0,0,0
+					text: "Удалить эффекты"
+					font_size: sp(22)
+					pos_hint: {'center_x': .5, 'center_y': .44}
+					size_hint: (.65, .12)
+					background_normal: "but.png"
+					background_down: "butp.png"
+					on_release:
+						root.delete_effect()
 
 		Screen:
 			name: 'old_arts'
