@@ -56,9 +56,15 @@ class SuppaLabel(Label):
 
 
 class Core(BoxLayout):
+	lang = 'ru'
 	col = ObjectProperty((.1, .1, .1, .0))
 	sp_text = ObjectProperty("")
-	worktext = StringProperty("Введите артикул")
+
+	if lang == 'ru':
+		worktext = StringProperty("Введите артикул")
+	else:
+		worktext = StringProperty("Enter Article")
+
 	press = NumericProperty(0)
 	cuart = ""
 	cudate = ""
@@ -846,7 +852,10 @@ class Core(BoxLayout):
 	def previous(self):
 		self.press = 0
 		self.ids.inputer.text = ''
-		self.worktext = 'Введите артикул'
+		if self.lang == 'ru':
+			self.worktext = 'Введите артикул'
+		else:
+			self.worktext = 'Enter Article'
 
 		self.pos_day_month_visible(False)
 
@@ -892,16 +901,25 @@ class Core(BoxLayout):
 		if len(self.standartdate) == 0:
 			self.ids.inputer.text = ""
 			self.pos_day_month_visible(True)
-			self.worktext = "Введите срок годности" 
+			if self.lang == 'ru':
+				self.worktext = "Введите срок годности"
+			else:
+				self.worktext = 'Enter article shelf life' 
 			self.press = 99
-			popup("Внимание!", "Срок годности должен быть числом")
-			return
+
+			if self.lang == 'ru':
+				popup("Внимание!", "Срок годности должен быть числом")
+				return
+			else:
+				popup("Warning!", "Article shelf life should be a number")
+				return
 
 		for each in self.standartdate:
 			if each.isdigit() == False and (each.upper() != "M"):
 				self.ids.inputer.text = ""
 				self.pos_day_month_visible(True)
-				self.worktext = "Введите срок годности в днях или месяцах \n"+"Или укажите 0 для указания даты ДО"
+				#bookmark
+				self.worktext = "Введите срок годности в днях или месяцах"
 				self.press = 499
 				popup("Внимание!", "Срок годности должен быть числом дней или месяцев с буквой 'M' в конце")
 				return
@@ -2541,18 +2559,23 @@ class Core(BoxLayout):
 	def read_from_base_new_group(self):
 
 		auth_key = "HqpU7WbJBeA4wN058kf9nPo9PZAAiUiEBrC3ZvP5"
+		try:
+			request = requests.get(self.url + "?auth=" + auth_key)
+			anwser = request.json()
+			return anwser
+		except:
+			popup('Warning', 'Internet connection failed')
 
-		request = requests.get(self.url + "?auth=" + auth_key)
-		anwser = request.json()
-
-		return anwser
 
 	def create_new_group(self, group_name, group_password):
 		if not group_name or not group_password:
 			popup('Внимание!', 'Все поля обязательны к заполнению!')
 			return
 
-		anwser = self.read_from_base_new_group()
+		try:
+			anwser = self.read_from_base_new_group()
+		except:
+			popup('Warning', 'No internet connection')
 
 		try:
 			for each in anwser:
@@ -2563,11 +2586,13 @@ class Core(BoxLayout):
 			pass
 
 		first_phrase = '{' + '"{}"'.format(group_name) + ': {' + '"Users": ' + '""' + ',' + '"Names":' + '""' + ', ' + '"DaysOfLife":' + '""' + ', ' + '"Saver":' + '""' + ', ' + '"Password":' + '"{}"'.format(group_password) + '}}'
-
-		self.write_to_base(first_phrase)
-		self.ids.mana.current = 'new_group_nickname'
-		self.current_group = group_name
-		self.current_password = group_password
+		try:
+			self.write_to_base(first_phrase)
+			self.ids.mana.current = 'new_group_nickname'
+			self.current_group = group_name
+			self.current_password = group_password
+		except:
+			pass
 
 	def new_group_new_user(self, name):
 		if self.create_user(name):
@@ -2655,40 +2680,50 @@ class Core(BoxLayout):
 
 		auth_key = "HqpU7WbJBeA4wN058kf9nPo9PZAAiUiEBrC3ZvP5"
 
-		request = requests.get(self.url[:-5] + self.current_group + ".json" + "?auth=" + auth_key)
-		anwser = request.json()
-		raw = request.json()
-		self.current_data = raw
-		if anwser == None:
-			popup('Внимание!', 'Данной группы не существует!')
-			return False
+		try:
+			request = requests.get(self.url[:-5] + self.current_group + ".json" + "?auth=" + auth_key)
+			anwser = request.json()
+			raw = request.json()
+			self.current_data = raw
+			if anwser == None:
+				popup('Внимание!', 'Данной группы не существует!')
+				return False
 		
 
-		return anwser
+			return anwser
+		except:
+			popup('Warning', 'No internet connection')
 
 	def write_to_base(self, text):
 
-		to_database = json.loads(text)
-
-		requests.patch(url=self.url, json=to_database)
+		try:
+			to_database = json.loads(text)
+			requests.patch(url=self.url, json=to_database)
+		except:
+			popup('Warning', 'Check your internet connection')
 
 	def create_digital_copy(self, names, days_of_life, saver):
 
-		sent = '{"DaysOfLife": ' + '"{}"'.format(days_of_life) + '}'
-		days_of_life = json.loads(sent)
-		url = "https://avocado-a066c.firebaseio.com/{}.json".format(self.current_group)
-		requests.patch(url=url, json=days_of_life)
+		try:
+
+			sent = '{"DaysOfLife": ' + '"{}"'.format(days_of_life) + '}'
+			days_of_life = json.loads(sent)
+			url = "https://avocado-a066c.firebaseio.com/{}.json".format(self.current_group)
+			requests.patch(url=url, json=days_of_life)
 
 
-		sent = '{"Names": ' + '"{}"'.format(names) + '}'
-		names = json.loads(sent)
-		url = "https://avocado-a066c.firebaseio.com/{}.json".format(self.current_group)
-		requests.patch(url=url, json=names)
+			sent = '{"Names": ' + '"{}"'.format(names) + '}'
+			names = json.loads(sent)
+			url = "https://avocado-a066c.firebaseio.com/{}.json".format(self.current_group)
+			requests.patch(url=url, json=names)
 
-		sent = '{"Saver": ' + '"{}"'.format(saver) + '}'
-		saver = json.loads(sent)
-		url = "https://avocado-a066c.firebaseio.com/{}.json".format(self.current_group)
-		requests.patch(url=url, json=saver)
+			sent = '{"Saver": ' + '"{}"'.format(saver) + '}'
+			saver = json.loads(sent)
+			url = "https://avocado-a066c.firebaseio.com/{}.json".format(self.current_group)
+			requests.patch(url=url, json=saver)
+
+		except:
+			popup('Warning', 'Check your internet connection')
 
 	def stop_list_activity(self, days_server, names_server, saves_server):
 		
@@ -2733,7 +2768,10 @@ class Core(BoxLayout):
 
 				to_database = json.loads(text)
 				url = "https://avocado-a066c.firebaseio.com/{}/Users.json".format(self.current_group)
-				requests.patch(url=url, json=to_database)
+				try:
+					requests.patch(url=url, json=to_database)
+				except:
+					popup('Warning', 'Check your internet connection')
 
 		self.stop_list = []
 		self.set_stop_list()
@@ -2774,7 +2812,11 @@ class Core(BoxLayout):
 
 		to_database = json.loads(text)
 		url = "https://avocado-a066c.firebaseio.com/{}/Users.json".format(self.current_group)
-		requests.patch(url=url, json=to_database)
+		
+		try:
+			requests.patch(url=url, json=to_database)
+		except:
+			popup('Warning', 'Check your internet connection')
 
 	def stop_my_data(self, mozzie):
 
@@ -3825,6 +3867,7 @@ Builder.load_string("""
 					size_hint: (.65, .12)
 					background_normal: "but.png"
 					background_down: "butp.png"
+					on_release: root.ids.mana.current = "language"
 
 				Button:
 					border: 0,0,0,0
@@ -4132,6 +4175,33 @@ Builder.load_string("""
 					background_normal: "but.png"
 					background_down: "butp.png"
 					on_release: root.exit_group()
+		Screen:
+			name: 'language'
+
+			FloatLayout:
+				canvas:
+					Rectangle:
+						size: self.size
+						pos: self.pos
+						source: 'back.png'
+
+				ToggleButton:
+					allow_no_selection: False
+					group: 'lang_lang'
+					state: 'down'
+					text: 'Русский'
+					pos_hint: {'center_x': .5, 'center_y': .09}
+					size_hint: (.65, .1)
+					on_press: root.lang = 'ru'
+
+
+				ToggleButton:
+					allow_no_selection: False
+					group: 'lang_lang'
+					text: 'English'
+					pos_hint: {'center_x': .5, 'center_y': .19}
+					size_hint: (.65, .1)
+					on_press: root.lang = 'eng'
 
 
 
