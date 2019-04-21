@@ -128,6 +128,80 @@ class Core(BoxLayout):
 	auth_key = "HqpU7WbJBeA4wN058kf9nPo9PZAAiUiEBrC3ZvP5"
 	url = 'https://avocado-a066c.firebaseio.com/'
 
+
+	#translation
+
+	def to_russian(self):
+		self.t_ot = 'От'
+		self.t_do = 'До'
+		self.t_day = 'День'
+		self.t_month = 'Месяц'
+		self.t_year = 'Год'
+		self.t_search = 'Поиск'
+		self.t_today = 'Сегодня'
+		self.t_random = 'Произвольно'
+		self.t_period = 'Период'
+		self.t_find = 'Найти'
+		self.t_dd = 'ДД'
+		self.t_mm = 'ММ'
+		t_edit = 'Редактирование'
+		t_save = 'Сохранить'
+		t_add_date = 'Добавить дату'
+		t_delete_article = 'Удалить артикул'
+
+	def to_english(self):
+		self.t_ot = 'from'
+		self.t_do = 'until'
+		self.t_day = 'Day'
+		self.t_month = 'Month'
+		self.t_year = 'Year'
+		self.t_search = 'Search'
+		self.t_today = 'Today'
+		self.t_random = 'Arbitrarily'
+		self.t_period = 'Period'
+		self.t_find = 'Find'
+		self.t_dd = 'DD'
+		self.t_mm = 'MM'
+		self.t_edit = 'Editing'
+		self.t_save = 'Save'
+		self.t_add_date = 'Add date'
+		self.t_delete_article = 'Delete article'
+	
+	if lang == 'ru':
+		t_ot = ObjectProperty('От')
+		t_do = ObjectProperty('До')
+		t_day = ObjectProperty('День')
+		t_month = ObjectProperty('Месяц')
+		t_year = ObjectProperty('Год')
+		t_search = ObjectProperty('Поиск')
+		t_today = ObjectProperty('Сегодня')
+		t_random = ObjectProperty('Произвольно')
+		t_period = ObjectProperty('Период')
+		t_find = ObjectProperty('Найти')
+		t_dd = ObjectProperty('ДД')
+		t_mm = ObjectProperty('ММ')
+		t_edit = ObjectProperty('Редактирование')
+		t_save = ObjectProperty('Сохранить')
+		t_add_date = ObjectProperty('Добавить дату')
+		t_delete_article = ObjectProperty('Удалить артикул')
+	else:
+		t_ot = ObjectProperty('from')
+		t_do = ObjectProperty('until')
+		t_day = ObjectProperty('Day')
+		t_month = ObjectProperty('Month')
+		t_year = ObjectProperty('Year')
+		t_search = ObjectProperty('Search')
+		t_today = ObjectProperty('Today')
+		t_random = ObjectProperty('Arbitrarily')
+		t_period = ObjectProperty('Period')
+		t_find = ObjectProperty('Find')
+		t_dd = ObjectProperty('DD')
+		t_mm = ObjectProperty('MM')
+		t_edit = ObjectProperty('Editing')
+		t_save = ObjectProperty('Save')
+		t_add_date = ObjectProperty('Add date')
+		t_delete_article = ObjectProperty('Delete article')
+
 	def show_prosrok(self, data):
 		if data:
 			self.prosrochka_button = {"center_x": .5,"center_y":.9625}
@@ -203,7 +277,10 @@ class Core(BoxLayout):
 			self.ids.fi.state = 'down'
 			self.ids.mana.current = 'work'
 
-			popup("Внимание", "Данные были удалены")
+			if self.lang == 'ru':
+				popup("Внимание", "Данные были удалены")
+			else:
+				popup('Attention!', 'All data is deleted')
 
 			self.show_prosrok(False)
 
@@ -285,7 +362,10 @@ class Core(BoxLayout):
 				if len(monthr) < 2:
 					monthr = '0'+monthr
 
-				m_label.text = 'Просрок до {}.{}.{}'.format(dayr, monthr, each[0].year)
+				if self.lang == 'ru':
+					m_label.text = 'Просрок до {}.{}.{}'.format(dayr, monthr, each[0].year)
+				else:
+					m_label.text = 'Expired at {}.{}.{}'.format(dayr, monthr, each[0].year)
 				m_label.container1 = 0.06*self.height
 				m_label.container2 = 0.035*self.height
 				self.grid.add_widget(m_label)
@@ -383,7 +463,10 @@ class Core(BoxLayout):
 			start_date = date(int(self.ids.to_range3.text), int(self.ids.to_range2.text), int(self.ids.to_range1.text))
 			end_date = date(int(self.ids.to_range6.text), int(self.ids.to_range5.text), int(self.ids.to_range4.text))
 		except:
-			popup('Внимание', 'Дата введена не корректно!')
+			if self.lang == 'ru':
+				popup('Внимание', 'Дата введена не корректно!')
+			else:
+				popup('Warning', 'Incorrect date!')
 			return
 
 		holder = {}
@@ -435,7 +518,11 @@ class Core(BoxLayout):
 
 				m_label = SuppaLabel()
 
-				m_label.text = 'Списать до {}.{}.{}'.format(day, month, year)
+				if self.lang == 'ru':
+					m_label.text = 'Списать до {}.{}.{}'.format(day, month, year)
+				else:
+					m_label.text = 'Dispose until {}.{}.{}'.format(day, month, year)
+
 				m_label.container1 = 0.06*self.height
 				m_label.container2 = 0.035*self.height
 
@@ -713,7 +800,10 @@ class Core(BoxLayout):
 
 			self.found_arts = []
 
-			popup("Внимание", "Данные были удалены")
+			if self.lang == 'ru':
+				popup("Внимание", "Данные были удалены")
+			else:
+				popup('Attention', 'Data is deleted')
 
 	def define_another_art(self):
 
@@ -736,7 +826,10 @@ class Core(BoxLayout):
 					self.ids.mana.current = "today"
 					self.ids.griddy4.clear_widgets()
 					self.col = (.1, .1, .1, .3)
-					self.sp_text ='Нет артикулов'
+					if self.lang == 'ru':
+						self.sp_text ='Нет артикулов'
+					else:
+						self.sp_text = 'No articles'
 				else:
 					self.col = (.1, .1, .1, .0)
 					self.sp_text =''
@@ -752,7 +845,11 @@ class Core(BoxLayout):
 
 					m_label = SuppaLabel()
 
-					m_label.text = 'Списать до {}.{}.{}'.format(day, month, year)
+					if self.lang == 'ru':
+						m_label.text = 'Списать до {}.{}.{}'.format(day, month, year)
+					else:
+						m_label.text = 'Dispose until {}.{}.{}'.format(day, month, year)
+
 					m_label.container1 = 0.06*self.height
 					m_label.container2 = 0.035*self.height
 
@@ -770,7 +867,11 @@ class Core(BoxLayout):
 					self.ids.to_d2.text = ''
 					self.ids.to_d3.text = ''
 			else:
-				popup("Внимание", "Вы ввели неверную дату")
+				if self.lang == 'ru':
+					popup("Внимание", "Вы ввели неверную дату")
+				else:
+					popup('Warning', 'You entered incorrect date')
+
 				self.ids.to_d1.text = ''
 				self.ids.to_d2.text = ''
 				self.ids.to_d3.text = ''
@@ -797,7 +898,11 @@ class Core(BoxLayout):
 				self.ids.mana.current = "today"
 				self.ids.griddy4.clear_widgets()
 				self.col = (.1, .1, .1, .3)
-				self.sp_text ='Нет артикулов'
+				if self.lang == 'ru':
+					self.sp_text ='Нет артикулов'
+				else:
+					self.sp_text = 'No articles'
+
 			else:
 				self.col = (.1, .1, .1, .0)
 				self.sp_text =''
@@ -813,7 +918,11 @@ class Core(BoxLayout):
 
 				m_label = SuppaLabel()
 
-				m_label.text = 'Списать сегодня'
+				if self.lang == 'ru':
+					m_label.text = 'Списать сегодня'
+				else:
+					m_label.text = 'Dispose today'
+
 				m_label.container1 = 0.06*self.height
 				m_label.container2 = 0.035*self.height
 
@@ -864,7 +973,10 @@ class Core(BoxLayout):
 	def repeat(self):
 
 		if last_art == None:
-			popup("Внимание", "Нет прошлого артикула")
+			if self.lang == 'ru':
+				popup("Внимание", "Нет прошлого артикула")
+			else:
+				popup('Warning', "You don't have previous article")
 		else:
 			self.ids.inputer.text = last_art
 
@@ -918,10 +1030,15 @@ class Core(BoxLayout):
 			if each.isdigit() == False and (each.upper() != "M"):
 				self.ids.inputer.text = ""
 				self.pos_day_month_visible(True)
-				#bookmark
-				self.worktext = "Введите срок годности в днях или месяцах"
+				if self.lang == 'ru':
+					self.worktext = "Введите срок годности в днях или месяцах"
+				else:
+					self.worktext = "Please enter shelf life in days or month"
 				self.press = 499
-				popup("Внимание!", "Срок годности должен быть числом дней или месяцев с буквой 'M' в конце")
+				if self.lang == 'ru':
+					popup("Внимание!", "Срок годности должен быть числом дней или месяцев с буквой 'M' в конце")
+				else:
+					popup("Внимание!", "Shelf life should be a whole number of days or month")
 				return
 
 		if self.day_or_what == 'month':
@@ -946,7 +1063,12 @@ class Core(BoxLayout):
 		article = self.ids.inputer.text
 		if not article.isdigit():
 			self.ids.inputer.text = ""
-			popup("Ошибка", "Введите числовой артикул")
+
+			if self.lang == 'ru':
+				popup("Ошибка", "Введите числовой артикул")
+			else:
+				popup('Error', 'Enter digital article')
+
 			self.press -= 1
 			return
 		else:
@@ -958,7 +1080,10 @@ class Core(BoxLayout):
 			last_art = self.ids.inputer.text
 			self.cuart = article
 			self.ids.inputer.text = ""
-			self.worktext = "Введите дату производства\n или окончания срока ДДММ"
+			if self.lang == 'ru':
+				self.worktext = "Введите дату производства\n или окончания срока"
+			else:
+				self.worktext = "Enter production date\n or expiry date"
 
 	def work2(self):
 		global cudate
@@ -1001,7 +1126,12 @@ class Core(BoxLayout):
 
 								if self.standartdate == "0" and worker == True:
 									self.pos_day_month_visible(True)
-									self.worktext = 'Введите срок годности'
+
+									if self.lang == 'ru':
+										self.worktext = 'Введите срок годности'
+									else:
+										self.worktext = 'Enter shelf life'
+
 									self.ids.ex_inputer.text = ''
 									self.ids.ex_inputer2.text = ''
 									self.ids.ex_inputer3.text = ''
@@ -1029,37 +1159,65 @@ class Core(BoxLayout):
 								self.step = 0
 								if sitrep == 'before':
 									self.pos_day_month_visible(True)
-									self.worktext = "Введите срок годности"
+
+									if self.lang == 'ru':
+										self.worktext = "Введите срок годности"
+									else:
+										self.worktext = 'Enter shelf life'
+
 									self.press = 99
 								else:
 									global standartdate
 									self.ids.inputer.focus = True
-									self.worktext = 'Введите название артикула'
+
+									if self.lang == 'ru':	
+										self.worktext = 'Введите название артикула'
+									else:
+										self.worktext = 'Enter article name'
+
 									self.standartdate = "0"
 									self.press = 199
 
 						else:
-							popup("Внимание!", "В этом месяце нет столько дней")
+							if self.lang == 'ru':
+								popup("Внимание!", "В этом месяце нет столько дней")
+							else:
+								popup('Warning!', "That month doesn't have so much days")
 							self.ids.ex_inputer.text = ""
 							self.ids.ex_inputer2.text = ""
 							self.press -= 1
 					else:
-						popup("Внимание!", "Вы вне диапазона!")
+						if self.lang == 'ru':
+							popup("Внимание!", "Вы вне диапазона!")
+						else:
+							popup('Warning!', 'You are out of range!')
 						self.ids.ex_inputer.text = ""
 						self.ids.ex_inputer2.text = ""
 						self.press -= 1
 				else:
-					popup("Внимание!", "Вы ввели буквы")
+					if self.lang == 'ru':
+						popup("Внимание!", "Вы ввели буквы")
+					else:
+						popup('Warning!', 'You entered literals')
+
 					self.ids.ex_inputer.text = ""
 					self.ids.ex_inputer2.text = ""
 					self.press -= 1
 			else:
-				popup("Внимание!", "Необходимый формат - ДДММ")
+				if self.lang == 'ru':
+					popup("Внимание!", "Необходимый формат - ДДММ")
+				else:
+					popup('Warning!', 'Should be in DDMM format')
+
 				self.ids.ex_inputer.text = ""
 				self.ids.ex_inputer2.text = ""
 				self.press -= 1
 		else:
-			popup("Внимание!", "Вы ввели символы!")
+			if self.lang == 'ru':
+				popup("Внимание!", "Вы ввели символы!")
+			else:
+				popup('Warning!', "You entered symbols!")
+
 			self.ids.ex_inputer.text = ""
 			self.ids.ex_inputer2.text = ""
 			self.press -= 1
@@ -1068,18 +1226,33 @@ class Core(BoxLayout):
 		if len(self.standartdate) == 0:
 			self.ids.inputer.text = ""
 			self.pos_day_month_visible(True)
-			self.worktext = "Введите срок годности" 
+			if self.lang == 'ru':
+				self.worktext = "Введите срок годности"
+			else:
+				self.worktext = 'Enter shelf life'
 			self.press = 99
-			popup("Внимание!", "Срок годности должен быть числом")
+
+			if self.lang == 'ru':
+				popup("Внимание!", "Срок годности должен быть числом")
+			else:
+				popup('Warning!', 'Shelf life should be a whole number')
 			return
 
 		for each in self.standartdate:
 			if each.isdigit() == False:
 				self.ids.inputer.text = ""
 				self.pos_day_month_visible(True)
-				self.worktext = "Введите срок годности" 
+
+				if self.lang == 'ru':
+					self.worktext = "Введите срок годности"
+				else:
+					self.worktext = 'Enter shelf life' 
 				self.press = 99
-				popup("Внимание!", "Срок годности должен быть числом")
+
+				if self.lang == 'ru':
+					popup("Внимание!", "Срок годности должен быть числом")
+				else:
+					popup('Warning!', 'Shelf life should be a whole number')
 				return
 
 		if self.day_or_what == 'month':
@@ -1088,7 +1261,12 @@ class Core(BoxLayout):
 			self.standartdate = self.standartdate + 'y'
 
 		self.pos_day_month_visible(False)
-		self.worktext = "Введите название артикула"
+
+		if self.lang == 'ru':
+			self.worktext = "Введите название артикула"
+		else:
+			self.worktext = 'Enter article name'
+
 		self.ids.inputer.text = ""
 		self.press = 199
 		self.ids.inputer.focus = True
@@ -1114,25 +1292,42 @@ class Core(BoxLayout):
 		self.if_recreated(self.cuart, 'deleteDate', final)
 
 		self.save(final, self.cuart)
-		sell = "Срок годности до {}".format(final)
-		popup("Сохранено", sell)
-		self.worktext = "Введите артикул"
+		if self.lang == 'ru':
+			sell = "Срок годности до {}".format(final)
+			popup("Сохранено", sell)
+			self.worktext = "Введите артикул"
+		else:
+			sell = "Best before {}".format(final)
+			popup("Saved", sell)
+			self.worktext = "Enter article"
+
 		self.ids.inputer.text = ""
 		self.press = 0
 		self.alarm()
 
 	def wise(self):
 		self.popup.dismiss()
-		self.worktext = "Введите артикул"
+
+		if self.lang == 'ru':
+			self.worktext = "Введите артикул"
+		else:
+			self.worktext = 'Enter article'
+
 		self.ids.inputer.text = ""
 		self.press = 0
 
 
 	def enter_prosrok(self, final):
-		title = 'Внимание!'
-		label = Label(text='Сохраняемый артикул просрочен,\n все равно сохранить?')
-		btn1 = Button(text='Да', on_release=lambda x: self.save_anyway(final))
-		btn2 = Button(text='Нет', on_release=lambda x: self.wise())
+		if self.lang == 'ru':
+			title = 'Внимание!'
+			label = Label(text='Сохраняемый артикул просрочен,\n все равно сохранить?')
+			btn1 = Button(text='Да', on_release=lambda x: self.save_anyway(final))
+			btn2 = Button(text='Нет', on_release=lambda x: self.wise())
+		else:
+			title = 'Warning!'
+			label = Label(text='This article is already expired,\n save it anyway?')
+			btn1 = Button(text='Yes', on_release=lambda x: self.save_anyway(final))
+			btn2 = Button(text='No', on_release=lambda x: self.wise())
 
 		fl = BoxLayout(orientation='vertical')
 		fl.add_widget(label)
@@ -1185,9 +1380,16 @@ class Core(BoxLayout):
 				self.if_recreated(self.cuart, 'deleteDate', final)
 
 				self.save(final, self.cuart)
-				sell = "Срок годности до {}".format(repres)
-				popup("Сохранено", sell)
-				self.worktext = "Введите артикул"
+
+				if self.lang == 'ru':
+					sell = "Срок годности до {}".format(repres)
+					popup("Сохранено", sell)
+					self.worktext = "Введите артикул"
+				else:
+					sell = "Best before {}".format(repres)
+					popup("Saved", sell)
+					self.worktext = "Enter article"
+
 				self.ids.inputer.text = ""
 				self.press = 0
 
@@ -1220,9 +1422,15 @@ class Core(BoxLayout):
 				self.if_recreated(self.cuart, 'deleteDate', final)
 
 				self.save(final, self.cuart)
-				sell = "Срок годности до {}".format(repres)
-				popup("Сохранено", sell)
-				self.worktext = "Введите артикул"
+				if self.lang == 'ru':
+					sell = "Срок годности до {}".format(repres)
+					popup("Сохранено", sell)
+					self.worktext = "Введите артикул"
+				else:
+					sell = "Best before {}".format(repres)
+					popup("Saved", sell)
+					self.worktext = "Enter article"
+
 				self.ids.inputer.text = ""
 				self.press = 0
 
@@ -1239,7 +1447,11 @@ class Core(BoxLayout):
 			if len(day) < 2:
 				day = '0'+day
 
-			sell = 'Срок годности до {}.{}.{}'.format(day, month, year)
+			if self.lang == 'ru':
+				sell = 'Срок годности до {}.{}.{}'.format(day, month, year)
+			else:
+				sell = 'Best before {}.{}.{}'.format(day, month, year)
+
 			ent = '{}{}{}'.format(day, month, year)
 
 			todayer = date.today()
@@ -1252,13 +1464,21 @@ class Core(BoxLayout):
 				self.if_recreated(self.cuart, 'deleteDate', ent)
 
 				self.save(ent, self.cuart)
-				popup("Сохранено", sell)
-				self.worktext = "Введите артикул"
+				if self.lang == 'ru':
+					popup("Сохранено", sell)
+					self.worktext = "Введите артикул"
+				else:
+					popup("Saved", sell)
+					self.worktext = "Enter article"
+
 				self.ids.inputer.text = ""
 				self.press = 0
 			
 		else:
-			popup("Внимание", "Некорректное количество дней")
+			if self.lang == 'ru':
+				popup("Внимание", "Некорректное количество дней")
+			else:
+				popup('Warning', 'Incorrect number of days')
 
 	def check2(self, ask):
 		try:
@@ -1296,8 +1516,13 @@ class Core(BoxLayout):
 			if entries[each-1] == ent:
 				samer = True
 		if samer:
-			popup("Внимание!", "Эта дата уже записана для этого артикула")
-			self.worktext = "Введите артикул"
+			if self.lang == 'ru':
+				popup("Внимание!", "Эта дата уже записана для этого артикула")
+				self.worktext = "Введите артикул"
+			else:
+				popup("Warning!", "This date is already exist")
+				self.worktext = "Enter article"
+
 			self.ids.inputer.text = ""
 			self.press = 0
 		else:
@@ -1308,12 +1533,23 @@ class Core(BoxLayout):
 
 ##########################################################------Database------##############################3
 	def create_new(self):
-		sentence = "Заполните необходимые поля\n чтобы создать артикул"
-		self.layout = FloatLayout(size=(self.width, self.height))
-		self.inputi = TextInput(hint_text="Артикул", multiline=False, size_hint_x=.5, size_hint_y=0.1, pos_hint={"center_x":.5,"center_y":.6})
-		self.inputi2 = TextInput(hint_text="Название", multiline=False, size_hint_x=.5, size_hint_y=0.1, pos_hint={"center_x":.5,"center_y":.45})
-		self.inputi3 = TextInput(hint_text="Стандартный срок", multiline=False, size_hint_x=.5, size_hint_y=0.1, pos_hint={"center_x":.5,"center_y":.35})
-		self.btn1 = Button(text="Создать", size_hint_y=None, size_hint_x=None, height=0.06*self.height, width=0.6*self.width, font_size=0.035*self.height, pos_hint={"center_x":.5,"center_y":.2}, on_release=lambda x:self.art_create())
+		if self.lang == 'ru':
+			tit = 'Создание'
+			sentence = "Заполните необходимые поля\n чтобы создать артикул"
+			self.layout = FloatLayout(size=(self.width, self.height))
+			self.inputi = TextInput(hint_text="Артикул", multiline=False, size_hint_x=.5, size_hint_y=0.1, pos_hint={"center_x":.5,"center_y":.6})
+			self.inputi2 = TextInput(hint_text="Название", multiline=False, size_hint_x=.5, size_hint_y=0.1, pos_hint={"center_x":.5,"center_y":.45})
+			self.inputi3 = TextInput(hint_text="Стандартный срок", multiline=False, size_hint_x=.5, size_hint_y=0.1, pos_hint={"center_x":.5,"center_y":.35})
+			self.btn1 = Button(text="Создать", size_hint_y=None, size_hint_x=None, height=0.06*self.height, width=0.6*self.width, font_size=0.035*self.height, pos_hint={"center_x":.5,"center_y":.2}, on_release=lambda x:self.art_create())
+		else:
+			tit = 'Creation'
+			sentence = "Please fill required fields\n to create article"
+			self.layout = FloatLayout(size=(self.width, self.height))
+			self.inputi = TextInput(hint_text="Article", multiline=False, size_hint_x=.5, size_hint_y=0.1, pos_hint={"center_x":.5,"center_y":.6})
+			self.inputi2 = TextInput(hint_text="Name", multiline=False, size_hint_x=.5, size_hint_y=0.1, pos_hint={"center_x":.5,"center_y":.45})
+			self.inputi3 = TextInput(hint_text="Shelf life", multiline=False, size_hint_x=.5, size_hint_y=0.1, pos_hint={"center_x":.5,"center_y":.35})
+			self.btn1 = Button(text="Create", size_hint_y=None, size_hint_x=None, height=0.06*self.height, width=0.6*self.width, font_size=0.035*self.height, pos_hint={"center_x":.5,"center_y":.2}, on_release=lambda x:self.art_create())
+
 		self.lbl = Label(text=sentence, font_size=0.025*self.height, pos_hint={"center_x":.5,"center_y":.86})
 
 		self.layout.add_widget(self.lbl)
@@ -1322,7 +1558,7 @@ class Core(BoxLayout):
 		self.layout.add_widget(self.inputi3)
 		self.layout.add_widget(self.btn1)
 
-		self.popup = Popup(title="Создание",
+		self.popup = Popup(title=tit,
 		content=self.layout,
 		size_hint=(.8, .6))
 		self.popup.open()
@@ -1339,20 +1575,34 @@ class Core(BoxLayout):
 				tester.remove("m")
 				new = "".join(tester)
 				if not new.isdigit():
-					popup("Внимание!", "Срок годности должен быть числом\n дней или месяцев с буквой 'M' в конце")
+					if self.lang == 'ru':
+						popup("Внимание!", "Срок годности должен быть числом\n дней, месяцев, или лет")
+					else:
+						popup("Warning!", "Shelf life should be a number of\n days, months or years")
 					return
 				else:
 					correct = True
 			else:
-				popup("Внимание!", "Срок годности должен быть числом\n дней или месяцев с буквой 'M' в конце")
+				if self.lang == 'ru':
+					popup("Внимание!", "Срок годности должен быть числом\n дней, месяцев, или лет")
+				else:
+					popup("Warning!", "Shelf life should be a number of\n days, months or years")
+
 				return
 
 			if correct == False:
-				popup("Внимание!", "Срок годности должен быть числом\n дней или месяцев с буквой 'M' в конце")
+				if self.lang == 'ru':
+					popup("Внимание!", "Срок годности должен быть числом\n дней, месяцев, или лет")
+				else:
+					popup("Warning!", "Shelf life should be a number of\n days, months or years")
+
 				return
 			else:
 				if self.inputi.text in art_names:
-					popup("Внимание!", "Этот артикул уже есть в базе данных")
+					if self.lang == 'ru':
+						popup("Внимание!", "Этот артикул уже есть в базе данных")
+					else:
+						popup('Warning!', 'This article is already in a database')
 					return
 				else:
 					
@@ -1373,7 +1623,10 @@ class Core(BoxLayout):
 
 
 		else:
-			popup("Внимание!", "Введите данные корректно")
+			if self.lang == 'ru':
+				popup("Внимание!", "Введите данные корректно")
+			else:
+				popup('Warning!', 'Enter correct data!')
 			return
 
 	def if_recreated(self, article, typer, value):
@@ -1405,7 +1658,10 @@ class Core(BoxLayout):
 			grid.bind(minimum_height=grid.setter("height"))
 			grid.clear_widgets()
 			if len(art_names) == 0 and code == 0:
-				popup("Внимание", "В базе данных нет записей")
+				if self.lang == 'ru':
+					popup("Внимание", "В базе данных нет записей")
+				else:
+					popup('Warning', 'No entires in database')
 			else:
 				if code == 0:
 					for each in art_names:
@@ -1449,7 +1705,10 @@ class Core(BoxLayout):
 	def start_one(self):
 		self.ids.ghost.text = art_names[inf_art]
 		self.ids.ghost2.text = inf_art
-		self.ids.ghost4.text = "Срок годности: {}".format(days_of_life[inf_art])
+		if self.lang == 'ru':
+			self.ids.ghost4.text = "Срок годности: {}".format(days_of_life[inf_art])
+		else:
+			self.ids.ghost4.text = "Shelf life: {}".format(days_of_life[inf_art])
 
 		self.grid = self.ids.ghost3
 		self.grid.bind(minimum_height=self.grid.setter("height"))
@@ -1493,7 +1752,10 @@ class Core(BoxLayout):
 		# We sorted dates in overview
 
 		for each in hound:
-			self.texter = "  До\n"+str(each)
+			if self.lang == 'ru':
+				self.texter = "  До\n"+str(each)
+			else:
+				self.texter = "  Until\n"+str(each)
 			self.btn = Button(text=self.texter, size_hint_y=None, height=0.09*self.height, font_size=0.035*self.height)
 			self.grid.add_widget(self.btn)
 
@@ -1514,11 +1776,20 @@ class Core(BoxLayout):
 
 ###########################---Edit---#########################################
 	def del_ask(self):
-		sentence = "Вы уверены что хотите безвозвратно\n удалить артикул {} ?".format(inf_art)
+		if self.lang == 'ru':
+			sentence = "Вы уверены что хотите безвозвратно\n удалить артикул {} ?".format(inf_art)
+			tit = 'Удаление'
+			self.layout = FloatLayout(size=(self.width, self.height))
+			self.btn1 = Button(text="Удалить", size_hint_y=None, size_hint_x=None, height=0.06*self.height, width=0.6*self.width, font_size=0.035*self.height, pos_hint={"center_x":.5,"center_y":.45}, on_release=lambda x:self.art_delete())
+			self.btn2 = Button(text="Удалить для всех", size_hint_y=None, size_hint_x=None, height=0.06*self.height, width=0.6*self.width, font_size=0.035*self.height, pos_hint={"center_x":.5,"center_y":.15}, on_release=lambda x:self.art_delete(True))
+		else:
+			sentence = "Do you want to permanently\n delete article {} ?".format(inf_art)
+			tit = 'Deletion'
+			self.layout = FloatLayout(size=(self.width, self.height))
+			self.btn1 = Button(text="Delete", size_hint_y=None, size_hint_x=None, height=0.06*self.height, width=0.6*self.width, font_size=0.035*self.height, pos_hint={"center_x":.5,"center_y":.45}, on_release=lambda x:self.art_delete())
+			self.btn2 = Button(text="Delete for everyone", size_hint_y=None, size_hint_x=None, height=0.06*self.height, width=0.6*self.width, font_size=0.035*self.height, pos_hint={"center_x":.5,"center_y":.15}, on_release=lambda x:self.art_delete(True))
 
-		self.layout = FloatLayout(size=(self.width, self.height))
-		self.btn1 = Button(text="Удалить", size_hint_y=None, size_hint_x=None, height=0.06*self.height, width=0.6*self.width, font_size=0.035*self.height, pos_hint={"center_x":.5,"center_y":.45}, on_release=lambda x:self.art_delete())
-		self.btn2 = Button(text="Удалить для всех", size_hint_y=None, size_hint_x=None, height=0.06*self.height, width=0.6*self.width, font_size=0.035*self.height, pos_hint={"center_x":.5,"center_y":.15}, on_release=lambda x:self.art_delete(True))
+
 		self.lbl = Label(text=sentence, font_size=0.025*self.height, pos_hint={"center_x":.5,"center_y":.86})
 
 		self.layout.add_widget(self.lbl)
@@ -1526,7 +1797,7 @@ class Core(BoxLayout):
 		if self.current_user:
 			self.layout.add_widget(self.btn2)
 
-		self.popup = Popup(title="Удаление",
+		self.popup = Popup(title=tit,
 		content=self.layout,
 		size_hint=(.8, .3))
 		self.popup.open()
@@ -1603,14 +1874,23 @@ class Core(BoxLayout):
 
 
 	def add_entry(self):
-		sentence = "Добавьте дату артикулу\n{} вручную".format(inf_art)
+		if self.lang == 'ru':
+			tit = 'Ручное добавление'
+			sentence = "Добавьте дату артикулу\n{} вручную".format(inf_art)
+			self.layout = FloatLayout(size=(self.width, self.height))
+			self.inputi = TextInput(multiline=False, size_hint_x=.2, size_hint_y=0.2, pos_hint={"center_x":.2,"center_y":.61}, hint_text='День')
+			self.inputi_2 = TextInput(multiline=False, size_hint_x=.2, size_hint_y=0.2, pos_hint={"center_x":.4,"center_y":.61}, hint_text='Месяц')
+			self.inputi_3 = TextInput(multiline=False, size_hint_x=.4, size_hint_y=0.2, pos_hint={"center_x":.7,"center_y":.61}, hint_text='Год')
+			self.btn1 = Button(text="Добавить", size_hint_y=None, size_hint_x=None, height=0.06*self.height, width=0.6*self.width, font_size=0.035*self.height, pos_hint={"center_x":.5,"center_y":.34}, on_release=lambda x:self.add_entry2())
+		else:
+			tit = 'Manual addition'
+			sentence = "Manually add date\n{} to article".format(inf_art)
+			self.layout = FloatLayout(size=(self.width, self.height))
+			self.inputi = TextInput(multiline=False, size_hint_x=.2, size_hint_y=0.2, pos_hint={"center_x":.2,"center_y":.61}, hint_text='Day')
+			self.inputi_2 = TextInput(multiline=False, size_hint_x=.2, size_hint_y=0.2, pos_hint={"center_x":.4,"center_y":.61}, hint_text='Month')
+			self.inputi_3 = TextInput(multiline=False, size_hint_x=.4, size_hint_y=0.2, pos_hint={"center_x":.7,"center_y":.61}, hint_text='Year')
+			self.btn1 = Button(text="Add", size_hint_y=None, size_hint_x=None, height=0.06*self.height, width=0.6*self.width, font_size=0.035*self.height, pos_hint={"center_x":.5,"center_y":.34}, on_release=lambda x:self.add_entry2())
 
-		
-		self.layout = FloatLayout(size=(self.width, self.height))
-		self.inputi = TextInput(multiline=False, size_hint_x=.2, size_hint_y=0.2, pos_hint={"center_x":.2,"center_y":.61}, hint_text='День')
-		self.inputi_2 = TextInput(multiline=False, size_hint_x=.2, size_hint_y=0.2, pos_hint={"center_x":.4,"center_y":.61}, hint_text='Месяц')
-		self.inputi_3 = TextInput(multiline=False, size_hint_x=.4, size_hint_y=0.2, pos_hint={"center_x":.7,"center_y":.61}, hint_text='Год')
-		self.btn1 = Button(text="Добавить", size_hint_y=None, size_hint_x=None, height=0.06*self.height, width=0.6*self.width, font_size=0.035*self.height, pos_hint={"center_x":.5,"center_y":.34}, on_release=lambda x:self.add_entry2())
 		self.lbl = Label(text=sentence, font_size=0.025*self.height, pos_hint={"center_x":.5,"center_y":.86})
 
 		self.inputi.bind(focus=lambda x, y: self.clear_field(1, y))
@@ -1627,7 +1907,7 @@ class Core(BoxLayout):
 		self.layout.add_widget(self.inputi_3)
 		self.layout.add_widget(self.btn1)
 
-		self.popup = Popup(title="Добавление",
+		self.popup = Popup(title=tit,
 		content=self.layout,
 		size_hint=(.8, .3))
 		self.popup.open()
@@ -1674,10 +1954,17 @@ class Core(BoxLayout):
 
 	def enter_prosrok2(self, final):
 
-		title = 'Внимание!'
-		label = Label(text='Сохраняемый артикул просрочен,\n все равно сохранить?')
-		btn1 = Button(text='Да', on_release=lambda x: self.save_anyway2(final))
-		btn2 = Button(text='Нет', on_release=lambda x: self.wise2())
+		if self.lang == 'ru':
+			title = 'Внимание!'
+			label = Label(text='Сохраняемый артикул просрочен,\n все равно сохранить?')
+			btn1 = Button(text='Да', on_release=lambda x: self.save_anyway2(final))
+			btn2 = Button(text='Нет', on_release=lambda x: self.wise2())
+		else:
+			title = 'Warning!'
+			label = Label(text='Date is expired,\n save it anyway?')
+			btn1 = Button(text='Yes', on_release=lambda x: self.save_anyway2(final))
+			btn2 = Button(text='No', on_release=lambda x: self.wise2())
+
 
 		fl = BoxLayout(orientation='vertical')
 		fl.add_widget(label)
@@ -1721,7 +2008,11 @@ class Core(BoxLayout):
 				hound = [i for i,x in enumerate(entries) if x==inf_art]
 				for each in hound:
 					if entries[each-1] == boomb:
-						popup("Внимание!", "Введенная дата уже записана")				
+						if self.lang == 'ru':
+							popup("Внимание!", "Введенная дата уже записана")
+						else:
+							popup('Warning!', 'This date is already in database')
+
 						self.inputi.text = ''
 						self.inputi_2.text = ''
 						self.inputi_3.text = ''
@@ -1732,7 +2023,10 @@ class Core(BoxLayout):
 				year = boomb[4:]
 
 				if len(year) < 4:
-					popup("Внимание!", "Введите 4-х значный год")				
+					if self.lang == 'ru':
+						popup("Внимание!", "Введите 4-х значный год")
+					else:
+						popup('Warning!', 'Enter year in following format - yyyy')
 					self.inputi.text = ''
 					self.inputi_2.text = ''
 					self.inputi_3.text = ''
@@ -1756,13 +2050,20 @@ class Core(BoxLayout):
 					self.letedit()
 					self.popup.dismiss()
 			else:
-				popup("Внимание!", "Ошибка ввода!")				
+				if self.lang == 'ru':
+					popup("Внимание!", "Ошибка ввода!")
+				else:
+					popup('Warning!', 'Input Error!')
+
 				self.inputi.text = ''
 				self.inputi_2.text = ''
 				self.inputi_3.text = ''
 				return
 		else:
-			popup("Внимание!", "Вы ничего не ввели")
+			if self.lang == 'ru':
+				popup("Внимание!", "Вы ничего не ввели")
+			else:
+				popup('Warning!', 'You entered nothing')
 
 	def letedit(self):
 		self.ids.name.text = art_names[inf_art]
@@ -1813,7 +2114,10 @@ class Core(BoxLayout):
 		# Should be sorted now
 
 		for each in hound:
-			self.texter = "  До\n"+str(each)
+			if self.lang == 'ru':
+				self.texter = "  До\n"+str(each)
+			else:
+				self.texter = "  Until\n"+str(each)
 			self.btn = Button(text=self.texter, size_hint_y=None, height=0.09*self.height, font_size=0.035*self.height)
 			self.grid.add_widget(self.btn)
 			self.btn.bind(on_release=self.entry_change)
@@ -1827,12 +2131,21 @@ class Core(BoxLayout):
 	def change_popup_name(self, flag):
 		name = art_names[inf_art]
 		ask = self.ids.name.text
-		sentence = "Вы уверены что хотите внести изменения\n в артикул {}?".format(name)
+
+		if self.lang == 'ru':
+			tit = "Внимание!"
+			sentence = "Вы уверены что хотите внести изменения\n в артикул {}?".format(name)
+			layout = FloatLayout(size=(self.width, self.height))
+			btn1 = Button(id="one", text="Изменить", size_hint_y=None, size_hint_x=None, height=0.06*self.height, width=0.6*self.width, font_size=0.035*self.height, pos_hint={"center_x":.5,"center_y":.45}, on_release=lambda x:self.changes_selector())
+			btn2 = Button(id="one", text="Изменить для всех", size_hint_y=None, size_hint_x=None, height=0.06*self.height, width=0.6*self.width, font_size=0.035*self.height, pos_hint={"center_x":.5,"center_y":.15}, on_release=lambda x:self.changes_selector(True))
+		else:
+			tit = "Warning!"
+			sentence = "Do you really want to\n change article {}?".format(name)
+			layout = FloatLayout(size=(self.width, self.height))
+			btn1 = Button(id="one", text="Change", size_hint_y=None, size_hint_x=None, height=0.06*self.height, width=0.6*self.width, font_size=0.035*self.height, pos_hint={"center_x":.5,"center_y":.45}, on_release=lambda x:self.changes_selector())
+			btn2 = Button(id="one", text="Change for everyone", size_hint_y=None, size_hint_x=None, height=0.06*self.height, width=0.6*self.width, font_size=0.035*self.height, pos_hint={"center_x":.5,"center_y":.15}, on_release=lambda x:self.changes_selector(True))
 
 
-		layout = FloatLayout(size=(self.width, self.height))
-		btn1 = Button(id="one", text="Изменить", size_hint_y=None, size_hint_x=None, height=0.06*self.height, width=0.6*self.width, font_size=0.035*self.height, pos_hint={"center_x":.5,"center_y":.45}, on_release=lambda x:self.changes_selector())
-		btn2 = Button(id="one", text="Изменить для всех", size_hint_y=None, size_hint_x=None, height=0.06*self.height, width=0.6*self.width, font_size=0.035*self.height, pos_hint={"center_x":.5,"center_y":.15}, on_release=lambda x:self.changes_selector(True))
 		lbl = Label(text=sentence, font_size=0.025*self.height, pos_hint={"center_x":.5,"center_y":.82})
 
 		layout.add_widget(lbl)
@@ -1841,7 +2154,7 @@ class Core(BoxLayout):
 			layout.add_widget(btn2)
 
 		if closer == False:
-			self.popup = Popup(title="Внимание!",
+			self.popup = Popup(title=tit,
 			content=layout,
 			size_hint=(.8, .3))
 			self.popup.open()
@@ -1849,14 +2162,23 @@ class Core(BoxLayout):
 			self.popup.dismiss()
 			ch_closer()
 			if flag:
-				popup("Выполнено", "Изменения сохранены")
+				if self.lang == 'ru':
+					popup("Выполнено", "Изменения сохранены")
+				else:
+					popup('Done', 'Changes saved')
 				self.get_them(0)
 			elif flag == None:
-				popup("Внимание", "Вы не ввели новых данных")
+				if self.lang == 'ru':
+					popup("Внимание", "Вы не ввели новых данных")
+				else:
+					popup('Warning', 'No new data found')
 			elif flag == 'merge':
 				pass
 			else:
-				popup("Внимание", "Вы ввели некорректные данные")
+				if self.lang == 'ru':
+					popup("Внимание", "Вы ввели некорректные данные")
+				else:
+					popup('Warning', 'Data is incorrect')
 
 	def changes_selector(self, *args):
 
@@ -1969,10 +2291,17 @@ class Core(BoxLayout):
 
 	def merge_arts(self, article):
 
-		title = 'Внимание!'
-		label = Label(text='Артикул {} уже существует,\n объединить?'.format(article))
-		btn1 = Button(text='Да', on_release=lambda x: self.do_merge(article))
-		btn2 = Button(text='Нет', on_release=lambda x: self.dis_my_pop())
+		if self.lang == 'ru':
+			title = 'Внимание!'
+			label = Label(text='Артикул {} уже существует,\n объединить?'.format(article))
+			btn1 = Button(text='Да', on_release=lambda x: self.do_merge(article))
+			btn2 = Button(text='Нет', on_release=lambda x: self.dis_my_pop())
+		else:
+			title = 'Warning!'
+			label = Label(text='Article {} is already exist,\n want to merge them?'.format(article))
+			btn1 = Button(text='Yes', on_release=lambda x: self.do_merge(article))
+			btn2 = Button(text='No', on_release=lambda x: self.dis_my_pop())
+
 
 		fl = BoxLayout(orientation='vertical')
 		fl.add_widget(label)
@@ -2061,9 +2390,12 @@ class Core(BoxLayout):
 			self.stop_list.append((inf_art, 'deleteART', None))
 			self.set_stop_list()
 
-		text = 'Миграция артикула {} в {} успешно!'.format(inf_art, article)
-
-		popup('Внимание!', text)
+		if self.lang == 'ru':
+			text = 'Миграция артикула {} в {} успешно!'.format(inf_art, article)
+			popup('Внимание!', text)
+		else:
+			text = 'Article {} migrated into {} successfully!'.format(inf_art, article)
+			popup('Warning!', text)
 
 	def work_out_article(self, article, *args):
 		global inf_art
@@ -2125,26 +2457,53 @@ class Core(BoxLayout):
 		month = self.date[2:4]
 		year = self.date[4:]
 
+		if self.lang == 'ru':
+			sentence = "Вы можете изменить дату"
+		else:
+			sentence = 'You can change date'
 
-		sentence = "Вы можете изменить дату"
-		
 		if self.current_user:
-			self.layout = FloatLayout(size=(self.width, self.height))
-			self.inputi_4 = TextInput(text=day, multiline=False, size_hint_x=.2, size_hint_y=0.12, pos_hint={"center_x":.2,"center_y":.83}, hint_text='День')
-			self.inputi_5 = TextInput(text=month, multiline=False, size_hint_x=.2, size_hint_y=0.12, pos_hint={"center_x":.4,"center_y":.83}, hint_text='Месяц')
-			self.inputi_6 = TextInput(text=year, multiline=False, size_hint_x=.4, size_hint_y=0.12, pos_hint={"center_x":.7,"center_y":.83}, hint_text='Год')
-			self.btn1 = Button(text="Изменить", size_hint_y=None, size_hint_x=None, height=0.06*self.height, width=0.6*self.width, font_size=0.035*self.height, pos_hint={"center_x":.5,"center_y":.65}, on_release=lambda x:self.save_entry())
-			self.btn1_2 = Button(text="Изменить для всех", size_hint_y=None, size_hint_x=None, height=0.06*self.height, width=0.6*self.width, font_size=0.035*self.height, pos_hint={"center_x":.5,"center_y":.48}, on_release=lambda x:self.save_entry(True))
-			self.btn2 = Button(text="Удалить", size_hint_y=None, size_hint_x=None, height=0.06*self.height, width=0.6*self.width, font_size=0.035*self.height, pos_hint={"center_x":.5,"center_y":.31}, on_release=lambda x:self.delete_entry())
-			self.btn3 = Button(text="Удалить для всех", size_hint_y=None, size_hint_x=None, height=0.06*self.height, width=0.6*self.width, font_size=0.035*self.height, pos_hint={"center_x":.5,"center_y":.14}, on_release=lambda x:self.delete_entry(True))
+			if self.lang == 'ru':
+				tit = 'Редактирование'
+				self.layout = FloatLayout(size=(self.width, self.height))
+				self.inputi_4 = TextInput(text=day, multiline=False, size_hint_x=.2, size_hint_y=0.12, pos_hint={"center_x":.2,"center_y":.83}, hint_text='День')
+				self.inputi_5 = TextInput(text=month, multiline=False, size_hint_x=.2, size_hint_y=0.12, pos_hint={"center_x":.4,"center_y":.83}, hint_text='Месяц')
+				self.inputi_6 = TextInput(text=year, multiline=False, size_hint_x=.4, size_hint_y=0.12, pos_hint={"center_x":.7,"center_y":.83}, hint_text='Год')
+				self.btn1 = Button(text="Изменить", size_hint_y=None, size_hint_x=None, height=0.06*self.height, width=0.6*self.width, font_size=0.035*self.height, pos_hint={"center_x":.5,"center_y":.65}, on_release=lambda x:self.save_entry())
+				self.btn1_2 = Button(text="Изменить для всех", size_hint_y=None, size_hint_x=None, height=0.06*self.height, width=0.6*self.width, font_size=0.035*self.height, pos_hint={"center_x":.5,"center_y":.48}, on_release=lambda x:self.save_entry(True))
+				self.btn2 = Button(text="Удалить", size_hint_y=None, size_hint_x=None, height=0.06*self.height, width=0.6*self.width, font_size=0.035*self.height, pos_hint={"center_x":.5,"center_y":.31}, on_release=lambda x:self.delete_entry())
+				self.btn3 = Button(text="Удалить для всех", size_hint_y=None, size_hint_x=None, height=0.06*self.height, width=0.6*self.width, font_size=0.035*self.height, pos_hint={"center_x":.5,"center_y":.14}, on_release=lambda x:self.delete_entry(True))
+			else:
+				tit = 'Edit'
+				self.layout = FloatLayout(size=(self.width, self.height))
+				self.inputi_4 = TextInput(text=day, multiline=False, size_hint_x=.2, size_hint_y=0.12, pos_hint={"center_x":.2,"center_y":.83}, hint_text='Day')
+				self.inputi_5 = TextInput(text=month, multiline=False, size_hint_x=.2, size_hint_y=0.12, pos_hint={"center_x":.4,"center_y":.83}, hint_text='Month')
+				self.inputi_6 = TextInput(text=year, multiline=False, size_hint_x=.4, size_hint_y=0.12, pos_hint={"center_x":.7,"center_y":.83}, hint_text='Year')
+				self.btn1 = Button(text="Change", size_hint_y=None, size_hint_x=None, height=0.06*self.height, width=0.6*self.width, font_size=0.035*self.height, pos_hint={"center_x":.5,"center_y":.65}, on_release=lambda x:self.save_entry())
+				self.btn1_2 = Button(text="Change for everyone", size_hint_y=None, size_hint_x=None, height=0.06*self.height, width=0.6*self.width, font_size=0.035*self.height, pos_hint={"center_x":.5,"center_y":.48}, on_release=lambda x:self.save_entry(True))
+				self.btn2 = Button(text="Delete", size_hint_y=None, size_hint_x=None, height=0.06*self.height, width=0.6*self.width, font_size=0.035*self.height, pos_hint={"center_x":.5,"center_y":.31}, on_release=lambda x:self.delete_entry())
+				self.btn3 = Button(text="Delete for everyone", size_hint_y=None, size_hint_x=None, height=0.06*self.height, width=0.6*self.width, font_size=0.035*self.height, pos_hint={"center_x":.5,"center_y":.14}, on_release=lambda x:self.delete_entry(True))
+						
 			self.lbl = Label(text=sentence, font_size=0.025*self.height, pos_hint={"center_x":.5,"center_y":.95})
 		else:
-			self.layout = FloatLayout(size=(self.width, self.height))
-			self.inputi_4 = TextInput(text=day, multiline=False, size_hint_x=.2, size_hint_y=0.15, pos_hint={"center_x":.2,"center_y":.63}, hint_text='День')
-			self.inputi_5 = TextInput(text=month, multiline=False, size_hint_x=.2, size_hint_y=0.15, pos_hint={"center_x":.4,"center_y":.63}, hint_text='Месяц')
-			self.inputi_6 = TextInput(text=year, multiline=False, size_hint_x=.4, size_hint_y=0.15, pos_hint={"center_x":.7,"center_y":.63}, hint_text='Год')
-			self.btn1 = Button(text="Изменить", size_hint_y=None, size_hint_x=None, height=0.06*self.height, width=0.6*self.width, font_size=0.035*self.height, pos_hint={"center_x":.5,"center_y":.40}, on_release=lambda x:self.save_entry())
-			self.btn2 = Button(text="Удалить", size_hint_y=None, size_hint_x=None, height=0.06*self.height, width=0.6*self.width, font_size=0.035*self.height, pos_hint={"center_x":.5,"center_y":.16}, on_release=lambda x:self.delete_entry())
+			if self.lang == 'ru':
+				tit = 'Редактирование'
+				self.layout = FloatLayout(size=(self.width, self.height))
+				self.inputi_4 = TextInput(text=day, multiline=False, size_hint_x=.2, size_hint_y=0.15, pos_hint={"center_x":.2,"center_y":.63}, hint_text='День')
+				self.inputi_5 = TextInput(text=month, multiline=False, size_hint_x=.2, size_hint_y=0.15, pos_hint={"center_x":.4,"center_y":.63}, hint_text='Месяц')
+				self.inputi_6 = TextInput(text=year, multiline=False, size_hint_x=.4, size_hint_y=0.15, pos_hint={"center_x":.7,"center_y":.63}, hint_text='Год')
+				self.btn1 = Button(text="Изменить", size_hint_y=None, size_hint_x=None, height=0.06*self.height, width=0.6*self.width, font_size=0.035*self.height, pos_hint={"center_x":.5,"center_y":.40}, on_release=lambda x:self.save_entry())
+				self.btn2 = Button(text="Удалить", size_hint_y=None, size_hint_x=None, height=0.06*self.height, width=0.6*self.width, font_size=0.035*self.height, pos_hint={"center_x":.5,"center_y":.16}, on_release=lambda x:self.delete_entry())
+			else:
+				tit = 'Edit'
+				self.layout = FloatLayout(size=(self.width, self.height))
+				self.inputi_4 = TextInput(text=day, multiline=False, size_hint_x=.2, size_hint_y=0.15, pos_hint={"center_x":.2,"center_y":.63}, hint_text='Day')
+				self.inputi_5 = TextInput(text=month, multiline=False, size_hint_x=.2, size_hint_y=0.15, pos_hint={"center_x":.4,"center_y":.63}, hint_text='Month')
+				self.inputi_6 = TextInput(text=year, multiline=False, size_hint_x=.4, size_hint_y=0.15, pos_hint={"center_x":.7,"center_y":.63}, hint_text='Year')
+				self.btn1 = Button(text="Change", size_hint_y=None, size_hint_x=None, height=0.06*self.height, width=0.6*self.width, font_size=0.035*self.height, pos_hint={"center_x":.5,"center_y":.40}, on_release=lambda x:self.save_entry())
+				self.btn2 = Button(text="Delete", size_hint_y=None, size_hint_x=None, height=0.06*self.height, width=0.6*self.width, font_size=0.035*self.height, pos_hint={"center_x":.5,"center_y":.16}, on_release=lambda x:self.delete_entry())
+
+
 			self.lbl = Label(text=sentence, font_size=0.025*self.height, pos_hint={"center_x":.5,"center_y":.85})
 
 		self.layout.add_widget(self.lbl)
@@ -2166,12 +2525,12 @@ class Core(BoxLayout):
 		self.inputi_6.bind(text=lambda x, y: self.pass_it_up2(3, y))
 
 		if self.current_user:
-			self.popup = Popup(title="Редактирование",
+			self.popup = Popup(title=tit,
 			content=self.layout,
 			size_hint=(.8, .45))
 			self.popup.open()
 		else:
-			self.popup = Popup(title="Редактирование",
+			self.popup = Popup(title=tit,
 			content=self.layout,
 			size_hint=(.8, .35))
 			self.popup.open()
@@ -2264,10 +2623,16 @@ class Core(BoxLayout):
 
 	def enter_prosrok3(self, final):
 
-		title = 'Внимание!'
-		label = Label(text='Сохраняемый артикул просрочен,\n все равно сохранить?')
-		btn1 = Button(text='Да', on_release=lambda x: self.save_anyway3(final))
-		btn2 = Button(text='Нет', on_release=lambda x: self.wise3())
+		if self.lang == 'ru':
+			title = 'Внимание!'
+			label = Label(text='Сохраняемый артикул просрочен,\n все равно сохранить?')
+			btn1 = Button(text='Да', on_release=lambda x: self.save_anyway3(final))
+			btn2 = Button(text='Нет', on_release=lambda x: self.wise3())
+		else:
+			title = 'Warning!'
+			label = Label(text='Article is expired,\n save it anyway?')
+			btn1 = Button(text='Yes', on_release=lambda x: self.save_anyway3(final))
+			btn2 = Button(text='No', on_release=lambda x: self.wise3())
 
 		fl = BoxLayout(orientation='vertical')
 		fl.add_widget(label)
@@ -2305,7 +2670,10 @@ class Core(BoxLayout):
 				hound = [i for i,x in enumerate(entries) if x==boomb]
 				for each in hound:
 					if entries[each+1] == inf_art:
-						popup("Внимание!", "Эта дата уже записана")
+						if self.lang == 'ru':
+							popup("Внимание!", "Эта дата уже записана")
+						else:
+							popup('Warning!', 'This day already in database')
 						return
 
 				day = boomb[:2]
@@ -2349,14 +2717,20 @@ class Core(BoxLayout):
 
 				self.letedit()
 		else:
-			popup("Внимание!", "Вы не изменили дату")
+			if self.lang == 'ru':
+				popup("Внимание!", "Вы не изменили дату")
+			else:
+				popup('Warning!', 'Date is not changed')
 
 	def datetest(self, date):
 		ask = date[:4]
 		year = date[4:]
 
 		if len(year) < 4:
-			popup("Внимание!", "Укажите 4-х значный год")
+			if self.lang == 'ru':
+				popup("Внимание!", "Укажите 4-х значный год")
+			else:
+				popup('Warning!', 'Year should have 4 digits')
 			return
 		if ask.isalnum(): 
 			if len(ask) == 4:
@@ -2365,15 +2739,30 @@ class Core(BoxLayout):
 						if self.check666(ask, year):
 							return True
 						else:
-							popup("Внимание!", "В этом месяце нет столько дней")
+							if self.lang == 'ru':
+								popup("Внимание!", "В этом месяце нет столько дней")
+							else:
+								popup('Warning!', 'This month do not have so many days')
 					else:
-						popup("Внимание!", "Вы вне диапазона!")
+						if self.lang == 'ru':
+							popup("Внимание!", "Вы вне диапазона!")
+						else:
+							popup('Warning!', 'You are out of range!')
 				else:
-					popup("Внимание!", "Вы ввели буквы")
+					if self.lang == 'ru':
+						popup("Внимание!", "Вы ввели буквы")
+					else:
+						popup('Warning!', 'You entered literals')
 			else:
-				popup("Внимание!", "Необходимый формат - ДДММ")
+				if self.lang == 'ru':
+					popup("Внимание!", "Необходимый формат - ДДММ")
+				else:
+					popup('Warning!', 'Required format - DDMM')
 		else:
-			popup("Внимание!", "Вы ввели символы!")
+			if self.lang == 'ru':
+				popup("Внимание!", "Вы ввели символы!")
+			else:
+				popup('Warning!', 'You entered symbols')
 
 	def check666(self, ask, year):
 		dayz = ask[:2]
@@ -2395,10 +2784,19 @@ class Core(BoxLayout):
 ###########################---Settings---#####################################
 
 	def delete_effect(self):
-		title = "Внимание!!!"
-		text = "Нажав на кнопку УДАЛИТЬ вы уничтожите\nвсе эффекты!"
-		self.lay = FloatLayout(size=(self.width, self.height))
-		self.btn1 = Button(background_normal="but_red.png", text="УДАЛИТЬ", size_hint_y=None, size_hint_x=None, height=0.13*self.height, width=0.8*self.width, font_size=0.035*self.height, pos_hint={"center_x":.5,"center_y":.34}, on_release=lambda x:self.exterminate_effect())
+
+		if self.lang == 'ru':
+			title = "Внимание!!!"
+			text = "Нажав на кнопку УДАЛИТЬ вы уничтожите\nвсе эффекты!"
+			self.lay = FloatLayout(size=(self.width, self.height))
+			self.btn1 = Button(background_normal="but_red.png", text="УДАЛИТЬ", size_hint_y=None, size_hint_x=None, height=0.13*self.height, width=0.8*self.width, font_size=0.035*self.height, pos_hint={"center_x":.5,"center_y":.34}, on_release=lambda x:self.exterminate_effect())
+		else:
+			title = "Warning!!!"
+			text = "If you press DELETE button\nall effects will be deleted!"
+			self.lay = FloatLayout(size=(self.width, self.height))
+			self.btn1 = Button(background_normal="but_red.png", text="DELETE", size_hint_y=None, size_hint_x=None, height=0.13*self.height, width=0.8*self.width, font_size=0.035*self.height, pos_hint={"center_x":.5,"center_y":.34}, on_release=lambda x:self.exterminate_effect())
+
+
 		self.lbl = Label(text=text, font_size=0.025*self.height, pos_hint={"center_x":.5,"center_y":.86})
 
 		self.lay.add_widget(self.lbl)
@@ -2415,10 +2813,19 @@ class Core(BoxLayout):
 		self.set_stop_list()
 
 	def are_you_sure(self):
-		title = "Внимание!!!"
-		text = "Нажав на кнопку УДАЛИТЬ вы уничтожите\nвсю базу данных безвозвратно!"
-		self.lay = FloatLayout(size=(self.width, self.height))
-		self.btn1 = Button(background_normal="but_red.png", text="УДАЛИТЬ", size_hint_y=None, size_hint_x=None, height=0.13*self.height, width=0.8*self.width, font_size=0.035*self.height, pos_hint={"center_x":.5,"center_y":.34}, on_release=lambda x:self.exterminate())
+
+		if self.lang == 'ru':
+			title = "Внимание!!!"
+			text = "Нажав на кнопку УДАЛИТЬ вы уничтожите\nвсю базу данных безвозвратно!"
+			self.lay = FloatLayout(size=(self.width, self.height))
+			self.btn1 = Button(background_normal="but_red.png", text="УДАЛИТЬ", size_hint_y=None, size_hint_x=None, height=0.13*self.height, width=0.8*self.width, font_size=0.035*self.height, pos_hint={"center_x":.5,"center_y":.34}, on_release=lambda x:self.exterminate())
+		else:
+			title = "Warning!!!"
+			text = "If you press DELETE button\nwhole database will be deleted!"
+			self.lay = FloatLayout(size=(self.width, self.height))
+			self.btn1 = Button(background_normal="but_red.png", text="DELETE", size_hint_y=None, size_hint_x=None, height=0.13*self.height, width=0.8*self.width, font_size=0.035*self.height, pos_hint={"center_x":.5,"center_y":.34}, on_release=lambda x:self.exterminate())
+
+
 		self.lbl = Label(text=text, font_size=0.025*self.height, pos_hint={"center_x":.5,"center_y":.86})
 
 		self.lay.add_widget(self.lbl)
@@ -2449,7 +2856,11 @@ class Core(BoxLayout):
 		self.poz.dismiss()
 		self.show_prosrok(False)
 
-		popup("Внимание", "База данных была полностью удалена")
+		if self.lang == 'ru':
+			popup("Внимание", "База данных была полностью удалена")
+		else:
+			popup('Warning', 'Database is deleted')
+
 		self.clearer()
 		self.alarm()
 		self.ids.griddy.clear_widgets()
@@ -2487,17 +2898,32 @@ class Core(BoxLayout):
 			self.grid.clear_widgets()
 			for each in self.stop_list:
 				if each[1] == 'deleteART':
-					self.texter = 'Удаление артикула [color=#04d3ff]{}[/color]'.format(each[0])
+					if self.lang == 'ru':
+						self.texter = 'Удаление артикула [color=#04d3ff]{}[/color]'.format(each[0])
+					else:
+						self.texter = 'Delete article [color=#04d3ff]{}[/color]'.format(each[0])
+
 				else:
-					self.texter = 'Удаление даты [color=#04d3ff]{}[/color] \nАртикула [color=#04d3ff]{}[/color]'.format(each[2], each[0])
+					if self.lang == 'ru':
+						self.texter = 'Удаление даты [color=#04d3ff]{}[/color] \nАртикула [color=#04d3ff]{}[/color]'.format(each[2], each[0])
+					else:
+						self.texter = 'Delete date [color=#04d3ff]{}[/color] \nArticle [color=#04d3ff]{}[/color]'.format(each[2], each[0])	
 				self.btn = Button(markup=True, text=self.texter, size_hint_y=None, height=0.09*self.height, font_size=0.035*self.height, on_release=lambda x: self.popup_del_item_from_stop_list(x.text))
 				self.grid.add_widget(self.btn)
 
 	def popup_del_item_from_stop_list(self, data):
-		title = 'Внимание!'
-		label = Label(text='Вы собираетесь удалить эффект,\nпродолжить?')
-		btn1 = Button(text='Да', on_release=lambda x: self.del_item_from_stop_list(data))
-		btn2 = Button(text='Нет', on_release=lambda x: self.close_this_one())
+
+		if self.lang == 'ru':
+
+			title = 'Внимание!'
+			label = Label(text='Вы собираетесь удалить эффект,\nпродолжить?')
+			btn1 = Button(text='Да', on_release=lambda x: self.del_item_from_stop_list(data))
+			btn2 = Button(text='Нет', on_release=lambda x: self.close_this_one())
+		else:
+			title = 'Warning!'
+			label = Label(text='You are about to delete an effect,\nproceed?')
+			btn1 = Button(text='Yes', on_release=lambda x: self.del_item_from_stop_list(data))
+			btn2 = Button(text='No', on_release=lambda x: self.close_this_one())
 
 		fl = BoxLayout(orientation='vertical')
 		fl.add_widget(label)
@@ -2519,7 +2945,7 @@ class Core(BoxLayout):
 		self.close_this_one()
 		data = data.split()
 
-		if data[1] == "артикула":
+		if data[1] == "артикула" or data[1] == 'article':
 			article = (data[2].split("]")[1]).split('[')[0]
 
 			self.stop_list.remove((article, 'deleteART', None))
@@ -2533,12 +2959,13 @@ class Core(BoxLayout):
 			self.set_stop_list()
 			self.load_group_home()
 
-
-
 	def turn_on_nothing_group_home(self):
 		self.grid.clear_widgets()
 		self.group_home_nothing_color = (.1, .1, .1, .3)
-		self.ids.nothing_to_show.text = 'Нет эффектов для применения'
+		if self.lang == 'ru':
+			self.ids.nothing_to_show.text = 'Нет эффектов для применения'
+		else:
+			self.ids.nothing_to_show.text = 'No effects to apply'
 
 	def while_loading(self):
 		self.loading = self.ids.float_group_home
@@ -2564,23 +2991,34 @@ class Core(BoxLayout):
 			anwser = request.json()
 			return anwser
 		except:
-			popup('Warning', 'Internet connection failed')
-
+			if self.lang == 'ru':
+				popup("Внимание!", "Нет интернет соединения")
+			else:
+				popup('Warning', 'Internet connection failed')
 
 	def create_new_group(self, group_name, group_password):
 		if not group_name or not group_password:
-			popup('Внимание!', 'Все поля обязательны к заполнению!')
+			if self.lang == 'ru':
+				popup('Внимание!', 'Все поля обязательны к заполнению!')
+			else:
+				popup('Warning!', 'All fields required')
 			return
 
 		try:
 			anwser = self.read_from_base_new_group()
 		except:
-			popup('Warning', 'No internet connection')
+			if self.lang == 'ru':
+				popup("Внимание!", "Нет интернет соединения")
+			else:
+				popup('Warning', 'No internet connection')
 
 		try:
 			for each in anwser:
 				if each == group_name:
-					popup('Внимание', 'Данная группа уже существует!')
+					if self.lang == 'ru':
+						popup('Внимание', 'Данная группа уже существует!')
+					else:
+						popup('Warning', 'Group already exist')
 					return
 		except:
 			pass
@@ -2619,7 +3057,6 @@ class Core(BoxLayout):
 		except:
 			return False
 
-
 		return True
 
 	def is_user_here(self, name):
@@ -2647,7 +3084,10 @@ class Core(BoxLayout):
 	def try_to_log_in(self, group_name, password):
 
 		if not group_name or not password:
-			popup('Внимание!', 'Все поля обязательны к заполнению!')
+			if self.lang == 'ru':
+				popup('Внимание!', 'Все поля обязательны к заполнению!')
+			else:
+				popup('Warning!', 'All fields are required')
 			return
 
 		self.current_group = group_name
@@ -2674,7 +3114,10 @@ class Core(BoxLayout):
 		if self.current_data['Password'] == self.current_password:
 			return True
 		else:
-			popup('Внимание', 'Неверный пароль!')
+			if self.lang == 'ru':
+				popup('Внимание', 'Неверный пароль!')
+			else:
+				popup('Warning', 'Wrong password!')
 
 	def read_from_base(self):
 
@@ -2686,13 +3129,18 @@ class Core(BoxLayout):
 			raw = request.json()
 			self.current_data = raw
 			if anwser == None:
-				popup('Внимание!', 'Данной группы не существует!')
+				if self.lang == 'ru':
+					popup('Внимание!', 'Данной группы не существует!')
+				else:
+					popup('Warning!', 'Group do not exist')
 				return False
 		
-
 			return anwser
 		except:
-			popup('Warning', 'No internet connection')
+			if self.lang == 'ru':
+				popup("Внимание!", "Нет интернет соединения")
+			else:
+				popup('Warning', 'No internet connection')
 
 	def write_to_base(self, text):
 
@@ -2700,7 +3148,10 @@ class Core(BoxLayout):
 			to_database = json.loads(text)
 			requests.patch(url=self.url, json=to_database)
 		except:
-			popup('Warning', 'Check your internet connection')
+			if self.lang == 'ru':
+				popup("Внимание!", "Нет интернет соединения")
+			else:
+				popup('Warning', 'Check your internet connection')
 
 	def create_digital_copy(self, names, days_of_life, saver):
 
@@ -2723,7 +3174,10 @@ class Core(BoxLayout):
 			requests.patch(url=url, json=saver)
 
 		except:
-			popup('Warning', 'Check your internet connection')
+			if self.lang == 'ru':
+				popup("Внимание!", "Нет интернет соединения")
+			else:
+				popup('Warning', 'Check your internet connection')
 
 	def stop_list_activity(self, days_server, names_server, saves_server):
 		
@@ -2771,7 +3225,10 @@ class Core(BoxLayout):
 				try:
 					requests.patch(url=url, json=to_database)
 				except:
-					popup('Warning', 'Check your internet connection')
+					if self.lang == 'ru':
+						popup("Внимание!", "Нет интернет соединения")
+					else:
+						popup('Warning', 'Check your internet connection')
 
 		self.stop_list = []
 		self.set_stop_list()
@@ -2816,7 +3273,10 @@ class Core(BoxLayout):
 		try:
 			requests.patch(url=url, json=to_database)
 		except:
-			popup('Warning', 'Check your internet connection')
+			if self.lang == 'ru':
+				popup("Внимание!", "Нет интернет соединения")
+			else:
+				popup('Warning', 'Check your internet connection')
 
 	def stop_my_data(self, mozzie):
 
@@ -3084,6 +3544,24 @@ class Core(BoxLayout):
 				for each in self.stop_list:
 					f.write(str(each[0])+','+str(each[1])+ ','+ str(each[2]) + '$')
 
+	def change_lang(self, data):
+		self.previous()
+		if data == 'ru':
+			self.worktext = 'Введите артикул'
+			self.dater_invisible()
+			self.show_buttons_before_after('hide')
+			self.ids.ex_inputer.text = ''
+			self.ids.ex_inputer2.text = ''
+			self.step = 0
+			self.to_russian()
+		else:
+			self.worktext = 'Enter article'
+			self.dater_invisible()
+			self.show_buttons_before_after('hide')
+			self.ids.ex_inputer.text = ''
+			self.ids.ex_inputer2.text = ''
+			self.step = 0
+			self.to_english()
 
 
 ###########################---App_Classes---##################################
@@ -3261,7 +3739,7 @@ Builder.load_string("""
 					allow_no_selection: False
 					group: 'before_after'
 					state: 'down'
-					text: "От"
+					text: root.t_ot
 					size_hint: (.3, .06)
 					pos_hint: root.pos_before_after1
 					on_press: root.switch_before_after('before')
@@ -3269,7 +3747,7 @@ Builder.load_string("""
 				ToggleButton:
 					allow_no_selection: False
 					group: 'before_after'
-					text: "До"
+					text: root.t_do
 					size_hint: (.3, .06)
 					pos_hint: root.pos_before_after2
 					on_press: root.switch_before_after('after')
@@ -3279,7 +3757,7 @@ Builder.load_string("""
 					state: 'down'
 					group: 'day_month_year'
 					state: 'down'
-					text: "Дни"
+					text: root.t_day
 					size_hint: (.3, .06)
 					pos_hint: root.pos_day_month_year1
 					on_press: root.day_or_what_changer('day')
@@ -3287,7 +3765,7 @@ Builder.load_string("""
 				ToggleButton:
 					allow_no_selection: False
 					group: 'day_month_year'
-					text: "Месяцы"
+					text: root.t_month
 					size_hint: (.3, .06)
 					pos_hint: root.pos_day_month_year2
 					on_press: root.day_or_what_changer('month')
@@ -3295,7 +3773,7 @@ Builder.load_string("""
 				ToggleButton:
 					allow_no_selection: False
 					group: 'day_month_year'
-					text: "Годы"
+					text: root.t_year
 					size_hint: (.3, .06)
 					pos_hint: root.pos_day_month_year3
 					on_press: root.day_or_what_changer('year')
@@ -3444,7 +3922,7 @@ Builder.load_string("""
 
 			TextInput:
 				font_size: 28
-				hint_text: 'Поиск'
+				hint_text: root.t_search
 				id: searcher
 				multiline: False
 				size_hint: (.7, .08)
@@ -3498,7 +3976,7 @@ Builder.load_string("""
 					state: 'down'
 					group: 'which_trash'
 					state: 'down'
-					text: "Сегодня"
+					text: root.t_today
 					size_hint: (.3, .06)
 					pos_hint: {"center_x": .2,"center_y":.9}
 					on_press: root.show_rangers(False)
@@ -3510,7 +3988,7 @@ Builder.load_string("""
 					id: bom_bom_bom2
 					allow_no_selection: False
 					group: 'which_trash'
-					text: "Произвольно"
+					text: root.t_random
 					size_hint: (.3, .06)
 					pos_hint: {"center_x": .5,"center_y":.9}
 					on_press: root.show_rangers(False)
@@ -3522,7 +4000,7 @@ Builder.load_string("""
 					id: bom_bom_bom3
 					allow_no_selection: False
 					group: 'which_trash'
-					text: "Период"
+					text: root.t_period
 					size_hint: (.3, .06)
 					pos_hint: {"center_x": .8,"center_y":.9}
 					on_press: root.show_rangers(True)
@@ -3532,7 +4010,7 @@ Builder.load_string("""
 				TextInput:
 					font_size: 28
 					id: to_d1
-					hint_text: 'ДД'
+					hint_text: root.t_dd
 					multiline: False
 					size_hint: (.11, .08)
 					pos_hint: root.pos_el1
@@ -3541,7 +4019,7 @@ Builder.load_string("""
 				TextInput:
 					font_size: 28
 					id: to_d2
-					hint_text: 'ММ'
+					hint_text: root.t_mm
 					multiline: False
 					size_hint: (.11, .08)
 					pos_hint: root.pos_el2
@@ -3559,7 +4037,7 @@ Builder.load_string("""
 				TextInput:
 					font_size: 18
 					id: to_range1
-					hint_text: 'ДД'
+					hint_text: root.t_dd
 					multiline: False
 					size_hint: (.11, .05)
 					pos_hint: root.ranger1
@@ -3568,7 +4046,7 @@ Builder.load_string("""
 				TextInput:
 					font_size: 18
 					id: to_range2
-					hint_text: 'ММ'
+					hint_text: root.t_mm
 					multiline: False
 					size_hint: (.11, .05)
 					pos_hint: root.ranger2
@@ -3586,7 +4064,7 @@ Builder.load_string("""
 				TextInput:
 					font_size: 18
 					id: to_range4
-					hint_text: 'ДД'
+					hint_text: root.t_dd
 					multiline: False
 					size_hint: (.11, .05)
 					pos_hint: root.ranger4
@@ -3595,7 +4073,7 @@ Builder.load_string("""
 				TextInput:
 					font_size: 18
 					id: to_range5
-					hint_text: 'ММ'
+					hint_text: root.t_mm
 					multiline: False
 					size_hint: (.11, .05)
 					pos_hint: root.ranger5
@@ -3613,7 +4091,7 @@ Builder.load_string("""
 				Button:
 					border: 0,0,0,0
 					font_size: 28
-					text: "Найти"
+					text: root.t_find
 					size_hint: (.31, .11)
 					pos_hint: root.ranger7
 					on_release: root.ranger_main()
@@ -3628,7 +4106,7 @@ Builder.load_string("""
 							pos: self.pos 
 							size: self.size
 					font_size: 18
-					text: 'От:'
+					text: root.t_ot + ':'
 					size_hint: (.1, .05)
 					pos_hint: root.ranger8
 
@@ -3640,13 +4118,13 @@ Builder.load_string("""
 							pos: self.pos 
 							size: self.size
 					font_size: 18
-					text: 'До:'
+					text: root.t_do + ':'
 					size_hint: (.1, .05)
 					pos_hint: root.ranger9
 
 				Button:
 					border: 0,0,0,0
-					text: "Найти"
+					text: root.t_find
 					size_hint: (.3, .08)
 					pos_hint: root.pos_el4
 					on_press: root.define_another_art()
@@ -3764,7 +4242,7 @@ Builder.load_string("""
 						source: 'back.png'
 				Label:
 					size: self.texture_size
-					text: "Редактирование"
+					text: root.t_edit
 					font_size: sp(40)
 					pos_hint:{"center_x":.5,"center_y":.9}
 
@@ -3791,7 +4269,7 @@ Builder.load_string("""
 
 				Button:
 					border: 0,0,0,0
-					text: "Сохранить"
+					text: root.t_save
 					font_size: sp(22)
 					pos_hint: {'center_x': .75, 'center_y': .7}
 					size_hint: (.4, .10)
@@ -3801,7 +4279,7 @@ Builder.load_string("""
 						root.change_popup_name(True)
 				Button:
 					border: 0,0,0,0
-					text: "Добавить дату"
+					text: root.t_add_date
 					font_size: sp(16)
 					pos_hint: {'center_x': .75, 'center_y': .6}
 					size_hint: (.4, .10)
@@ -3812,7 +4290,7 @@ Builder.load_string("""
 
 				Button:
 					border: 0,0,0,0
-					text: "Удалить артикул"
+					text: root.t_delete_article
 					font_size: sp(18)
 					pos_hint: {'center_x': .75, 'center_y': .1}
 					size_hint: (.5, .12)
@@ -3861,7 +4339,7 @@ Builder.load_string("""
 
 				Button:
 					border: 0,0,0,0
-					text: "Язык"
+					text: root.t_language
 					font_size: sp(22)
 					pos_hint: {'center_x': .5, 'center_y': .8}
 					size_hint: (.65, .12)
@@ -3871,7 +4349,7 @@ Builder.load_string("""
 
 				Button:
 					border: 0,0,0,0
-					text: "Синхронизировать"
+					text: root.t_sync
 					font_size: sp(22)
 					pos_hint: {'center_x': .5, 'center_y': .68}
 					size_hint: (.65, .12)
@@ -3882,7 +4360,7 @@ Builder.load_string("""
 
 				Button:
 					border: 0,0,0,0
-					text: "Удалить базу данных"
+					text: root.t_delete_database
 					font_size: sp(22)
 					pos_hint: {'center_x': .5, 'center_y': .56}
 					size_hint: (.65, .12)
@@ -3893,7 +4371,7 @@ Builder.load_string("""
 
 				Button:
 					border: 0,0,0,0
-					text: "Удалить эффекты"
+					text: root.t_delete_effects
 					font_size: sp(22)
 					pos_hint: {'center_x': .5, 'center_y': .44}
 					size_hint: (.65, .12)
@@ -4190,18 +4668,20 @@ Builder.load_string("""
 					group: 'lang_lang'
 					state: 'down'
 					text: 'Русский'
-					pos_hint: {'center_x': .5, 'center_y': .09}
+					pos_hint: {'center_x': .5, 'center_y': .79}
 					size_hint: (.65, .1)
 					on_press: root.lang = 'ru'
+					on_press: root.change_lang('ru')
 
 
 				ToggleButton:
 					allow_no_selection: False
 					group: 'lang_lang'
 					text: 'English'
-					pos_hint: {'center_x': .5, 'center_y': .19}
+					pos_hint: {'center_x': .5, 'center_y': .89}
 					size_hint: (.65, .1)
 					on_press: root.lang = 'eng'
+					on_press: root.change_lang('eng')
 
 
 
