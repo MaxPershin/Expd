@@ -144,10 +144,26 @@ class Core(BoxLayout):
 		self.t_find = 'Найти'
 		self.t_dd = 'ДД'
 		self.t_mm = 'ММ'
-		t_edit = 'Редактирование'
-		t_save = 'Сохранить'
-		t_add_date = 'Добавить дату'
-		t_delete_article = 'Удалить артикул'
+		self.t_edit = 'Редактирование'
+		self.t_save = 'Сохранить'
+		self.t_add_date = 'Добавить дату'
+		self.t_delete_article = 'Удалить артикул'
+		self.t_delete_effects = 'Удалить эффекты'
+		self.t_delete_database = 'Удалить базу данных'
+		self.t_sync = 'Синхронизировать'
+		self.t_language = 'Язык'
+		self.t_exit = 'Выйти'
+		self.t_group = 'группа'
+		self.t_your_sync = 'Запланированные действия'
+		self.t_expired = 'просрок'
+		self.t_group_name = 'Название группы'
+		self.t_password = 'Пароль'
+		self.t_enter = 'Войти'
+		self.t_create_group = 'Создать группу'
+		self.t_create_user = 'Создать пользователя'
+		self.t_create = 'Создать'
+		self.t_user_name = 'Имя пользователя'
+		self.t_we_have_expired = 'Найдены просроченные артикулы'
 
 	def to_english(self):
 		self.t_ot = 'from'
@@ -166,6 +182,22 @@ class Core(BoxLayout):
 		self.t_save = 'Save'
 		self.t_add_date = 'Add date'
 		self.t_delete_article = 'Delete article'
+		self.t_delete_effects = 'Delete effects'
+		self.t_delete_database = 'Delete database'
+		self.t_sync = 'Synchronize'
+		self.t_language = 'Language'
+		self.t_exit = 'Logout'
+		self.t_group = 'group'
+		self.t_your_sync = 'Actions to sync'
+		self.t_expired = 'expired'
+		self.t_group_name = 'Group Name'
+		self.t_password = 'Password'
+		self.t_enter = 'Login'
+		self.t_create_group = 'Create group'
+		self.t_create_user = 'Create User'
+		self.t_create = 'Create'
+		self.t_user_name = 'User name'
+		self.t_we_have_expired = 'Expired articles found!'
 	
 	if lang == 'ru':
 		t_ot = ObjectProperty('От')
@@ -184,6 +216,24 @@ class Core(BoxLayout):
 		t_save = ObjectProperty('Сохранить')
 		t_add_date = ObjectProperty('Добавить дату')
 		t_delete_article = ObjectProperty('Удалить артикул')
+		t_delete_effects = ObjectProperty('Удалить эффекты')
+		t_delete_database = ObjectProperty('Удалить базу данных')
+		t_sync = ObjectProperty('Синхронизировать')
+		t_language = ObjectProperty('Язык')
+		t_exit = ObjectProperty('Выйти')
+		t_group = ObjectProperty('группа')
+		t_your_sync = ObjectProperty('Запланированные действия')
+		t_expired = ObjectProperty('просрок')
+		t_group_name = ObjectProperty('Название группы')
+		t_password = ObjectProperty('Пароль')
+		t_enter = ObjectProperty('Войти')
+		t_create_group = ObjectProperty('Создать группу')
+		t_create_user = ObjectProperty('Создать пользователя')
+		t_create = ObjectProperty('Создать')
+		t_user_name = ObjectProperty('Имя пользователя')
+		t_we_have_expired = ObjectProperty('Найдены просроченные артикулы')
+
+
 	else:
 		t_ot = ObjectProperty('from')
 		t_do = ObjectProperty('until')
@@ -201,6 +251,22 @@ class Core(BoxLayout):
 		t_save = ObjectProperty('Save')
 		t_add_date = ObjectProperty('Add date')
 		t_delete_article = ObjectProperty('Delete article')
+		t_delete_effects = ObjectProperty('Delete effects')
+		t_delete_database = ObjectProperty('Delete database')
+		t_sync = ObjectProperty('Synchronize')
+		t_language = ObjectProperty('Language')
+		t_exit = ObjectProperty('Logout')
+		t_group = ObjectProperty('group')
+		t_your_sync = ObjectProperty('Actions to sync')
+		t_expired = ObjectProperty('expired')
+		t_group_name = ObjectProperty('Group Name')
+		t_password = ObjectProperty('Password')
+		t_enter = ObjectProperty('Login')
+		t_create_group = ObjectProperty('Create group')
+		t_create_user = ObjectProperty('Create User')
+		t_create = ObjectProperty('Create')
+		t_user_name = ObjectProperty('User name')
+		t_we_have_expired = ObjectProperty('Expired articles found!')
 
 	def show_prosrok(self, data):
 		if data:
@@ -3044,7 +3110,7 @@ class Core(BoxLayout):
 			request = requests.get(self.url + '{}/Users.json'.format(self.current_group) +"?auth=" + self.auth_key)
 			anwser = request.json()
 			for each in anwser:
-				print()
+				pass
 
 			text = '{'+ '"{}"'.format(name) + ': ""' + '}'
 
@@ -3536,10 +3602,36 @@ class Core(BoxLayout):
 			f = open("stop_list.txt", "w+")
 			f.close()
 
-		print(self.stop_list)
+	def get_lang(self, *args):
+		try:
+			with open('lang.txt', 'r') as f:
+				data = f.read()
+				
+				self.lang = data
+
+				if self.lang == 'ru':
+					self.to_russian()
+					self.worktext = 'Введите артикул'
+					self.ids.russian_button.state = 'down'
+					self.ids.english_button.state = 'normal'
+				else:
+					self.to_english()
+					self.worktext = 'Enter article'
+					self.ids.russian_button.state = 'normal'
+					self.ids.english_button.state = 'down'
+		except:
+			f = open("lang.txt", "w+")
+			f.close()
+
+			self.lang = 'ru'
+			self.to_russian()
+
+	def set_lang(self, data):
+		with open("lang.txt", "w") as f:
+			f.write(data)
+
 
 	def set_stop_list(self):
-		print(self.stop_list)
 		with open("stop_list.txt", "w") as f:
 				for each in self.stop_list:
 					f.write(str(each[0])+','+str(each[1])+ ','+ str(each[2]) + '$')
@@ -3573,6 +3665,7 @@ class ProtoApp(App):
 				mine = obj
 				break
 
+		Clock.schedule_once(mine.get_lang, 0.1)
 		Clock.schedule_once(mine.alarm, 2)
 		Clock.schedule_once(mine.get_settings, 1)
 
@@ -3666,7 +3759,7 @@ Builder.load_string("""
 			background_color: 1, .35, .35, 1
 			halign: 'center'
 			valign: "middle"
-			text: 'Есть просроченные артикулы'
+			text: root.t_we_have_expired
 			text_size: self.size
 			size_hint: (.8, 1)
 			font_size: sp(25)
@@ -3956,7 +4049,7 @@ Builder.load_string("""
 				Button:
 					id: posrok_button
 					border: 0,0,0,0
-					text: "Просрок"
+					text: root.t_expired
 					size_hint: (.3, .06)
 					background_normal: ''
 					background_color: .92, 0, 0, 1
@@ -4434,7 +4527,7 @@ Builder.load_string("""
 				TextInput:
 					font_size: sp(24)
 					id: group_name
-					hint_text: 'Имя группы'
+					hint_text: root.t_group_name
 					multiline: False
 					size_hint: (.8, .08)
 					pos_hint: {'center_x': .5, 'center_y': .75}
@@ -4443,14 +4536,14 @@ Builder.load_string("""
 					font_size: sp(24)
 					id: group_password
 					password: True
-					hint_text: 'Пароль'
+					hint_text: root.t_password
 					multiline: False
 					size_hint: (.8, .08)
 					pos_hint: {'center_x': .5, 'center_y': .65}
 
 				Button:
 					border: 0,0,0,0
-					text: "Войти"
+					text: root.t_enter
 					font_size: sp(22)
 					pos_hint: {'center_x': .5, 'center_y': .5}
 					size_hint: (.65, .1)
@@ -4461,7 +4554,7 @@ Builder.load_string("""
 
 				Button:
 					border: 0,0,0,0
-					text: "Создать группу"
+					text: root.t_create_group
 					font_size: sp(22)
 					pos_hint: {'center_x': .5, 'center_y': .4}
 					size_hint: (.65, .1)
@@ -4485,14 +4578,14 @@ Builder.load_string("""
 
 				font_size: sp(24)
 				id: new_nickname
-				hint_text: 'Создать пользоваля'
+				hint_text: root.t_create_user
 				multiline: False
 				size_hint: (.8, .08)
 				pos_hint: {'center_x': .5, 'center_y': .75}
 
 			Button:
 
-				text: "Создать"
+				text: root.t_create
 				border: 0,0,0,0
 				font_size: sp(22)
 				pos_hint: {'center_x': .5, 'center_y': .65}
@@ -4517,14 +4610,14 @@ Builder.load_string("""
 
 				font_size: sp(24)
 				id: nickname
-				hint_text: 'Имя пользователя'
+				hint_text: root.t_user_name
 				multiline: False
 				size_hint: (.8, .08)
 				pos_hint: {'center_x': .5, 'center_y': .75}
 
 			Button:
 
-				text: "Войти"
+				text: root.t_enter
 				border: 0,0,0,0
 				font_size: sp(22)
 				pos_hint: {'center_x': .5, 'center_y': .65}
@@ -4536,7 +4629,7 @@ Builder.load_string("""
 
 			Button:
 
-				text: "Создать"
+				text: root.t_create
 				border: 0,0,0,0
 				font_size: sp(22)
 				pos_hint: {'center_x': .5, 'center_y': .55}
@@ -4592,7 +4685,7 @@ Builder.load_string("""
 
 					size_hint: (1, .05)
 					pos_hint:{"center_x":.5,"center_y":.79}
-					text: "Ваши синхронизируемые изменения"
+					text: root.t_your_sync
 					color: 1,0,1,1
 					font_size: sp(25)
 
@@ -4621,7 +4714,7 @@ Builder.load_string("""
 
 				Label:
 					size: self.texture_size
-					text: 'группа'
+					text: root.t_group
 					color: 1,0,1,1
 					font_size: sp(25)
 					pos_hint:{"center_x":.5,"center_y":.95}
@@ -4634,7 +4727,7 @@ Builder.load_string("""
 					pos_hint:{"center_x":.5,"center_y":.85}
 
 				Button:
-					text: "Синхронизировать"
+					text: root.t_sync
 					border: 0,0,0,0
 					font_size: sp(22)
 					pos_hint: {'center_x': .5, 'center_y': .19}
@@ -4645,7 +4738,7 @@ Builder.load_string("""
 					on_release: root.while_loading()
 
 				Button:
-					text: "Выйти"
+					text: root.t_exit
 					border: 0,0,0,0
 					font_size: sp(22)
 					pos_hint: {'center_x': .5, 'center_y': .09}
@@ -4664,6 +4757,7 @@ Builder.load_string("""
 						source: 'back.png'
 
 				ToggleButton:
+					id: russian_button
 					allow_no_selection: False
 					group: 'lang_lang'
 					state: 'down'
@@ -4672,9 +4766,11 @@ Builder.load_string("""
 					size_hint: (.65, .1)
 					on_press: root.lang = 'ru'
 					on_press: root.change_lang('ru')
+					on_press: root.set_lang('ru')
 
 
 				ToggleButton:
+					id: english_button
 					allow_no_selection: False
 					group: 'lang_lang'
 					text: 'English'
@@ -4682,6 +4778,7 @@ Builder.load_string("""
 					size_hint: (.65, .1)
 					on_press: root.lang = 'eng'
 					on_press: root.change_lang('eng')
+					on_press: root.set_lang('eng')
 
 
 
