@@ -2,6 +2,8 @@
 #reload(sys)
 #sys.setdefaultencoding("utf-8")
 
+from zbarcam import ZBarCam
+
 from kivy.config import Config
 Config.set('graphics', 'resizable', False)
 Config.set('graphics', 'width', '414')
@@ -3722,6 +3724,8 @@ def sync():
 
 Builder.load_string("""
 #:import NoTransition kivy.uix.screenmanager.NoTransition
+#:import ZBarSymbol pyzbar.pyzbar.ZBarSymbol
+#:import ZBarCam kivy.garden.zbarcam.ZBarCam
 
 <SuppaLabel>:
 	canvas.before:
@@ -3912,6 +3916,16 @@ Builder.load_string("""
 						root.press += 1
 						root.catch_art()
 
+				Button:
+					id: testcam
+					border: 0,0,0,0
+					pos_hint: {'center_x': .72, 'center_y': .70}
+					size_hint: (.3, .3)
+					background_normal: "arrow_next.png"
+					background_down: "butp.png"
+					on_press: root.ids.mana.current = "TestCam"
+
+
 
 				Button:
 					border: 0,0,0,0
@@ -3984,6 +3998,18 @@ Builder.load_string("""
 					Button:
 						text: "<<"
 						on_release: root.type('<<')
+
+		Screen:
+			name: 'TestCam'
+			BoxLayout:
+			    orientation: 'vertical'
+				ZBarCam:
+					id: zbarcam
+					code_types: ZBarSymbol.QRCODE, ZBarSymbol.EAN13
+				Label:
+					size_hint: None, None
+					size: self.texture_size[0], 50
+					text: ', '.join([str(symbol.data) for symbol in zbarcam.symbols])
 
 
 		Screen:

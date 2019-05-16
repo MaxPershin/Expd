@@ -36,14 +36,14 @@ version = 3.0.0
 
 # (list) Application requirements
 # comma seperated e.g. requirements = sqlite3,kivy
-requirements = kivy,dateutil,openssl,android,requests
+requirements = kivy,dateutil,openssl,android,requests,libiconv,libzbar,Pillow==5.2.0,pyzbar==0.1.8
 
 # (str) Custom source folders for requirements
 # Sets custom source for any requirements with recipes
 # requirements.source.kivy = ../../kivy
 
 # (list) Garden requirements
-#garden_requirements =
+garden_requirements = xcamera
 
 # (str) Presplash of the application
 presplash.filename = splash.png
@@ -85,7 +85,7 @@ fullscreen = 0
 android.presplash_color = black
 
 # (list) Permissions
-android.permissions = INTERNET,ACCESS_NETWORK_STATE,ACCESS_WIFI_STATE
+android.permissions = INTERNET,ACCESS_NETWORK_STATE,ACCESS_WIFI_STATE,CAMERA
 
 # (int) Android API to use
 #android.api = 19
