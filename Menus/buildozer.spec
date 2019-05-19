@@ -22,13 +22,13 @@ source.include_exts = py,png,jpg,kv,atlas,
 #source.exclude_exts = spec
 
 # (list) List of directory to exclude (let empty to not exclude anything)
-#source.exclude_dirs = tests, bin
+source.exclude_dirs = bin,venv,.buildozer
 
 # (list) List of exclusions using pattern matching
 #source.exclude_patterns = license,images/*/*.jpg
 
 # (str) Application versioning (method 1)
-version = 3.0.0
+version = 4.0.0
 
 # (str) Application versioning (method 2)
 # version.regex = __version__ = ['"](.*)['"]
@@ -36,7 +36,7 @@ version = 3.0.0
 
 # (list) Application requirements
 # comma seperated e.g. requirements = sqlite3,kivy
-requirements = kivy,dateutil,openssl,android,requests,libiconv,libzbar,Pillow==5.2.0,pyzbar==0.1.8
+requirements = kivy,dateutil,openssl,android,requests,libiconv,libzbar,Pillow==5.2.0,python3,pyzbar==0.1.8
 
 # (str) Custom source folders for requirements
 # Sets custom source for any requirements with recipes
@@ -89,6 +89,11 @@ android.permissions = INTERNET,ACCESS_NETWORK_STATE,ACCESS_WIFI_STATE,CAMERA
 
 # (int) Android API to use
 #android.api = 19
+android.api = 27
+android.minapi = 21
+android.sdk = 20
+android.ndk = 17c
+android.ndk_api = 21
 
 # (int) Minimum API required
 #android.minapi = 9
@@ -147,7 +152,7 @@ android.permissions = INTERNET,ACCESS_NETWORK_STATE,ACCESS_WIFI_STATE,CAMERA
 #android.gradle_dependencies =
 
 # (str) python-for-android branch to use, defaults to stable
-#p4a.branch = stable
+p4a.branch = master
 
 # (str) OUYA Console category. Should be one of GAME or APP
 # If you leave this blank, OUYA support will not be enabled

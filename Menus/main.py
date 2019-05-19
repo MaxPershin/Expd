@@ -2,12 +2,11 @@
 #reload(sys)
 #sys.setdefaultencoding("utf-8")
 
-from zbarcam import ZBarCam
-
 from kivy.config import Config
 Config.set('graphics', 'resizable', False)
 Config.set('graphics', 'width', '414')
 Config.set('graphics', 'height', '736')
+from zbarcam import ZBarCam
 
 from kivy.app import App
 from kivy.lang import Builder
@@ -56,6 +55,19 @@ class SuppaLabel(Label):
 	container1 = ObjectProperty(10)
 	container2 = ObjectProperty(10)
 
+class Reader(BoxLayout):
+	hinter = ObjectProperty({"center_x": .5,"center_y": .9})
+	previous = ""
+
+	def stop_cam(self, text):
+		if text:
+			mine = ''
+			for obj in gc.get_objects(): #This way I could find an instance ;)
+				if isinstance(obj, Core):
+					mine = obj
+					break
+
+			mine.stop_cam(text)
 
 class Core(BoxLayout):
 	lang = 'ru'
@@ -129,6 +141,8 @@ class Core(BoxLayout):
 	new_users = ''
 	auth_key = "HqpU7WbJBeA4wN058kf9nPo9PZAAiUiEBrC3ZvP5"
 	url = 'https://avocado-a066c.firebaseio.com/'
+
+	r = None
 
 
 	#translation
@@ -269,6 +283,18 @@ class Core(BoxLayout):
 		t_create = ObjectProperty('Create')
 		t_user_name = ObjectProperty('User name')
 		t_we_have_expired = ObjectProperty('Expired articles found!')
+
+	def go_cam(self):
+		if self.r == None:
+			self.r = Reader()
+			self.ids.summertime.add_widget(self.r)
+		else:
+			self.r.hinter = {"center_x": .5,"center_y": .9}
+			self.r.ids.zbarcam.start()
+
+	def stop_cam(self, text):
+		self.r.ids.zbarcam.stop()
+		self.r.hinter = {"center_x": -2,"center_y": .9}
 
 	def show_prosrok(self, data):
 		if data:
@@ -3725,7 +3751,6 @@ def sync():
 Builder.load_string("""
 #:import NoTransition kivy.uix.screenmanager.NoTransition
 #:import ZBarSymbol pyzbar.pyzbar.ZBarSymbol
-#:import ZBarCam kivy.garden.zbarcam.ZBarCam
 
 <SuppaLabel>:
 	canvas.before:
@@ -3738,6 +3763,18 @@ Builder.load_string("""
 	size_hint_y: None
 	height: root.container1
 	font_size: root.container2
+
+<Reader>:
+	orientation: 'vertical'
+	pos_hint: root.hinter
+	ZBarCam:
+		id: zbarcam
+		code_types: ZBarSymbol.QRCODE, ZBarSymbol.EAN13
+	Label:
+		size_hint: None, None
+		size: self.texture_size[0], 50
+		text: ', '.join([str(symbol.data) for symbol in zbarcam.symbols])
+		on_text: root.stop_cam(self.text)
 
 <Core>:
 	orientation: "vertical"
@@ -3772,7 +3809,6 @@ Builder.load_string("""
 			on_press: root.ids.se.state = 'normal'
 			on_press: root.ids.th.state = 'normal'
 			on_press: root.ids.fo.state = 'normal'
-
 			on_press: root.ids.mana.current = "old_arts"
 			on_press: root.alarm_out()
 			on_press: root.put_trash()
@@ -3808,6 +3844,7 @@ Builder.load_string("""
 		Screen:
 			name: 'work'
 			FloatLayout:
+				id: summertime
 				canvas:
 					Color: 
 						rgb: 1, 1, 1
@@ -3916,16 +3953,6 @@ Builder.load_string("""
 						root.press += 1
 						root.catch_art()
 
-				Button:
-					id: testcam
-					border: 0,0,0,0
-					pos_hint: {'center_x': .72, 'center_y': .70}
-					size_hint: (.3, .3)
-					background_normal: "arrow_next.png"
-					background_down: "butp.png"
-					on_press: root.ids.mana.current = "TestCam"
-
-
 
 				Button:
 					border: 0,0,0,0
@@ -3935,6 +3962,14 @@ Builder.load_string("""
 					background_down: "butp.png"
 					on_release:
 						root.repeat()
+
+				Button:
+					text: "Initiate cam"
+					border: 0,0,0,0
+					pos_hint: {'center_x': .5, 'center_y': .8}
+					size_hint: (.24, .07)
+					on_release:
+						root.go_cam()
 
 
 				Button:
@@ -3998,18 +4033,6 @@ Builder.load_string("""
 					Button:
 						text: "<<"
 						on_release: root.type('<<')
-
-		Screen:
-			name: 'TestCam'
-			BoxLayout:
-			    orientation: 'vertical'
-				ZBarCam:
-					id: zbarcam
-					code_types: ZBarSymbol.QRCODE, ZBarSymbol.EAN13
-				Label:
-					size_hint: None, None
-					size: self.texture_size[0], 50
-					text: ', '.join([str(symbol.data) for symbol in zbarcam.symbols])
 
 
 		Screen:
