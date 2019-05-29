@@ -57,7 +57,6 @@ class SuppaLabel(Label):
 
 class Reader(BoxLayout):
 	hinter = ObjectProperty({"center_x": .5,"center_y": .9})
-	previous = ""
 
 	def stop_cam(self, text):
 		if text:
