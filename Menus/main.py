@@ -60,7 +60,6 @@ class Reader(BoxLayout):
 
 	def stop_cam(self, text):
 		if text:
-			mine = ''
 			for obj in gc.get_objects():
 				try: #This way I could find an instance ;)
 					if isinstance(obj, Core):
@@ -81,6 +80,8 @@ class Core(BoxLayout):
 	else:
 		worktext = StringProperty("Enter Article")
 
+
+	new_barcode = None
 	press = NumericProperty(0)
 	cuart = ""
 	cudate = ""
@@ -98,6 +99,8 @@ class Core(BoxLayout):
 	ex_input3 = ObjectProperty({"center_x":-5,"center_y":.68})
 
 	before_after = ObjectProperty('before')
+
+	pos_unknown_EAN = ObjectProperty({"center_x": -5,"center_y":.80})
 
 	pos_before_after1 = ObjectProperty({"center_x": -5,"center_y":.8}) #{"center_x": .35,"center_y":.8}
 	pos_before_after2 = ObjectProperty({"center_x": -5,"center_y":.8}) #{"center_x": .65,"center_y":.8}
@@ -288,6 +291,14 @@ class Core(BoxLayout):
 		t_user_name = ObjectProperty('User name')
 		t_we_have_expired = ObjectProperty('Expired articles found!')
 
+	def show_unknown_ean(self, action):
+		if action == 'hide':
+			self.pos_unknown_EAN = {"center_x": -5,"center_y":.92}
+		else:
+			self.pos_unknown_EAN = {"center_x": .5,"center_y":.80}
+			self.ids.inputer.text = ''
+			self.show_cam_button('hide')
+
 	def go_cam(self):
 		if self.r == None:
 			self.r = Reader()
@@ -310,7 +321,8 @@ class Core(BoxLayout):
 			sup = str(art_bars[texter])
 			self.ids.inputer.text = sup
 		else:
-			pass
+			self.new_barcode = texter
+			self.show_unknown_ean('show')
 
 	def show_prosrok(self, data):
 		if data:
@@ -1077,6 +1089,7 @@ class Core(BoxLayout):
 			self.worktext = 'Enter Article'
 
 		self.pos_day_month_visible(False)
+		self.show_cam_button('show')
 
 		self.catch_art()
 
@@ -1185,6 +1198,10 @@ class Core(BoxLayout):
 			self.step = 1
 			self.dater_visible()
 			self.show_buttons_before_after('show')
+			self.show_cam_button('hide')
+
+			self.save_ean(article)
+			self.show_unknown_ean('hide')
 
 			global last_art
 			last_art = self.ids.inputer.text
@@ -1194,6 +1211,20 @@ class Core(BoxLayout):
 				self.worktext = "Введите дату производства\n или окончания срока"
 			else:
 				self.worktext = "Enter production date\n or expiry date"
+
+	def save_ean(self, article):
+		f = open("barcode.txt", "a")
+		f.write(str((self.new_barcode + "$" + article + "$")))
+		f.close()
+		self.new_barcode = None
+		sync()
+
+	def show_cam_button(self, action):
+		if action == 'hide':
+			self.pos_init_cam = {'center_x': -2, 'center_y': .8}
+		else:
+			self.pos_init_cam = {'center_x': .5, 'center_y': .8}
+			self.show_unknown_ean('hide')
 
 	def work2(self):
 		global cudate
@@ -1413,6 +1444,7 @@ class Core(BoxLayout):
 
 		self.ids.inputer.text = ""
 		self.press = 0
+		self.show_cam_button('show')
 		self.alarm()
 
 	def wise(self):
@@ -1425,6 +1457,7 @@ class Core(BoxLayout):
 
 		self.ids.inputer.text = ""
 		self.press = 0
+		self.show_cam_button('show')
 
 
 	def enter_prosrok(self, final):
@@ -1502,6 +1535,7 @@ class Core(BoxLayout):
 
 				self.ids.inputer.text = ""
 				self.press = 0
+				self.show_cam_button('show')
 
 		elif ex[len(ex)-1].upper() == "Y":
 			newex = ex.replace("Y","")
@@ -1543,6 +1577,7 @@ class Core(BoxLayout):
 
 				self.ids.inputer.text = ""
 				self.press = 0
+				self.show_cam_button('show')
 
 		elif str(ex).isdigit() and int(ex) >= 0:
 			ex = int(ex)
@@ -1583,6 +1618,7 @@ class Core(BoxLayout):
 
 				self.ids.inputer.text = ""
 				self.press = 0
+				self.show_cam_button('show')
 			
 		else:
 			if self.lang == 'ru':
@@ -1635,6 +1671,7 @@ class Core(BoxLayout):
 
 			self.ids.inputer.text = ""
 			self.press = 0
+			self.show_cam_button('show')
 		else:
 			f = open("saver.txt", "a")
 			f.write(str((ent + "$" + article + "$")))
@@ -3914,6 +3951,22 @@ Builder.load_string("""
 					size_hint: (.8, .15)
 					font_size: sp(25)
 					pos_hint:{"center_x": .5,"center_y":.92}
+
+				Label:
+					canvas.before:
+						Color: 
+							rgb: 0, .8, .4
+						Rectangle:
+							size: self.size
+							pos: self.pos
+
+					halign: 'center'
+					valign: "middle"
+					text: 'Неизвестный EAN! Введите артикул для ассоциации'
+					text_size: self.size
+					size_hint: (.8, .07)
+					font_size: sp(15)
+					pos_hint: root.pos_unknown_EAN
 
 				ToggleButton:
 					allow_no_selection: False
