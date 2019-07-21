@@ -61,10 +61,13 @@ class Reader(BoxLayout):
 	def stop_cam(self, text):
 		if text:
 			mine = ''
-			for obj in gc.get_objects(): #This way I could find an instance ;)
-				if isinstance(obj, Core):
-					mine = obj
-					break
+			for obj in gc.get_objects():
+				try: #This way I could find an instance ;)
+					if isinstance(obj, Core):
+						mine = obj
+						break
+				except:
+					pass
 
 			mine.stop_cam(text)
 
@@ -108,6 +111,8 @@ class Core(BoxLayout):
 	pos_el3 = ObjectProperty({"center_x":-5,"center_y":.795})
 	pos_el4 = ObjectProperty({"center_x":-5,"center_y":.795})
 	pos_el5 = ObjectProperty({'center_x':.5, 'center_y': .1})
+
+	pos_init_cam = ObjectProperty({'center_x': .5, 'center_y': .8})
 
 	container1 = ObjectProperty(10)
 	container2 = ObjectProperty(10)
@@ -294,6 +299,18 @@ class Core(BoxLayout):
 	def stop_cam(self, text):
 		self.r.ids.zbarcam.stop()
 		self.r.hinter = {"center_x": -2,"center_y": .9}
+		if text != "NO":
+			text = text.split("'")[1]
+			self.compare_barcode(text)
+		else:
+			return
+
+	def compare_barcode(self, texter):
+		if texter in art_bars:
+			sup = str(art_bars[texter])
+			self.ids.inputer.text = sup
+		else:
+			pass
 
 	def show_prosrok(self, data):
 		if data:
@@ -3697,7 +3714,8 @@ class ProtoApp(App):
 		Clock.schedule_once(mine.get_settings, 1)
 
 	def build(self):
-		return Core()
+		self.coreid = Core()
+		return self.coreid
 
 class ScreenManagement(ScreenManager):
 	pass
@@ -3705,6 +3723,22 @@ class ScreenManagement(ScreenManager):
 
 
 def sync():
+	try:
+		f = open("barcode.txt", "r+")
+		dawread = f.read()
+		f.close()
+		global art_bars
+		art_bars = {}
+		templ = dawread.split("$")
+		counter = 0
+
+		while counter < (len(templ)-1):
+			art_bars[templ[counter]] = templ[counter+1]
+			counter += 2
+	except:
+		f = open("barcode.txt", "w+")
+		f.close()
+
 	try:
 		f = open("saver.txt", "r+")
 		rawread = f.read()
@@ -3766,9 +3800,22 @@ Builder.load_string("""
 <Reader>:
 	orientation: 'vertical'
 	pos_hint: root.hinter
+	canvas.before: 
+		Color: 
+			rgb: 1, .65, .18
+		Rectangle:
+			pos: self.pos 
+			size: self.size
 	ZBarCam:
 		id: zbarcam
 		code_types: ZBarSymbol.QRCODE, ZBarSymbol.EAN13
+	Button:
+		border: 0,0,0,0
+		text: 'exit'
+		pos_hint: {"center_x": .5,"center_y": 1}
+		size_hint: (.4, .1)
+		font_size: sp(25)
+		on_release: root.stop_cam("NO")
 	Label:
 		size_hint: None, None
 		size: self.texture_size[0], 50
@@ -3965,7 +4012,7 @@ Builder.load_string("""
 				Button:
 					text: "Initiate cam"
 					border: 0,0,0,0
-					pos_hint: {'center_x': .5, 'center_y': .8}
+					pos_hint: root.pos_init_cam
 					size_hint: (.24, .07)
 					on_release:
 						root.go_cam()
@@ -4883,6 +4930,7 @@ Builder.load_string("""
 			on_press: root.ids.mana.current = "settings"
 	""")
 
+art_bars = {}
 entries = []
 art_names = {}
 days_of_life = {}
