@@ -1200,7 +1200,9 @@ class Core(BoxLayout):
 			self.show_buttons_before_after('show')
 			self.show_cam_button('hide')
 
-			self.save_ean(article)
+			if self.new_barcode != None:
+				self.save_ean(article)
+
 			self.show_unknown_ean('hide')
 
 			global last_art
