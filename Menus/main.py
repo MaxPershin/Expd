@@ -22,7 +22,7 @@ from kivy.uix.textinput import TextInput
 from kivy.factory import Factory
 from kivy.lang import Builder
 
-from kivy.properties import StringProperty, NumericProperty, BooleanProperty, ObjectProperty
+from kivy.properties import NumericProperty, BooleanProperty, ObjectProperty
 from kivy.uix.popup import Popup
 from kivy.uix.button import Button
 from kivy.uix.checkbox import CheckBox
@@ -76,9 +76,9 @@ class Core(BoxLayout):
 	sp_text = ObjectProperty("")
 
 	if lang == 'ru':
-		worktext = StringProperty("Введите артикул")
+		worktext = ObjectProperty("Введите артикул")
 	else:
-		worktext = StringProperty("Enter Article")
+		worktext = ObjectProperty("Enter Article")
 
 
 	new_barcode = None
@@ -1851,13 +1851,136 @@ class Core(BoxLayout):
 		self.start_one()
 
 ###########################---INFORMATION---##################################
+
+# Under CONSTRUCTION!!! (Make Create New Ean GREAT AGAIN!)
+
+	def new_ean(self):
+		self.manage_ean_popup.dismiss()
+
+		layout = FloatLayout(size=(self.width, self.height))
+
+		ean_input = TextInput(multiline=False, size_hint_x=.2, size_hint_y=0.2,
+			pos_hint={"center_x":.2,"center_y":.61},
+			hint_text='Введите EAN')
+
+		button1 = Button(text='Create', size_hint_y=None, size_hint_x=None,
+					height=0.06*self.height, width=0.5*self.width, font_size=0.035*self.height,
+					pos_hint={"center_x":.5,"center_y":.1}, halign='center',
+					valign="middle", on_release=lambda x:self.new_ean())
+
+		self.new_ean_popup = Popup(title='Manage Ean',
+		content=layout,
+		size_hint=(.8, .65))
+
+		self.new_ean_popup.open()
+
+	def manage_eans(self):
+		collection = []
+		for ean, in_art in art_bars.items():    # for name, age in dictionary.iteritems():  (for Python 2.x)
+			if in_art == inf_art:
+				collection.append(ean)
+
+		#bookmark
+
+		layout = FloatLayout(size=(self.width, self.height))
+
+		button1 = Button(text='Create', size_hint_y=None, size_hint_x=None,
+					height=0.06*self.height, width=0.5*self.width, font_size=0.035*self.height,
+					pos_hint={"center_x":.5,"center_y":.1}, halign='center',
+					valign="middle", on_release=lambda x:self.new_ean())
+
+		scrolly = ScrollView(size_hint_x= .95, size_hint_y= .8, pos_hint={'center_x': .5, 'center_y': .58})
+		grid_for_scroll = GridLayout(id='ean_griddy', spacing=2, cols=1, size_hint_y=None, height=0)
+		grid_for_scroll.bind(minimum_height=grid_for_scroll.setter("height"))
+
+
+		for each in collection:
+			grid_for_scroll.add_widget(Button(text='{}'.format(each), size_hint_y=None, height=0.09*self.height, font_size=0.035*self.height))
+		scrolly.add_widget(grid_for_scroll)
+		layout.add_widget(scrolly)
+		layout.add_widget(button1)
+
+		self.manage_ean_popup = Popup(title='Manage Ean',
+		content=layout,
+		size_hint=(.8, .65))
+
+		self.manage_ean_popup.open()
+
+	def show_all_eans(self):
+		collection = []
+		for ean, in_art in art_bars.items():    # for name, age in dictionary.iteritems():  (for Python 2.x)
+			if in_art == inf_art:
+				collection.append(ean)
+
+		layout = FloatLayout(size=(self.width, self.height))
+		scrolly = ScrollView(size_hint_x= .95, size_hint_y= .95, pos_hint={'center_x': .5, 'center_y': .5})
+		grid_for_scroll = GridLayout(id='ean_griddy', spacing=2, cols=1, size_hint_y=None, height=0)
+		grid_for_scroll.bind(minimum_height=grid_for_scroll.setter("height"))
+
+
+		for each in collection:
+			grid_for_scroll.add_widget(Button(text='{}'.format(each), size_hint_y=None, height=0.09*self.height, font_size=0.035*self.height))
+		scrolly.add_widget(grid_for_scroll)
+		layout.add_widget(scrolly)
+
+
+		popup = Popup(title='EAN',
+		content=layout,
+		size_hint=(.8, .5))
+
+		popup.open()
+
 	def start_one(self):
 		self.ids.ghost.text = art_names[inf_art]
 		self.ids.ghost2.text = inf_art
 		if self.lang == 'ru':
-			self.ids.ghost4.text = "Срок годности: {}".format(days_of_life[inf_art])
+			sent = days_of_life[inf_art]
+			if sent[-1] == 'm':
+				sent = sent[:-1] + ' мес'
+			elif sent[-1] == 'y':
+				sent = sent[:-1] + ' лет'
+			else:
+				sent = sent + ' дней'
+
+			self.ids.ghost4.text = "Срок годности: {}".format(sent)
 		else:
-			self.ids.ghost4.text = "Shelf life: {}".format(days_of_life[inf_art])
+			sent = days_of_life[inf_art]
+			if sent[-1] == 'm':
+				sent = sent[:-1] + ' mon'
+			elif sent[-1] == 'y':
+				sent = sent[:-1] + ' years'
+			else:
+				sent = sent + ' days'
+
+			self.ids.ghost4.text = "Shelf life: {}".format(sent)
+
+		## Collect Eans by value in dict ##
+		collection = []
+
+		try:
+			self.ids.info_canvas.remove_widget(self.bob)
+		except:
+			pass
+
+		self.btn = Button(text='...', size_hint_y=None, size_hint_x=None,
+					height=0.06*self.height, width=0.1*self.width, font_size=0.035*self.height,
+					pos_hint={"center_x":.92,"center_y":.7}, halign='center',
+					valign="top", on_release=lambda x:self.show_all_eans())
+
+		for ean, in_art in art_bars.items():    # for name, age in dictionary.iteritems():  (for Python 2.x)
+			if in_art == inf_art:
+				collection.append(ean)
+
+		if len(collection) == 0:
+			if self.lang == 'ru':
+				self.ids.ghost5.text = 'Нет привязанного EAN'
+			else:
+				self.ids.ghost5.text = 'No EANs'
+		else:
+			self.ids.ghost5.text = "EAN: {}".format(collection[0])
+			if len(collection) > 1:
+				self.bob = self.btn
+				self.ids.info_canvas.add_widget(self.btn)
 
 		self.grid = self.ids.ghost3
 		self.grid.bind(minimum_height=self.grid.setter("height"))
@@ -4413,7 +4536,7 @@ Builder.load_string("""
 		Screen:
 			name: 'information'
 			FloatLayout:
-				id: canvas
+				id: info_canvas
 				canvas:
 					Rectangle:
 						size: self.size
@@ -4439,11 +4562,17 @@ Builder.load_string("""
 					text: ""
 					font_size: sp(30)
 					pos_hint:{"center_x":.5,"center_y":.75}
+				Label:
+					id: ghost5
+					size: self.texture_size
+					text: ''
+					font_size: sp(30)
+					pos_hint: {"center_x":.5, "center_y":.70}
 
 				ScrollView:
 					size_hint_x: 0.9
-					size_hint_y: 0.5
-					pos_hint: {'center_x': .5, 'center_y': .45}
+					size_hint_y: 0.48
+					pos_hint: {'center_x': .5, 'center_y': .41}
 					GridLayout:
 						id: ghost3
 						canvas:
@@ -4514,7 +4643,7 @@ Builder.load_string("""
 					border: 0,0,0,0
 					text: root.t_save
 					font_size: sp(22)
-					pos_hint: {'center_x': .75, 'center_y': .7}
+					pos_hint: {'center_x': .75, 'center_y': .8}
 					size_hint: (.4, .10)
 					background_normal: "but.png"
 					background_down: "butp.png"
@@ -4524,12 +4653,22 @@ Builder.load_string("""
 					border: 0,0,0,0
 					text: root.t_add_date
 					font_size: sp(16)
-					pos_hint: {'center_x': .75, 'center_y': .6}
+					pos_hint: {'center_x': .75, 'center_y': .7}
 					size_hint: (.4, .10)
 					background_normal: "but.png"
 					background_down: "butp.png"
 					on_release:
 						root.add_entry()
+				Button:
+					border: 0,0,0,0
+					text: 'Manage Ean'
+					font_size: sp(16)
+					pos_hint: {'center_x': .75, 'center_y': .6}
+					size_hint: (.4, .10)
+					background_normal: "but.png"
+					background_down: "butp.png"
+					on_release:
+						root.manage_eans()
 
 				Button:
 					border: 0,0,0,0
@@ -4998,7 +5137,7 @@ def popup(title, text):
 	popup.open()
 
 closer = False
-new_date = StringProperty("")
+new_date = ObjectProperty("")
 
 def ch_closer():
 	global closer
