@@ -319,7 +319,7 @@ class Core(BoxLayout):
 	def compare_barcode(self, texter):
 		
 		for each in art_bars:
-			if texter in each:
+			if texter in art_bars[each]:
 				self.ids.inputer.text = str(each)
 				return
 
@@ -4099,6 +4099,7 @@ def sync():
 	except:
 		f = open("daysoflife.txt", "w+")
 		f.close()
+
 
 
 Builder.load_string("""
