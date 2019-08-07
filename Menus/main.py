@@ -317,12 +317,14 @@ class Core(BoxLayout):
 			return
 
 	def compare_barcode(self, texter):
-		if texter in art_bars:
-			sup = str(art_bars[texter])
-			self.ids.inputer.text = sup
-		else:
-			self.new_barcode = texter
-			self.show_unknown_ean('show')
+		
+		for each in art_bars:
+			if texter in each:
+				self.ids.inputer.text = str(each)
+				return
+
+		self.new_barcode = texter
+		self.show_unknown_ean('show')
 
 	def show_prosrok(self, data):
 		if data:
@@ -1215,8 +1217,8 @@ class Core(BoxLayout):
 				self.worktext = "Enter production date\n or expiry date"
 
 	def save_ean(self, article):
-		f = open("barcode.txt", "a")
-		f.write(str((self.new_barcode + "$" + article + "$")))
+		f = open("barcode.txt", "a", newline='')
+		f.write(str((article + "$" + self.new_barcode + "$")))
 		f.close()
 		self.new_barcode = None
 		sync()
@@ -1817,7 +1819,7 @@ class Core(BoxLayout):
 						top = "{} {}".format(each, art_names[each])
 						if search.lower() in top.lower():
 							self.info = "{} {}".format(each, art_names[each])
-							self.btn = Button(id=each, text=self.info, size_hint_y=None, height=0.09*self.height, font_size=0.035*self.height)
+							self.btn = Button(text=self.info, size_hint_y=None, height=0.09*self.height, font_size=0.035*self.height)
 							grid.add_widget(self.btn)
 							self.btn.bind(on_release=self.infor)
 
@@ -1852,35 +1854,55 @@ class Core(BoxLayout):
 
 ###########################---INFORMATION---##################################
 
-# Under CONSTRUCTION!!! (Make Create New Ean GREAT AGAIN!)
-
-	def new_ean(self):
+	def create_ean(self):
+		n_ean = self.ean_input.text
 		self.manage_ean_popup.dismiss()
 
-		layout = FloatLayout(size=(self.width, self.height))
+		f = open("barcode.txt", "a", newline='')
+		f.write(str((inf_art + "$" + n_ean + "$")))
+		f.close()
+		sync()
+		
+	#bookmark
 
-		ean_input = TextInput(multiline=False, size_hint_x=.2, size_hint_y=0.2,
-			pos_hint={"center_x":.2,"center_y":.61},
-			hint_text='Введите EAN')
+	def new_ean(self):
+		try:
+			self.manage_ean_popup.dismiss()
+		except:
+			pass
 
-		button1 = Button(text='Create', size_hint_y=None, size_hint_x=None,
+		self.layout = FloatLayout(size=(self.width, self.height))
+
+		self.button1 = Button(text='Creater', size_hint_y=None, size_hint_x=None,
 					height=0.06*self.height, width=0.5*self.width, font_size=0.035*self.height,
-					pos_hint={"center_x":.5,"center_y":.1}, halign='center',
-					valign="middle", on_release=lambda x:self.new_ean())
+					pos_hint={"center_x":.5,"center_y":.28}, halign='center',
+					valign="middle", on_release=lambda x:self.create_ean())
 
-		self.new_ean_popup = Popup(title='Manage Ean',
-		content=layout,
-		size_hint=(.8, .65))
+		self.ean_input = TextInput(id='hola', multiline=False, size_hint_x=.75, size_hint_y=0.35, 
+			pos_hint={"center_x":.5,"center_y":.7}, hint_text='Enter EAN', font_size=27) 
 
-		self.new_ean_popup.open()
+		self.layout.add_widget(self.button1)
+		self.layout.add_widget(self.ean_input)
+
+		self.manage_ean_popup = Popup(title='Manage Ean',
+		content=self.layout,
+		size_hint=(.8, .24))
+
+		self.manage_ean_popup.open()
 
 	def manage_eans(self):
-		collection = []
-		for ean, in_art in art_bars.items():    # for name, age in dictionary.iteritems():  (for Python 2.x)
-			if in_art == inf_art:
-				collection.append(ean)
+		try:
+			self.manage_ean_popup.dismiss()
+		except:
+			pass
 
-		#bookmark
+		collection = []
+		if inf_art not in art_bars:
+			self.new_ean()
+			return
+		for each in art_bars[inf_art]:
+			collection.append(each)
+
 
 		layout = FloatLayout(size=(self.width, self.height))
 
@@ -1895,7 +1917,12 @@ class Core(BoxLayout):
 
 
 		for each in collection:
-			grid_for_scroll.add_widget(Button(text='{}'.format(each), size_hint_y=None, height=0.09*self.height, font_size=0.035*self.height))
+			self.btn = Button(text='{}'.format(each),
+			size_hint_y=None, height=0.09*self.height,
+			font_size=0.035*self.height)
+			grid_for_scroll.add_widget(self.btn)
+			self.btn.bind(on_release=self.change_ean)
+
 		scrolly.add_widget(grid_for_scroll)
 		layout.add_widget(scrolly)
 		layout.add_widget(button1)
@@ -1905,6 +1932,125 @@ class Core(BoxLayout):
 		size_hint=(.8, .65))
 
 		self.manage_ean_popup.open()
+
+	def change2_ean(self):
+		local = []
+
+		print(art_bars[inf_art])
+		
+		if self.ean_input.text in art_bars[inf_art]:
+			self.manage_ean_popup.dismiss()
+			self.manage_eans()
+			popup('Warning!', 'This EAN already there!')
+			return
+
+		self.change3_ean()
+
+	def change3_ean(self):
+
+		f = open("barcode.txt", "r+")
+		dawread = f.read()
+		f.close()
+		global art_bars
+		art_bars = {}
+		templ = dawread.split("$")[:-1]
+
+		hound = [i for i,x in enumerate(templ) if x==inf_art]
+		for each in hound:
+			if templ[each+1] == self.current_button:
+				templ[each+1] = self.ean_input.text
+
+				with open("barcode.txt", "w") as f:
+					for each in templ:
+						f.write(str(each + "$"))
+				sync()
+				self.manage_ean_popup.dismiss()
+				self.manage_eans()
+				return
+
+#bookmark
+	def delete2_ean(self):
+		article = inf_art
+		barcode = self.current_button
+
+		f = open("barcode.txt", "r+")
+		dawread = f.read()
+		f.close()
+		global art_bars
+		art_bars = {}
+		templ = dawread.split("$")[:-1]
+
+		hound = [i for i,x in enumerate(templ) if x==article]
+		for each in hound:
+			if templ[each+1] == barcode:
+				del templ[each]
+				del templ[each]
+
+				with open("barcode.txt", "w") as f:
+					for each in templ:
+						f.write(str(each + "$"))
+				sync()
+				self.manage_ean_popup.dismiss()
+				self.manage_eans()
+				return
+
+	def delete_ean(self):
+		self.manage_ean_popup.dismiss()
+
+		self.layout = FloatLayout(size=(self.width, self.height))
+
+		self.lbl = Label(text="You want to delete EAN?", font_size=0.025*self.height, 
+				pos_hint={"center_x":.5,"center_y":.86})
+
+		self.button1 = Button(text='Yes', size_hint_y=None, size_hint_x=None,
+					height=0.06*self.height, width=0.5*self.width, font_size=0.035*self.height,
+					pos_hint={"center_x":.5,"center_y":.42}, halign='center',
+					valign="middle", on_release=lambda x:self.delete2_ean())
+
+		self.button2 = Button(text='No', size_hint_y=None, size_hint_x=None,
+					height=0.06*self.height, width=0.5*self.width, font_size=0.035*self.height,
+					pos_hint={"center_x":.5,"center_y":.18}, halign='center',
+					valign="middle", on_release=lambda x:self.manage_eans())
+
+		self.layout.add_widget(self.button1)
+		self.layout.add_widget(self.button2)
+		self.layout.add_widget(self.lbl)
+
+		self.manage_ean_popup = Popup(title='Manage Ean',
+		content=self.layout,
+		size_hint=(.8, .35))
+
+		self.manage_ean_popup.open()
+
+	def change_ean(self, button):
+		self.manage_ean_popup.dismiss()
+		self.current_button = button.text
+
+		self.layout = FloatLayout(size=(self.width, self.height))
+
+		self.ean_input = TextInput(text=button.text, multiline=False, size_hint_x=.75, size_hint_y=0.25, 
+			pos_hint={"center_x":.5,"center_y":.7}, hint_text='Enter EAN', font_size=27)
+
+		self.button1 = Button(text='Change', size_hint_y=None, size_hint_x=None,
+					height=0.06*self.height, width=0.5*self.width, font_size=0.035*self.height,
+					pos_hint={"center_x":.5,"center_y":.42}, halign='center',
+					valign="middle", on_release=lambda x:self.change2_ean())
+
+		self.button2 = Button(text='Delete', size_hint_y=None, size_hint_x=None,
+					height=0.06*self.height, width=0.5*self.width, font_size=0.035*self.height,
+					pos_hint={"center_x":.5,"center_y":.18}, halign='center',
+					valign="middle", on_release=lambda x:self.delete_ean())
+
+		self.layout.add_widget(self.button1)
+		self.layout.add_widget(self.button2)
+		self.layout.add_widget(self.ean_input)
+
+		self.manage_ean_popup = Popup(title='Manage Ean',
+		content=self.layout,
+		size_hint=(.8, .35))
+
+		self.manage_ean_popup.open()
+
 
 	def show_all_eans(self):
 		collection = []
@@ -3123,6 +3269,10 @@ class Core(BoxLayout):
 		f.write(none)
 		f.close()
 
+		f = open("barcode.txt", "w")
+		f.write(none)
+		f.close()
+
 		sync()
 
 		self.poz.dismiss()
@@ -3852,6 +4002,7 @@ class Core(BoxLayout):
 			self.ids.ex_inputer2.text = ''
 			self.step = 0
 			self.to_russian()
+			self.new_barcode = None
 		else:
 			self.worktext = 'Enter article'
 			self.dater_invisible()
@@ -3893,10 +4044,17 @@ def sync():
 		art_bars = {}
 		templ = dawread.split("$")
 		counter = 0
-
 		while counter < (len(templ)-1):
-			art_bars[templ[counter]] = templ[counter+1]
+			
+			if templ[counter] in art_bars:
+				art_bars[templ[counter]].append(templ[counter+1])
+			else:
+				lister = []
+				lister.append(templ[counter+1])
+				art_bars[templ[counter]] = lister
 			counter += 2
+
+		print(art_bars)
 	except:
 		f = open("barcode.txt", "w+")
 		f.close()
