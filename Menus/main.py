@@ -1217,6 +1217,7 @@ class Core(BoxLayout):
 				self.worktext = "Enter production date\n or expiry date"
 
 	def save_ean(self, article):
+		self.if_recreated(article, 'deleteEAN', self.new_barcode)
 		f = open("barcode.txt", "a", newline='')
 		f.write(str((article + "$" + self.new_barcode + "$")))
 		f.close()
@@ -1787,6 +1788,18 @@ class Core(BoxLayout):
 		elif typer == 'deleteDate':
 			return self.deleteDate_check(article, value)
 
+		elif typer == 'deleteEAN':
+			return self.deleteEAN_check(article, value)
+
+	def deleteEAN_check(self, article, value):
+		tester = (article, 'deleteEAN', value)
+		
+		if tester in self.stop_list:
+			self.stop_list.remove(tester)
+			self.set_stop_list()
+			return True
+
+
 	def deleteDate_check(self, article, value):
 		tester = (article, 'deleteDate', value)
 		
@@ -1805,9 +1818,9 @@ class Core(BoxLayout):
 
 	def get_them(self, code):
 			search = self.ids.searcher.text
-			grid = self.ids.griddy
-			grid.bind(minimum_height=grid.setter("height"))
-			grid.clear_widgets()
+			self.search_grid = self.ids.griddy
+			self.search_grid.bind(minimum_height=self.search_grid.setter("height"))
+			self.search_grid.clear_widgets()
 			if len(art_names) == 0 and code == 0:
 				if self.lang == 'ru':
 					popup("Внимание", "В базе данных нет записей")
@@ -1820,7 +1833,7 @@ class Core(BoxLayout):
 						if search.lower() in top.lower():
 							self.info = "{} {}".format(each, art_names[each])
 							self.btn = Button(text=self.info, size_hint_y=None, height=0.09*self.height, font_size=0.035*self.height)
-							grid.add_widget(self.btn)
+							self.search_grid.add_widget(self.btn)
 							self.btn.bind(on_release=self.infor)
 
 	def popup(self, title, text):
@@ -1858,12 +1871,13 @@ class Core(BoxLayout):
 		n_ean = self.ean_input.text
 		self.manage_ean_popup.dismiss()
 
+		self.if_recreated(inf_art, 'deleteEAN', n_ean)
+
 		f = open("barcode.txt", "a", newline='')
 		f.write(str((inf_art + "$" + n_ean + "$")))
 		f.close()
 		sync()
 		
-	#bookmark
 
 	def new_ean(self):
 		try:
@@ -1933,10 +1947,8 @@ class Core(BoxLayout):
 
 		self.manage_ean_popup.open()
 
-	def change2_ean(self):
+	def change2_ean(self, args):
 		local = []
-
-		print(art_bars[inf_art])
 		
 		if self.ean_input.text in art_bars[inf_art]:
 			self.manage_ean_popup.dismiss()
@@ -1944,9 +1956,15 @@ class Core(BoxLayout):
 			popup('Warning!', 'This EAN already there!')
 			return
 
-		self.change3_ean()
+		self.change3_ean(args)
 
-	def change3_ean(self):
+	def change3_ean(self, args):
+
+		self.if_recreated(inf_art, 'deleteEAN', self.current_button)
+
+		if args:
+			self.stop_list.append((inf_art, 'deleteEAN', self.current_button))
+			self.set_stop_list()
 
 		f = open("barcode.txt", "r+")
 		dawread = f.read()
@@ -1968,10 +1986,12 @@ class Core(BoxLayout):
 				self.manage_eans()
 				return
 
-#bookmark
-	def delete2_ean(self):
+	def delete2_ean(self, *args):
+
 		article = inf_art
 		barcode = self.current_button
+
+		self.if_recreated(article, 'deleteEAN', barcode)
 
 		f = open("barcode.txt", "r+")
 		dawread = f.read()
@@ -1989,12 +2009,23 @@ class Core(BoxLayout):
 				with open("barcode.txt", "w") as f:
 					for each in templ:
 						f.write(str(each + "$"))
+
+				if args[0]:
+					self.stop_list.append((inf_art, 'deleteEAN', self.current_button))
+					self.set_stop_list()
+
 				sync()
 				self.manage_ean_popup.dismiss()
 				self.manage_eans()
 				return
 
-	def delete_ean(self):
+
+	def delete_ean(self, *argument):
+
+		arg = ''
+		if argument:
+			arg = True
+
 		self.manage_ean_popup.dismiss()
 
 		self.layout = FloatLayout(size=(self.width, self.height))
@@ -2005,7 +2036,7 @@ class Core(BoxLayout):
 		self.button1 = Button(text='Yes', size_hint_y=None, size_hint_x=None,
 					height=0.06*self.height, width=0.5*self.width, font_size=0.035*self.height,
 					pos_hint={"center_x":.5,"center_y":.42}, halign='center',
-					valign="middle", on_release=lambda x:self.delete2_ean())
+					valign="middle", on_release=lambda x:self.delete2_ean(arg))
 
 		self.button2 = Button(text='No', size_hint_y=None, size_hint_x=None,
 					height=0.06*self.height, width=0.5*self.width, font_size=0.035*self.height,
@@ -2028,33 +2059,68 @@ class Core(BoxLayout):
 
 		self.layout = FloatLayout(size=(self.width, self.height))
 
-		self.ean_input = TextInput(text=button.text, multiline=False, size_hint_x=.75, size_hint_y=0.25, 
+
+		if self.current_user:
+			self.ean_input = TextInput(text=button.text, multiline=False, size_hint_x=.75, size_hint_y=0.15, 
+			pos_hint={"center_x":.5,"center_y":.8}, hint_text='Enter EAN', font_size=27)
+
+			self.button1 = Button(text='Change', size_hint_y=None, size_hint_x=None,
+						height=0.06*self.height, width=0.5*self.width, font_size=0.035*self.height,
+						pos_hint={"center_x":.5,"center_y":.59}, halign='center',
+						valign="middle", on_release=lambda x:self.change2_ean(False))
+
+			self.button2 = Button(text='Delete', size_hint_y=None, size_hint_x=None,
+						height=0.06*self.height, width=0.5*self.width, font_size=0.035*self.height,
+						pos_hint={"center_x":.5,"center_y":.44}, halign='center',
+						valign="middle", on_release=lambda x:self.delete_ean())
+
+			self.button3 = Button(text='Change for everyone', size_hint_y=None, size_hint_x=None,
+						height=0.06*self.height, width=0.5*self.width, font_size=0.035*self.height,
+						pos_hint={"center_x":.5,"center_y":.29}, halign='center',
+						valign="middle", on_release=lambda x:self.change2_ean(True))
+
+			self.button4 = Button(text='Delete for everyone', size_hint_y=None, size_hint_x=None,
+						height=0.06*self.height, width=0.5*self.width, font_size=0.035*self.height,
+						pos_hint={"center_x":.5,"center_y":.14}, halign='center',
+						valign="middle", on_release=lambda x:self.delete_ean(True))
+
+			self.layout.add_widget(self.button1)
+			self.layout.add_widget(self.button2)
+			self.layout.add_widget(self.button3)
+			self.layout.add_widget(self.button4)
+			self.layout.add_widget(self.ean_input)
+
+			self.manage_ean_popup = Popup(title='Manage Ean',
+			content=self.layout,
+			size_hint=(.8, .5))
+
+		else:
+			self.ean_input = TextInput(text=button.text, multiline=False, size_hint_x=.75, size_hint_y=0.25, 
 			pos_hint={"center_x":.5,"center_y":.7}, hint_text='Enter EAN', font_size=27)
 
-		self.button1 = Button(text='Change', size_hint_y=None, size_hint_x=None,
-					height=0.06*self.height, width=0.5*self.width, font_size=0.035*self.height,
-					pos_hint={"center_x":.5,"center_y":.42}, halign='center',
-					valign="middle", on_release=lambda x:self.change2_ean())
+			self.button1 = Button(text='Change', size_hint_y=None, size_hint_x=None,
+						height=0.06*self.height, width=0.5*self.width, font_size=0.035*self.height,
+						pos_hint={"center_x":.5,"center_y":.42}, halign='center',
+						valign="middle", on_release=lambda x:self.change2_ean())
 
-		self.button2 = Button(text='Delete', size_hint_y=None, size_hint_x=None,
-					height=0.06*self.height, width=0.5*self.width, font_size=0.035*self.height,
-					pos_hint={"center_x":.5,"center_y":.18}, halign='center',
-					valign="middle", on_release=lambda x:self.delete_ean())
+			self.button2 = Button(text='Delete', size_hint_y=None, size_hint_x=None,
+						height=0.06*self.height, width=0.5*self.width, font_size=0.035*self.height,
+						pos_hint={"center_x":.5,"center_y":.18}, halign='center',
+						valign="middle", on_release=lambda x:self.delete_ean())
 
-		self.layout.add_widget(self.button1)
-		self.layout.add_widget(self.button2)
-		self.layout.add_widget(self.ean_input)
+			self.layout.add_widget(self.button1)
+			self.layout.add_widget(self.button2)
+			self.layout.add_widget(self.ean_input)
 
-		self.manage_ean_popup = Popup(title='Manage Ean',
-		content=self.layout,
-		size_hint=(.8, .35))
+			self.manage_ean_popup = Popup(title='Manage Ean',
+			content=self.layout,
+			size_hint=(.8, .35))
 
 		self.manage_ean_popup.open()
 
-
 	def show_all_eans(self):
 		collection = []
-		for ean, in_art in art_bars.items():    # for name, age in dictionary.iteritems():  (for Python 2.x)
+		for ean, in_art in art_bars.items():
 			if in_art == inf_art:
 				collection.append(ean)
 
@@ -2274,6 +2340,30 @@ class Core(BoxLayout):
 			del dawread[each]
 
 		with open("saver.txt", "w") as f:
+			for each in dawread:
+				f.write(str(each + "$"))
+
+		#lets delete all eans
+
+		f = open("barcode.txt", "r+")
+		dawread = f.read()
+		f.close()
+		dawread = dawread.split("$")
+		del dawread[-1]
+		hound = [i for i,x in enumerate(dawread) if x==inf_art]
+		worker = []
+
+		for each in hound:
+			worker.append(each+1)
+
+		worker = worker[::-1]
+
+
+		for each in worker:
+			del dawread[each-1]
+			del dawread[each-1]
+
+		with open("barcode.txt", "w") as f:
 			for each in dawread:
 				f.write(str(each + "$"))
 
@@ -3325,12 +3415,18 @@ class Core(BoxLayout):
 					else:
 						self.texter = 'Delete article [color=#04d3ff]{}[/color]'.format(each[0])
 
+				elif each[1] == 'deleteEAN':
+					if self.lang == 'ru':
+						self.texter = 'Удаление EAN [color=#04d3ff]{}[/color] \nАртикула [color=#04d3ff]{}[/color]'.format(each[2], each[0])
+					else:
+						self.texter = 'Delete EAN [color=#04d3ff]{}[/color] \nArticle [color=#04d3ff]{}[/color]'.format(each[2], each[0])
+
 				else:
 					if self.lang == 'ru':
 						self.texter = 'Удаление даты [color=#04d3ff]{}[/color] \nАртикула [color=#04d3ff]{}[/color]'.format(each[2], each[0])
 					else:
 						self.texter = 'Delete date [color=#04d3ff]{}[/color] \nArticle [color=#04d3ff]{}[/color]'.format(each[2], each[0])	
-				self.btn = Button(markup=True, text=self.texter, size_hint_y=None, height=0.09*self.height, font_size=0.035*self.height, on_release=lambda x: self.popup_del_item_from_stop_list(x.text))
+				self.btn = Button(markup=True, halign='left', text=self.texter, size_hint_y=None, height=0.09*self.height, font_size=0.035*self.height, on_release=lambda x: self.popup_del_item_from_stop_list(x.text))
 				self.grid.add_widget(self.btn)
 
 	def popup_del_item_from_stop_list(self, data):
@@ -3373,6 +3469,16 @@ class Core(BoxLayout):
 			self.stop_list.remove((article, 'deleteART', None))
 			self.set_stop_list()
 			self.load_group_home()
+
+		elif data[1] == "EAN":
+
+			article = data[4].split(']')[1].split('[')[0]
+			ean = data[2].split(']')[1].split('[')[0]
+
+			self.stop_list.remove((article, 'deleteEAN', ean))
+			self.set_stop_list()
+			self.load_group_home()
+
 		else:
 			date = (data[2].split("]")[1]).split('[')[0]
 			article = (data[4].split(']')[1]).split('[')[0]
@@ -3445,7 +3551,7 @@ class Core(BoxLayout):
 		except:
 			pass
 
-		first_phrase = '{' + '"{}"'.format(group_name) + ': {' + '"Users": ' + '""' + ',' + '"Names":' + '""' + ', ' + '"DaysOfLife":' + '""' + ', ' + '"Saver":' + '""' + ', ' + '"Password":' + '"{}"'.format(group_password) + '}}'
+		first_phrase = '{' + '"{}"'.format(group_name) + ': {' + '"Users": ' + '""' + ',' + '"Names":' + '""' + ', ' + '"DaysOfLife":' + '""' + ', ' + '"Saver":' + '""' + ', ' + '"EAN":' + '""' + ', ' + '"Password":' + '"{}"'.format(group_password) + '}}'
 		try:
 			self.write_to_base(first_phrase)
 			self.ids.mana.current = 'new_group_nickname'
@@ -3575,7 +3681,7 @@ class Core(BoxLayout):
 			else:
 				popup('Warning', 'Check your internet connection')
 
-	def create_digital_copy(self, names, days_of_life, saver):
+	def create_digital_copy(self, names, days_of_life, saver, seans):
 
 		try:
 
@@ -3595,13 +3701,18 @@ class Core(BoxLayout):
 			url = "https://avocado-a066c.firebaseio.com/{}.json".format(self.current_group)
 			requests.patch(url=url, json=saver)
 
+			sent = '{"EAN": ' + '"{}"'.format(seans) + '}'
+			saver = json.loads(sent)
+			url = "https://avocado-a066c.firebaseio.com/{}.json".format(self.current_group)
+			requests.patch(url=url, json=saver)
+
 		except:
 			if self.lang == 'ru':
 				popup("Внимание!", "Нет интернет соединения")
 			else:
 				popup('Warning', 'Check your internet connection')
 
-	def stop_list_activity(self, days_server, names_server, saves_server):
+	def stop_list_activity(self, days_server, names_server, saves_server, eans_server):
 		
 		for each in self.stop_list:
 
@@ -3619,6 +3730,13 @@ class Core(BoxLayout):
 							del saves_server[eaz-1]
 							del saves_server[eaz-1]
 
+					if each[0] in eans_server:
+						hound = [i for i, x in enumerate(eans_server) if x == each[0]]
+						hound.reverse()
+						for eaz in hound:
+							del eans_server[eaz-1]
+							del eans_server[eaz-1]
+
 			if each[1] == 'deleteDate':
 				value = each[2]
 				art = each[0]
@@ -3630,6 +3748,19 @@ class Core(BoxLayout):
 						if saves_server[eaz-1] == value:
 							del saves_server[eaz-1]
 							del saves_server[eaz-1]
+							return
+
+			if each[1] == 'deleteEAN':
+				value = each[2]
+				art = each[0]
+
+				if art in eans_server:
+					hound = [i for i, x in enumerate(eans_server) if x == art]
+
+					for eaz in hound:
+						if eans_server[eaz-1] == value:
+							del eans_server[eaz-1]
+							del eans_server[eaz-1]
 							return
 
 	def send_stop_list(self, data):
@@ -3675,6 +3806,7 @@ class Core(BoxLayout):
 
 		subject = data['Users'][self.current_user]
 		test = [x for x, in subject if x.isalnum() or x == ',']
+
 		test = ''.join(test).split(',')
 
 		mozzie = []
@@ -3721,6 +3853,12 @@ class Core(BoxLayout):
 
 		saves_to_stop = rawread.split('$')[:-1]
 
+		f = open("barcode.txt", "r+")
+		rawread = f.read()
+		f.close()
+
+		eans_to_stop = rawread.split('$')[:-1]
+
 		for each in mozzie:
 
 			if each[1] == 'deleteART':
@@ -3749,6 +3887,18 @@ class Core(BoxLayout):
 							del saves_to_stop[eaz-1]
 							del saves_to_stop[eaz-1]
 
+			if each[1] == 'deleteEAN':
+				value = each[2]
+				art = each[0]
+
+				if art in eans_to_stop:
+					hound = [i for i, x in enumerate(eans_to_stop) if x == art]
+
+					for eaz in hound:
+						if eans_to_stop[eaz-1] == value:
+							del eans_to_stop[eaz-1]
+							del eans_to_stop[eaz-1]
+
 
 		with open("artname.txt", "w+") as f:
 			for x in names_to_stop:
@@ -3760,6 +3910,10 @@ class Core(BoxLayout):
 
 		with open("saver.txt", "w+") as f:
 			for x in saves_to_stop:
+				f.write(str(x + "$"))
+
+		with open("barcode.txt", "w+") as f:
+			for x in eans_to_stop:
 				f.write(str(x + "$"))
 
 		sync()
@@ -3777,9 +3931,12 @@ class Core(BoxLayout):
 			days_of_life_from_server = data['DaysOfLife'].split('$')[:-1]
 			names_from_server = data['Names'].split('$')[:-1]
 			saves_from_server = data['Saver'].split('$')[:-1]
+			eans_from_server = data['EAN'].split('$')[:-1]
 
+			#stop list activity
 			self.read_my_stop_list(data)
-			self.stop_list_activity(days_of_life_from_server, names_from_server, saves_from_server)
+			print('my_stop_list_frm_internet --> ')
+			self.stop_list_activity(days_of_life_from_server, names_from_server, saves_from_server, eans_from_server)
 			self.send_stop_list(data)
 
 			f = open("daysoflife.txt", "r+")
@@ -3889,6 +4046,64 @@ class Core(BoxLayout):
 			if len(updated_saves) == 0:
 				updated_saves = ''
 
+			# We update EANs 
+
+			f = open("barcode.txt", "r+")
+			rawread = f.read()
+			f.close()
+
+			eans_local = rawread.split('$')[:-1]
+
+			if len(eans_from_server) == 0:
+				updated_eans = eans_local
+			elif len(eans_local) == 0:
+				updated_eans = eans_from_server
+			else:
+
+				eans_local += eans_from_server
+
+				articles_only = []
+				eans_only = []
+
+				for x in range(len(eans_local)):
+					if x % 2 != 0:
+						articles_only.append(eans_local[x])
+					else:
+						eans_only.append(eans_local[x])
+
+				final_hub = {}
+
+
+				for x in range(len(articles_only)):
+					
+					if articles_only[x] not in final_hub:
+						final_hub[articles_only[x]] = [eans_only[x]]
+					else:
+						old = final_hub[articles_only[x]]
+						realm = eans_only[x]
+						old.append(realm)
+						old = list(set(old))
+						final_hub[articles_only[x]] = old
+
+				updated_eans = []
+
+				for each in final_hub:
+					for eaz in final_hub[each]:
+						updated_eans.append(eaz)
+						updated_eans.append(each)
+
+			if len(updated_names) == 0:
+				updated_names = ''
+			if len(updated_days_of_life) == 0:
+				updated_days_of_life = ''
+			if len(updated_saves) == 0:
+				updated_saves = ''
+			if len(updated_eans) == 0:
+				updated_eans = ''
+
+			with open("barcode.txt", "w") as f:
+				for each in updated_eans:
+					f.write(str(each + "$"))
 
 			with open("artname.txt", "w") as f:
 				for each in updated_names_to_phone:
@@ -3906,6 +4121,7 @@ class Core(BoxLayout):
 			updated_names = '$'.join(updated_names)+'$'
 			updated_days_of_life = '$'.join(updated_days_of_life)+'$'
 			updated_saves = '$'.join(updated_saves)+'$'
+			updated_eans = '$'.join(updated_eans)+'$'
 
 			if len(updated_names) == 1:
 				updated_saves = ''
@@ -3913,14 +4129,18 @@ class Core(BoxLayout):
 				updated_days_of_life = ''
 			if len(updated_saves) == 1:
 				updated_saves = ''
+			if len(updated_eans) == 1:
+				updated_eans = ''
 
 			if updated_names == '$':
 				updated_names = ''
 
-			self.create_digital_copy(updated_names, updated_days_of_life, updated_saves)
+			self.create_digital_copy(updated_names, updated_days_of_life, updated_saves, updated_eans)
 			self.alarm()
 			self.load_group_home()
 			self.destroy_loading()
+			self.search_grid.clear_widgets()
+			#internet sync complete
 
 	def set_settings(self, data):
 
@@ -3989,8 +4209,8 @@ class Core(BoxLayout):
 
 	def set_stop_list(self):
 		with open("stop_list.txt", "w") as f:
-				for each in self.stop_list:
-					f.write(str(each[0])+','+str(each[1])+ ','+ str(each[2]) + '$')
+			for each in self.stop_list:
+				f.write(str(each[0])+','+str(each[1])+ ','+ str(each[2]) + '$')
 
 	def change_lang(self, data):
 		self.previous()
@@ -4054,7 +4274,6 @@ def sync():
 				art_bars[templ[counter]] = lister
 			counter += 2
 
-		print(art_bars)
 	except:
 		f = open("barcode.txt", "w+")
 		f.close()
