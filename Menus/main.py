@@ -300,12 +300,15 @@ class Core(BoxLayout):
 			self.show_cam_button('hide')
 
 	def go_cam(self):
-		if self.r == None:
-			self.r = Reader()
-			self.ids.summertime.add_widget(self.r)
-		else:
-			self.r.hinter = {"center_x": .5,"center_y": .9}
-			self.r.ids.zbarcam.start()
+		try:
+			if self.r == None:
+				self.r = Reader()
+				self.ids.summertime.add_widget(self.r)
+			else:
+				self.r.hinter = {"center_x": .5,"center_y": .9}
+				self.r.ids.zbarcam.start()
+		except:
+			pass
 
 	def stop_cam(self, text):
 		self.r.ids.zbarcam.stop()
@@ -3748,7 +3751,7 @@ class Core(BoxLayout):
 						if saves_server[eaz-1] == value:
 							del saves_server[eaz-1]
 							del saves_server[eaz-1]
-							return
+							break
 
 			if each[1] == 'deleteEAN':
 				value = each[2]
@@ -3761,7 +3764,7 @@ class Core(BoxLayout):
 						if eans_server[eaz-1] == value:
 							del eans_server[eaz-1]
 							del eans_server[eaz-1]
-							return
+							break
 
 	def send_stop_list(self, data):
 
