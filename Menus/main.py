@@ -300,15 +300,12 @@ class Core(BoxLayout):
 			self.show_cam_button('hide')
 
 	def go_cam(self):
-		try:
-			if self.r == None:
-				self.r = Reader()
-				self.ids.summertime.add_widget(self.r)
-			else:
-				self.r.hinter = {"center_x": .5,"center_y": .9}
-				self.r.ids.zbarcam.start()
-		except:
-			pass
+		if self.r == None:
+			self.r = Reader()
+			self.ids.summertime.add_widget(self.r)
+		else:
+			self.r.hinter = {"center_x": .5,"center_y": .9}
+			self.r.ids.zbarcam.start()
 
 	def stop_cam(self, text):
 		self.r.ids.zbarcam.stop()
@@ -3878,6 +3875,13 @@ class Core(BoxLayout):
 							del saves_to_stop[eaz-1]
 							del saves_to_stop[eaz-1]
 
+					if each[0] in eans_to_stop:
+						hound = [i for i, x in enumerate(eans_to_stop) if x == each[0]]
+						hound.reverse()
+						for eaz in hound:
+							del eans_to_stop[eaz-1]
+							del eans_to_stop[eaz-1]
+
 			if each[1] == 'deleteDate':
 				value = each[2]
 				art = each[0]
@@ -3938,7 +3942,6 @@ class Core(BoxLayout):
 
 			#stop list activity
 			self.read_my_stop_list(data)
-			print('my_stop_list_frm_internet --> ')
 			self.stop_list_activity(days_of_life_from_server, names_from_server, saves_from_server, eans_from_server)
 			self.send_stop_list(data)
 
