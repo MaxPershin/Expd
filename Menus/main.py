@@ -1871,6 +1871,11 @@ class Core(BoxLayout):
 		n_ean = self.ean_input.text
 		self.manage_ean_popup.dismiss()
 
+		for each in art_bars[inf_art]:
+			if each == n_ean:
+				popup('Warning', 'This EAN is already in a list')
+				return
+
 		self.if_recreated(inf_art, 'deleteEAN', n_ean)
 
 		f = open("barcode.txt", "a", newline='')
@@ -2120,9 +2125,11 @@ class Core(BoxLayout):
 
 	def show_all_eans(self):
 		collection = []
+
 		for ean, in_art in art_bars.items():
-			if in_art == inf_art:
-				collection.append(ean)
+			if ean == inf_art:
+				for eaz in art_bars[ean]:
+					collection.append(eaz)
 
 		layout = FloatLayout(size=(self.width, self.height))
 		scrolly = ScrollView(size_hint_x= .95, size_hint_y= .95, pos_hint={'center_x': .5, 'center_y': .5})
@@ -2179,9 +2186,10 @@ class Core(BoxLayout):
 					pos_hint={"center_x":.92,"center_y":.7}, halign='center',
 					valign="top", on_release=lambda x:self.show_all_eans())
 
-		for ean, in_art in art_bars.items():    # for name, age in dictionary.iteritems():  (for Python 2.x)
-			if in_art == inf_art:
-				collection.append(ean)
+		for ean, in_art in art_bars.items():
+			if ean == inf_art:
+				for eaz in art_bars[ean]:
+					collection.append(eaz)
 
 		if len(collection) == 0:
 			if self.lang == 'ru':
@@ -4381,7 +4389,7 @@ Builder.load_string("""
 		size_hint_y: 10
 
 		Image:
-			source: 'head.jpg'
+			source: 'head.png'
 			size_hint: (1, 1)
 			pos_hint: {"center_x": .5,"center_y": .5}
 
@@ -5461,7 +5469,7 @@ Builder.load_string("""
 			Color: 
 				rgb: 1, 1, 1, 
 			Rectangle:
-				source: 'bar.jpg'
+				source: 'bar.png'
 				pos: self.pos 
 				size: self.size
 
