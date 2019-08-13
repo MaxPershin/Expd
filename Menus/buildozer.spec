@@ -49,7 +49,7 @@ garden_requirements = xcamera
 presplash.filename = splash.png
 
 # (str) Icon of the application
-#icon.filename = %(source.dir)s/data/icon.png
+icon.filename = icona.png
 
 # (str) Supported orientation (one of landscape, portrait or all)
 orientation = portrait

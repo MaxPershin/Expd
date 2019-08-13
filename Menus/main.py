@@ -38,6 +38,8 @@ import threading
 import json
 import requests
 
+from kivy.core.window import Window
+
 year = int(strftime("%Y"))
 if year % 4 == 0:
  	extra = 1
@@ -187,6 +189,7 @@ class Core(BoxLayout):
 		self.t_create = 'Создать'
 		self.t_user_name = 'Имя пользователя'
 		self.t_we_have_expired = 'Найдены просроченные артикулы'
+		self.t_manage_ean = 'Управление EAN'
 
 	def to_english(self):
 		self.t_ot = 'from'
@@ -221,6 +224,7 @@ class Core(BoxLayout):
 		self.t_create = 'Create'
 		self.t_user_name = 'User name'
 		self.t_we_have_expired = 'Expired articles found!'
+		self.t_manage_ean = 'Manage EAN'
 	
 	if lang == 'ru':
 		t_ot = ObjectProperty('От')
@@ -255,6 +259,7 @@ class Core(BoxLayout):
 		t_create = ObjectProperty('Создать')
 		t_user_name = ObjectProperty('Имя пользователя')
 		t_we_have_expired = ObjectProperty('Найдены просроченные артикулы')
+		t_manage_ean = ObjectProperty('Управление EAN')
 
 
 	else:
@@ -290,6 +295,7 @@ class Core(BoxLayout):
 		t_create = ObjectProperty('Create')
 		t_user_name = ObjectProperty('User name')
 		t_we_have_expired = ObjectProperty('Expired articles found!')
+		t_manage_ean = ObjectProperty('Manage EAN')
 
 	def show_unknown_ean(self, action):
 		if action == 'hide':
@@ -1871,10 +1877,13 @@ class Core(BoxLayout):
 		n_ean = self.ean_input.text
 		self.manage_ean_popup.dismiss()
 
-		for each in art_bars[inf_art]:
-			if each == n_ean:
-				popup('Warning', 'This EAN is already in a list')
-				return
+		try:
+			for each in art_bars[inf_art]:
+				if each == n_ean:
+					popup('Warning', 'This EAN is already in a list')
+					return
+		except:
+			pass
 
 		self.if_recreated(inf_art, 'deleteEAN', n_ean)
 
@@ -2058,33 +2067,45 @@ class Core(BoxLayout):
 
 		self.manage_ean_popup.open()
 
+	#bookmark
+
 	def change_ean(self, button):
 		self.manage_ean_popup.dismiss()
 		self.current_button = button.text
 
 		self.layout = FloatLayout(size=(self.width, self.height))
 
+		if self.lang == 'ru':
+			change = 'Изменить'
+			delete = 'Удалить'
+			change_eve = 'Изменить для всех'
+			delete_eve = 'Удалить для всех'
+		else:
+			change = 'Change'
+			delete = 'Delete'
+			change_eve = 'Change for everyone'
+			delete_eve = 'Delete for everyone'
 
 		if self.current_user:
 			self.ean_input = TextInput(text=button.text, multiline=False, size_hint_x=.75, size_hint_y=0.15, 
 			pos_hint={"center_x":.5,"center_y":.8}, hint_text='Enter EAN', font_size=27)
 
-			self.button1 = Button(text='Change', size_hint_y=None, size_hint_x=None,
+			self.button1 = Button(text=change, size_hint_y=None, size_hint_x=None,
 						height=0.06*self.height, width=0.5*self.width, font_size=0.035*self.height,
 						pos_hint={"center_x":.5,"center_y":.59}, halign='center',
 						valign="middle", on_release=lambda x:self.change2_ean(False))
 
-			self.button2 = Button(text='Delete', size_hint_y=None, size_hint_x=None,
+			self.button2 = Button(text=delete, size_hint_y=None, size_hint_x=None,
 						height=0.06*self.height, width=0.5*self.width, font_size=0.035*self.height,
 						pos_hint={"center_x":.5,"center_y":.44}, halign='center',
 						valign="middle", on_release=lambda x:self.delete_ean())
 
-			self.button3 = Button(text='Change for everyone', size_hint_y=None, size_hint_x=None,
+			self.button3 = Button(text=change_eve, size_hint_y=None, size_hint_x=None,
 						height=0.06*self.height, width=0.5*self.width, font_size=0.035*self.height,
 						pos_hint={"center_x":.5,"center_y":.29}, halign='center',
 						valign="middle", on_release=lambda x:self.change2_ean(True))
 
-			self.button4 = Button(text='Delete for everyone', size_hint_y=None, size_hint_x=None,
+			self.button4 = Button(text=delete_eve, size_hint_y=None, size_hint_x=None,
 						height=0.06*self.height, width=0.5*self.width, font_size=0.035*self.height,
 						pos_hint={"center_x":.5,"center_y":.14}, halign='center',
 						valign="middle", on_release=lambda x:self.delete_ean(True))
@@ -3329,17 +3350,39 @@ class Core(BoxLayout):
 		self.set_stop_list()
 
 	def are_you_sure(self):
-
+#sovilaz
 		if self.lang == 'ru':
 			title = "Внимание!!!"
 			text = "Нажав на кнопку УДАЛИТЬ вы уничтожите\nвсю базу данных безвозвратно!"
 			self.lay = FloatLayout(size=(self.width, self.height))
-			self.btn1 = Button(background_normal="but_red.png", text="УДАЛИТЬ", size_hint_y=None, size_hint_x=None, height=0.13*self.height, width=0.8*self.width, font_size=0.035*self.height, pos_hint={"center_x":.5,"center_y":.34}, on_release=lambda x:self.exterminate())
+
+			self.btn1 = Button(background_normal="but_red.png", text="УДАЛИТЬ",
+			size_hint_y=None, size_hint_x=None, height=0.13*self.height,
+			width=0.8*self.width, font_size=0.035*self.height,
+			pos_hint={"center_x":.5,"center_y":.50}, on_release=lambda x:self.exterminate(False))
+
+			self.btn2 = Button(background_normal="but_red.png", text="УДАЛИТЬ ДЛЯ ВСЕХ",
+			size_hint_y=None, size_hint_x=None, height=0.13*self.height,
+			width=0.8*self.width, font_size=0.035*self.height,
+			pos_hint={"center_x":.5,"center_y":.17}, on_release=lambda x:self.exterminate(True))
+
+
+
 		else:
 			title = "Warning!!!"
 			text = "If you press DELETE button\nwhole database will be deleted!"
 			self.lay = FloatLayout(size=(self.width, self.height))
-			self.btn1 = Button(background_normal="but_red.png", text="DELETE", size_hint_y=None, size_hint_x=None, height=0.13*self.height, width=0.8*self.width, font_size=0.035*self.height, pos_hint={"center_x":.5,"center_y":.34}, on_release=lambda x:self.exterminate())
+
+			self.btn1 = Button(background_normal="but_red.png",
+				text="DELETE", size_hint_y=None, size_hint_x=None,
+				height=0.13*self.height, width=0.8*self.width,
+				font_size=0.035*self.height, pos_hint={"center_x":.5,"center_y":.34},
+				on_release=lambda x:self.exterminate(False))
+
+			self.btn2 = Button(background_normal="but_red.png", text="Delete for everyone",
+			size_hint_y=None, size_hint_x=None, height=0.13*self.height,
+			width=0.8*self.width, font_size=0.035*self.height,
+			pos_hint={"center_x":.5,"center_y":.14}, on_release=lambda x:self.exterminate(True))
 
 
 		self.lbl = Label(text=text, font_size=0.025*self.height, pos_hint={"center_x":.5,"center_y":.86})
@@ -3347,12 +3390,47 @@ class Core(BoxLayout):
 		self.lay.add_widget(self.lbl)
 		self.lay.add_widget(self.btn1)
 
+		if self.current_user:
+			self.lay.add_widget(self.btn2)
+			hinter = (.95, .39)
+		else:
+			hinter = (.95, .28)
+			self.btn1.pos_hint = {"center_x":.5,"center_y":.30}
+
 		self.poz = Popup(title=title,
 		content=self.lay,
-		size_hint=(.8, .3))
+		size_hint=hinter)
 		self.poz.open()
 
-	def exterminate(self):
+	def exterminate_online(self):
+
+		sent = '{"DaysOfLife": ' + '""' + '}'
+		days_of_life = json.loads(sent)
+		url = "https://avocado-a066c.firebaseio.com/{}.json".format(self.current_group)
+		requests.patch(url=url, json=days_of_life)
+
+		sent = '{"EAN": ' + '""' + '}'
+		days_of_life = json.loads(sent)
+		url = "https://avocado-a066c.firebaseio.com/{}.json".format(self.current_group)
+		requests.patch(url=url, json=days_of_life)
+
+		sent = '{"Names": ' + '""' + '}'
+		days_of_life = json.loads(sent)
+		url = "https://avocado-a066c.firebaseio.com/{}.json".format(self.current_group)
+		requests.patch(url=url, json=days_of_life)
+
+		sent = '{"Saver": ' + '""' + '}'
+		days_of_life = json.loads(sent)
+		url = "https://avocado-a066c.firebaseio.com/{}.json".format(self.current_group)
+		requests.patch(url=url, json=days_of_life)
+
+		#Work in progress ----->>>>> Write down extension for user stop-list deletion.
+
+	def exterminate(self, global_wipe):
+
+		if global_wipe:
+			self.exterminate_online()
+
 		none = ""
 
 		f = open("daysoflife.txt", "w")
@@ -5053,7 +5131,7 @@ Builder.load_string("""
 						root.add_entry()
 				Button:
 					border: 0,0,0,0
-					text: 'Manage Ean'
+					text: root.t_manage_ean
 					font_size: sp(16)
 					pos_hint: {'center_x': .75, 'center_y': .6}
 					size_hint: (.4, .10)
@@ -5525,7 +5603,7 @@ last_art = None
 def popup(title, text):
 	popup = Popup(title=title,
 	content=Label(text=text),
-	size_hint=(None, None), size=(250, 200))
+	size_hint=(0.65, 0.25))
 	popup.open()
 
 closer = False
