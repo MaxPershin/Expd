@@ -157,6 +157,7 @@ class Core(BoxLayout):
 	#translation
 
 	def to_russian(self):
+		self.t_delete = 'Удалить'
 		self.t_ot = 'От'
 		self.t_do = 'До'
 		self.t_day = 'День'
@@ -192,6 +193,7 @@ class Core(BoxLayout):
 		self.t_manage_ean = 'Управление EAN'
 
 	def to_english(self):
+		self.t_delete = 'Delete'
 		self.t_ot = 'from'
 		self.t_do = 'until'
 		self.t_day = 'Day'
@@ -227,6 +229,7 @@ class Core(BoxLayout):
 		self.t_manage_ean = 'Manage EAN'
 	
 	if lang == 'ru':
+		t_delete = ObjectProperty('Удалить')
 		t_ot = ObjectProperty('От')
 		t_do = ObjectProperty('До')
 		t_day = ObjectProperty('День')
@@ -263,6 +266,7 @@ class Core(BoxLayout):
 
 
 	else:
+		t_delete = 'Delete'
 		t_ot = ObjectProperty('from')
 		t_do = ObjectProperty('until')
 		t_day = ObjectProperty('Day')
@@ -3350,7 +3354,7 @@ class Core(BoxLayout):
 		self.set_stop_list()
 
 	def are_you_sure(self):
-#sovilaz
+
 		if self.lang == 'ru':
 			title = "Внимание!!!"
 			text = "Нажав на кнопку УДАЛИТЬ вы уничтожите\nвсю базу данных безвозвратно!"
@@ -3365,8 +3369,6 @@ class Core(BoxLayout):
 			size_hint_y=None, size_hint_x=None, height=0.13*self.height,
 			width=0.8*self.width, font_size=0.035*self.height,
 			pos_hint={"center_x":.5,"center_y":.17}, on_release=lambda x:self.exterminate(True))
-
-
 
 		else:
 			title = "Warning!!!"
@@ -3424,7 +3426,23 @@ class Core(BoxLayout):
 		url = "https://avocado-a066c.firebaseio.com/{}.json".format(self.current_group)
 		requests.patch(url=url, json=days_of_life)
 
-		#Work in progress ----->>>>> Write down extension for user stop-list deletion.
+		data = self.read_from_base()
+		judge = data['Users']
+
+		for each in judge:
+
+			text = '{'+ '"{}"'.format(each) + ': ""' + '}'
+
+			to_database = json.loads(text)
+			url = "https://avocado-a066c.firebaseio.com/{}/Users.json".format(self.current_group)
+		
+			try:
+				requests.patch(url=url, json=to_database)
+			except:
+				if self.lang == 'ru':
+					popup("Внимание!", "Нет интернет соединения")
+				else:
+					popup('Warning', 'Check your internet connection')
 
 	def exterminate(self, global_wipe):
 
@@ -4233,6 +4251,79 @@ class Core(BoxLayout):
 			self.destroy_loading()
 			self.search_grid.clear_widgets()
 			#internet sync complete
+
+	def dont_delete_user(self):
+		self.popup.dismiss()
+
+	def delete_user1(self):
+		#bookmark
+
+		data = self.read_from_base()
+		names = data['Users']
+		del names[self.current_user]
+
+		try:
+			sent = '{"Users": ' + '""' + '}'
+			saver = json.loads(sent)
+			url = "https://avocado-a066c.firebaseio.com/{}.json".format(self.current_group)
+			requests.patch(url=url, json=saver)
+			
+			
+			for each in names:
+				name = each
+				val = names[each] 
+
+				text = '{'+ '"{}"'.format(name) + ': "{}"'.format(val) + '}'
+
+				to_database = json.loads(text)
+
+				url = "https://avocado-a066c.firebaseio.com/{}/Users.json".format(self.current_group)
+
+				requests.patch(url=url, json=to_database)
+
+			self.popup.dismiss()	
+			self.exit_group()
+		except:
+			if self.lang == 'ru':
+				popup("Внимание!", "Нет интернет соединения")
+				self.popup.dismiss()
+			else:
+				popup('Warning', 'Check your internet connection')
+
+	def delete_user(self):
+
+		if self.lang == 'ru':
+			tit = 'Удаление'
+			sentence = "Вы хотите удалить пользователя {}?".format(self.current_user)
+			self.layout = FloatLayout(size=(self.width, self.height))
+
+			self.btn1 = Button(text="Да", size_hint_y=.5, size_hint_x=.4, font_size=0.035*self.height,
+				pos_hint={"center_x":.29,"center_y":.3}, on_release=lambda x:self.delete_user1())
+
+			self.btn2 = Button(text="Нет", size_hint_y=.5, size_hint_x=.4, font_size=0.035*self.height,
+				pos_hint={"center_x":.71,"center_y":.3}, on_release=lambda x:self.dont_delete_user())
+
+		else:
+			tit = 'Deletion'
+			sentence = "Do you want to delete user {}?".format(self.current_user)
+			self.layout = FloatLayout(size=(self.width, self.height))
+			
+			self.btn1 = Button(text="Yes", size_hint_y=.5, size_hint_x=.4, font_size=0.035*self.height,
+				pos_hint={"center_x":.29,"center_y":.3}, on_release=lambda x:self.delete_user1())
+
+			self.btn2 = Button(text="No", size_hint_y=.5, size_hint_x=.4, font_size=0.035*self.height,
+				pos_hint={"center_x":.71,"center_y":.3}, on_release=lambda x:self.dont_delete_user())
+
+		self.lbl = Label(text=sentence, font_size=0.025*self.height, pos_hint={"center_x":.5,"center_y":.86})
+
+		self.layout.add_widget(self.lbl)
+		self.layout.add_widget(self.btn1)
+		self.layout.add_widget(self.btn2)
+
+		self.popup = Popup(title=tit,
+		content=self.layout,
+		size_hint=(.85, .2))
+		self.popup.open()
 
 	def set_settings(self, data):
 
@@ -5500,11 +5591,22 @@ Builder.load_string("""
 					text: root.t_exit
 					border: 0,0,0,0
 					font_size: sp(22)
-					pos_hint: {'center_x': .5, 'center_y': .09}
-					size_hint: (.65, .1)
+					pos_hint: {'center_x': .32, 'center_y': .09}
+					size_hint: (.325, .1)
 					background_normal: "but.png"
 					background_down: "butp.png"
 					on_release: root.exit_group()
+
+				Button:
+					text: root.t_delete
+					border: 0,0,0,0
+					font_size: sp(22)
+					pos_hint: {'center_x': .68, 'center_y': .09}
+					size_hint: (.325, .1)
+					background_normal: "but_red.png"
+					background_down: "butp.png"
+					on_release: root.delete_user()
+
 		Screen:
 			name: 'language'
 
