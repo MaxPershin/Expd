@@ -1497,7 +1497,7 @@ class Core(BoxLayout):
 
 		self.popup = Popup(title=title,
 		content=fl,
-		size_hint=(None, None), size=(300, 200))
+		size_hint=(0.65, 0.25))
 		self.popup.open()
 
 	def go(self):
@@ -1664,7 +1664,7 @@ class Core(BoxLayout):
 	def popup(self, title, text):
 		popup = Popup(title=title,
 		content=Label(text=text),
-		size_hint=(None, None), size=(200, 100))
+		size_hint=(0.65, 0.25))
 		popup.open()
 
 	def save(self, ent, article):
@@ -1849,7 +1849,7 @@ class Core(BoxLayout):
 	def popup(self, title, text):
 		popup = Popup(title=title,
 		content=Label(text=text),
-		size_hint=(None, None), size=(200, 100))
+		size_hint=(0.65, 0.25))
 		popup.open()
 
 	def infor(self, button):
@@ -2517,7 +2517,7 @@ class Core(BoxLayout):
 
 		self.popup2 = Popup(title=title,
 		content=fl,
-		size_hint=(None, None), size=(300, 200))
+		size_hint=(0.65, 0.25))
 		self.popup2.open()
 
 	def add_entry2(self):
@@ -3185,7 +3185,7 @@ class Core(BoxLayout):
 
 		self.popup2 = Popup(title=title,
 		content=fl,
-		size_hint=(None, None), size=(300, 200))
+		size_hint=(0.65, 0.25))
 		self.popup2.open()
 #######################################################################################
 
@@ -3557,7 +3557,7 @@ class Core(BoxLayout):
 
 		self.popup = Popup(title=title,
 		content=fl,
-		size_hint=(None, None), size=(300, 200))
+		size_hint=(0.65, 0.25))
 		self.popup.open()
 
 	def close_this_one(self):
