@@ -507,7 +507,7 @@ class Core(BoxLayout):
 				pass
 
 			self.texter = str(counter)+'. ' + each[1] + ' ' + art_names[each[1]]
-			self.btn = ToggleButton(text=self.texter, size_hint_y=None, height=0.09*self.height, font_size=0.035*self.height)
+			self.btn = ToggleButton(text=self.texter, size_hint_y=None, height=0.09*self.height, font_size="25sp")
 			self.grid.add_widget(self.btn)
 			self.btn.bind(on_press=self.check_status2)
 
@@ -664,7 +664,7 @@ class Core(BoxLayout):
 
 				for eaz in each[1]:
 					self.texter = eaz + ' ' + art_names[eaz]
-					self.btn = Button(text=self.texter, size_hint_y=None, height=0.09*self.height, font_size=0.035*self.height)
+					self.btn = Button(text=self.texter, size_hint_y=None, height=0.09*self.height, font_size="25sp")
 					self.grid.add_widget(self.btn)
 		
 
@@ -993,7 +993,7 @@ class Core(BoxLayout):
 
 					for each in storage:
 						self.texter = each + ' ' + art_names[each]
-						self.btn = Button(text=self.texter, size_hint_y=None, height=0.09*self.height, font_size=0.035*self.height)
+						self.btn = Button(text=self.texter, size_hint_y=None, height=0.09*self.height, font_size="25sp")
 						self.grid.add_widget(self.btn)
 
 					self.ids.mana.current = "today"
@@ -1066,7 +1066,7 @@ class Core(BoxLayout):
 
 				for each in storage:
 					self.texter = each + ' ' + art_names[each]
-					self.btn = ToggleButton(text=self.texter, size_hint_y=None, height=0.09*self.height, font_size=0.035*self.height)
+					self.btn = ToggleButton(text=self.texter, size_hint_y=None, height=0.09*self.height, font_size="25sp")
 					self.grid.add_widget(self.btn)
 					self.btn.bind(on_press=self.check_status)
 
@@ -1702,7 +1702,7 @@ class Core(BoxLayout):
 			self.inputi = TextInput(hint_text="Артикул", multiline=False, size_hint_x=.5, size_hint_y=0.1, pos_hint={"center_x":.5,"center_y":.6})
 			self.inputi2 = TextInput(hint_text="Название", multiline=False, size_hint_x=.5, size_hint_y=0.1, pos_hint={"center_x":.5,"center_y":.45})
 			self.inputi3 = TextInput(hint_text="Стандартный срок", multiline=False, size_hint_x=.5, size_hint_y=0.1, pos_hint={"center_x":.5,"center_y":.35})
-			self.btn1 = Button(text="Создать", size_hint_y=None, size_hint_x=None, height=0.06*self.height, width=0.6*self.width, font_size=0.035*self.height, pos_hint={"center_x":.5,"center_y":.2}, on_release=lambda x:self.art_create())
+			self.btn1 = Button(text="Создать", size_hint_y=None, size_hint_x=None, height=0.06*self.height, width=0.6*self.width, font_size="25sp", pos_hint={"center_x":.5,"center_y":.2}, on_release=lambda x:self.art_create())
 		else:
 			tit = 'Creation'
 			sentence = "Please fill required fields\n to create article"
@@ -1710,9 +1710,9 @@ class Core(BoxLayout):
 			self.inputi = TextInput(hint_text="Article", multiline=False, size_hint_x=.5, size_hint_y=0.1, pos_hint={"center_x":.5,"center_y":.6})
 			self.inputi2 = TextInput(hint_text="Name", multiline=False, size_hint_x=.5, size_hint_y=0.1, pos_hint={"center_x":.5,"center_y":.45})
 			self.inputi3 = TextInput(hint_text="Shelf life", multiline=False, size_hint_x=.5, size_hint_y=0.1, pos_hint={"center_x":.5,"center_y":.35})
-			self.btn1 = Button(text="Create", size_hint_y=None, size_hint_x=None, height=0.06*self.height, width=0.6*self.width, font_size=0.035*self.height, pos_hint={"center_x":.5,"center_y":.2}, on_release=lambda x:self.art_create())
+			self.btn1 = Button(text="Create", size_hint_y=None, size_hint_x=None, height=0.06*self.height, width=0.6*self.width, font_size="25sp", pos_hint={"center_x":.5,"center_y":.2}, on_release=lambda x:self.art_create())
 
-		self.lbl = Label(text=sentence, font_size=0.025*self.height, pos_hint={"center_x":.5,"center_y":.86})
+		self.lbl = Label(text=sentence, text_size=(self.width, None), halign='center', font_size="20sp", pos_hint={"center_x":.5,"center_y":.86})
 
 		self.layout.add_widget(self.lbl)
 		self.layout.add_widget(self.inputi)
@@ -1842,7 +1842,7 @@ class Core(BoxLayout):
 						top = "{} {}".format(each, art_names[each])
 						if search.lower() in top.lower():
 							self.info = "{} {}".format(each, art_names[each])
-							self.btn = Button(text=self.info, size_hint_y=None, height=0.09*self.height, font_size=0.035*self.height)
+							self.btn = Button(text=self.info, size_hint_y=None, height=0.09*self.height, font_size="25sp")
 							self.search_grid.add_widget(self.btn)
 							self.btn.bind(on_release=self.infor)
 
@@ -1906,12 +1906,12 @@ class Core(BoxLayout):
 		self.layout = FloatLayout(size=(self.width, self.height))
 
 		self.button1 = Button(text='Creater', size_hint_y=None, size_hint_x=None,
-					height=0.06*self.height, width=0.5*self.width, font_size=0.035*self.height,
+					height=0.06*self.height, width=0.5*self.width, font_size="25sp",
 					pos_hint={"center_x":.5,"center_y":.28}, halign='center',
 					valign="middle", on_release=lambda x:self.create_ean())
 
 		self.ean_input = TextInput(id='hola', multiline=False, size_hint_x=.75, size_hint_y=0.35, 
-			pos_hint={"center_x":.5,"center_y":.7}, hint_text='Enter EAN', font_size=27) 
+			pos_hint={"center_x":.5,"center_y":.7}, hint_text='Enter EAN', font_size='27sp') 
 
 		self.layout.add_widget(self.button1)
 		self.layout.add_widget(self.ean_input)
@@ -1939,7 +1939,7 @@ class Core(BoxLayout):
 		layout = FloatLayout(size=(self.width, self.height))
 
 		button1 = Button(text='Create', size_hint_y=None, size_hint_x=None,
-					height=0.06*self.height, width=0.5*self.width, font_size=0.035*self.height,
+					height=0.06*self.height, width=0.5*self.width, font_size="25sp",
 					pos_hint={"center_x":.5,"center_y":.1}, halign='center',
 					valign="middle", on_release=lambda x:self.new_ean())
 
@@ -1951,7 +1951,7 @@ class Core(BoxLayout):
 		for each in collection:
 			self.btn = Button(text='{}'.format(each),
 			size_hint_y=None, height=0.09*self.height,
-			font_size=0.035*self.height)
+			font_size="25sp")
 			grid_for_scroll.add_widget(self.btn)
 			self.btn.bind(on_release=self.change_ean)
 
@@ -2048,16 +2048,16 @@ class Core(BoxLayout):
 
 		self.layout = FloatLayout(size=(self.width, self.height))
 
-		self.lbl = Label(text="You want to delete EAN?", font_size=0.025*self.height, 
+		self.lbl = Label(text="You want to delete EAN?", font_size="25sp", 
 				pos_hint={"center_x":.5,"center_y":.86})
 
 		self.button1 = Button(text='Yes', size_hint_y=None, size_hint_x=None,
-					height=0.06*self.height, width=0.5*self.width, font_size=0.035*self.height,
+					height=0.06*self.height, width=0.5*self.width, font_size="25sp",
 					pos_hint={"center_x":.5,"center_y":.42}, halign='center',
 					valign="middle", on_release=lambda x:self.delete2_ean(arg))
 
 		self.button2 = Button(text='No', size_hint_y=None, size_hint_x=None,
-					height=0.06*self.height, width=0.5*self.width, font_size=0.035*self.height,
+					height=0.06*self.height, width=0.5*self.width, font_size="25sp",
 					pos_hint={"center_x":.5,"center_y":.18}, halign='center',
 					valign="middle", on_release=lambda x:self.manage_eans())
 
@@ -2092,25 +2092,25 @@ class Core(BoxLayout):
 
 		if self.current_user:
 			self.ean_input = TextInput(text=button.text, multiline=False, size_hint_x=.75, size_hint_y=0.15, 
-			pos_hint={"center_x":.5,"center_y":.8}, hint_text='Enter EAN', font_size=27)
+			pos_hint={"center_x":.5,"center_y":.8}, hint_text='Enter EAN', font_size='27sp')
 
 			self.button1 = Button(text=change, size_hint_y=None, size_hint_x=None,
-						height=0.06*self.height, width=0.5*self.width, font_size=0.035*self.height,
+						height=0.06*self.height, width=0.5*self.width, font_size="25sp",
 						pos_hint={"center_x":.5,"center_y":.59}, halign='center',
 						valign="middle", on_release=lambda x:self.change2_ean(False))
 
 			self.button2 = Button(text=delete, size_hint_y=None, size_hint_x=None,
-						height=0.06*self.height, width=0.5*self.width, font_size=0.035*self.height,
+						height=0.06*self.height, width=0.5*self.width, font_size="25sp",
 						pos_hint={"center_x":.5,"center_y":.44}, halign='center',
 						valign="middle", on_release=lambda x:self.delete_ean())
 
 			self.button3 = Button(text=change_eve, size_hint_y=None, size_hint_x=None,
-						height=0.06*self.height, width=0.5*self.width, font_size=0.035*self.height,
+						height=0.06*self.height, width=0.5*self.width, font_size="25sp",
 						pos_hint={"center_x":.5,"center_y":.29}, halign='center',
 						valign="middle", on_release=lambda x:self.change2_ean(True))
 
 			self.button4 = Button(text=delete_eve, size_hint_y=None, size_hint_x=None,
-						height=0.06*self.height, width=0.5*self.width, font_size=0.035*self.height,
+						height=0.06*self.height, width=0.5*self.width, font_size="25sp",
 						pos_hint={"center_x":.5,"center_y":.14}, halign='center',
 						valign="middle", on_release=lambda x:self.delete_ean(True))
 
@@ -2126,15 +2126,15 @@ class Core(BoxLayout):
 
 		else:
 			self.ean_input = TextInput(text=button.text, multiline=False, size_hint_x=.75, size_hint_y=0.25, 
-			pos_hint={"center_x":.5,"center_y":.7}, hint_text='Enter EAN', font_size=27)
+			pos_hint={"center_x":.5,"center_y":.7}, hint_text='Enter EAN', font_size='27sp')
 
 			self.button1 = Button(text='Change', size_hint_y=None, size_hint_x=None,
-						height=0.06*self.height, width=0.5*self.width, font_size=0.035*self.height,
+						height=0.06*self.height, width=0.5*self.width, font_size="25sp",
 						pos_hint={"center_x":.5,"center_y":.42}, halign='center',
 						valign="middle", on_release=lambda x:self.change2_ean())
 
 			self.button2 = Button(text='Delete', size_hint_y=None, size_hint_x=None,
-						height=0.06*self.height, width=0.5*self.width, font_size=0.035*self.height,
+						height=0.06*self.height, width=0.5*self.width, font_size="25sp",
 						pos_hint={"center_x":.5,"center_y":.18}, halign='center',
 						valign="middle", on_release=lambda x:self.delete_ean())
 
@@ -2163,7 +2163,7 @@ class Core(BoxLayout):
 
 
 		for each in collection:
-			grid_for_scroll.add_widget(Button(text='{}'.format(each), size_hint_y=None, height=0.09*self.height, font_size=0.035*self.height))
+			grid_for_scroll.add_widget(Button(text='{}'.format(each), size_hint_y=None, height=0.09*self.height, font_size="25sp"))
 		scrolly.add_widget(grid_for_scroll)
 		layout.add_widget(scrolly)
 
@@ -2207,7 +2207,7 @@ class Core(BoxLayout):
 			pass
 
 		self.btn = Button(text='...', size_hint_y=None, size_hint_x=None,
-					height=0.06*self.height, width=0.1*self.width, font_size=0.035*self.height,
+					height=0.06*self.height, width=0.1*self.width, font_size="25sp",
 					pos_hint={"center_x":.92,"center_y":.7}, halign='center',
 					valign="top", on_release=lambda x:self.show_all_eans())
 
@@ -2273,7 +2273,7 @@ class Core(BoxLayout):
 				self.texter = "  До\n"+str(each)
 			else:
 				self.texter = "  Until\n"+str(each)
-			self.btn = Button(text=self.texter, size_hint_y=None, height=0.09*self.height, font_size=0.035*self.height)
+			self.btn = Button(text=self.texter, size_hint_y=None, height=0.09*self.height, font_size="25sp")
 			self.grid.add_widget(self.btn)
 
 
@@ -2297,17 +2297,17 @@ class Core(BoxLayout):
 			sentence = "Вы уверены что хотите безвозвратно\n удалить артикул {} ?".format(inf_art)
 			tit = 'Удаление'
 			self.layout = FloatLayout(size=(self.width, self.height))
-			self.btn1 = Button(text="Удалить", size_hint_y=None, size_hint_x=None, height=0.06*self.height, width=0.6*self.width, font_size=0.035*self.height, pos_hint={"center_x":.5,"center_y":.45}, on_release=lambda x:self.art_delete())
-			self.btn2 = Button(text="Удалить для всех", size_hint_y=None, size_hint_x=None, height=0.06*self.height, width=0.6*self.width, font_size=0.035*self.height, pos_hint={"center_x":.5,"center_y":.15}, on_release=lambda x:self.art_delete(True))
+			self.btn1 = Button(text="Удалить", size_hint_y=None, size_hint_x=None, height=0.06*self.height, width=0.6*self.width, font_size="25sp", pos_hint={"center_x":.5,"center_y":.45}, on_release=lambda x:self.art_delete())
+			self.btn2 = Button(text="Удалить для всех", size_hint_y=None, size_hint_x=None, height=0.06*self.height, width=0.6*self.width, font_size="25sp", pos_hint={"center_x":.5,"center_y":.15}, on_release=lambda x:self.art_delete(True))
 		else:
 			sentence = "Do you want to permanently\n delete article {} ?".format(inf_art)
 			tit = 'Deletion'
 			self.layout = FloatLayout(size=(self.width, self.height))
-			self.btn1 = Button(text="Delete", size_hint_y=None, size_hint_x=None, height=0.06*self.height, width=0.6*self.width, font_size=0.035*self.height, pos_hint={"center_x":.5,"center_y":.45}, on_release=lambda x:self.art_delete())
-			self.btn2 = Button(text="Delete for everyone", size_hint_y=None, size_hint_x=None, height=0.06*self.height, width=0.6*self.width, font_size=0.035*self.height, pos_hint={"center_x":.5,"center_y":.15}, on_release=lambda x:self.art_delete(True))
+			self.btn1 = Button(text="Delete", size_hint_y=None, size_hint_x=None, height=0.06*self.height, width=0.6*self.width, font_size="25sp", pos_hint={"center_x":.5,"center_y":.45}, on_release=lambda x:self.art_delete())
+			self.btn2 = Button(text="Delete for everyone", size_hint_y=None, size_hint_x=None, height=0.06*self.height, width=0.6*self.width, font_size="25sp", pos_hint={"center_x":.5,"center_y":.15}, on_release=lambda x:self.art_delete(True))
 
 
-		self.lbl = Label(text=sentence, font_size=0.025*self.height, pos_hint={"center_x":.5,"center_y":.86})
+		self.lbl = Label(text=sentence, font_size="25sp", pos_hint={"center_x":.5,"center_y":.86})
 
 		self.layout.add_widget(self.lbl)
 		self.layout.add_widget(self.btn1)
@@ -2422,7 +2422,7 @@ class Core(BoxLayout):
 			self.inputi = TextInput(multiline=False, size_hint_x=.2, size_hint_y=0.2, pos_hint={"center_x":.2,"center_y":.61}, hint_text='День')
 			self.inputi_2 = TextInput(multiline=False, size_hint_x=.2, size_hint_y=0.2, pos_hint={"center_x":.4,"center_y":.61}, hint_text='Месяц')
 			self.inputi_3 = TextInput(multiline=False, size_hint_x=.4, size_hint_y=0.2, pos_hint={"center_x":.7,"center_y":.61}, hint_text='Год')
-			self.btn1 = Button(text="Добавить", size_hint_y=None, size_hint_x=None, height=0.06*self.height, width=0.6*self.width, font_size=0.035*self.height, pos_hint={"center_x":.5,"center_y":.34}, on_release=lambda x:self.add_entry2())
+			self.btn1 = Button(text="Добавить", size_hint_y=None, size_hint_x=None, height=0.06*self.height, width=0.6*self.width, font_size="25sp", pos_hint={"center_x":.5,"center_y":.34}, on_release=lambda x:self.add_entry2())
 		else:
 			tit = 'Manual addition'
 			sentence = "Manually add date\n{} to article".format(inf_art)
@@ -2430,9 +2430,9 @@ class Core(BoxLayout):
 			self.inputi = TextInput(multiline=False, size_hint_x=.2, size_hint_y=0.2, pos_hint={"center_x":.2,"center_y":.61}, hint_text='Day')
 			self.inputi_2 = TextInput(multiline=False, size_hint_x=.2, size_hint_y=0.2, pos_hint={"center_x":.4,"center_y":.61}, hint_text='Month')
 			self.inputi_3 = TextInput(multiline=False, size_hint_x=.4, size_hint_y=0.2, pos_hint={"center_x":.7,"center_y":.61}, hint_text='Year')
-			self.btn1 = Button(text="Add", size_hint_y=None, size_hint_x=None, height=0.06*self.height, width=0.6*self.width, font_size=0.035*self.height, pos_hint={"center_x":.5,"center_y":.34}, on_release=lambda x:self.add_entry2())
+			self.btn1 = Button(text="Add", size_hint_y=None, size_hint_x=None, height=0.06*self.height, width=0.6*self.width, font_size="25sp", pos_hint={"center_x":.5,"center_y":.34}, on_release=lambda x:self.add_entry2())
 
-		self.lbl = Label(text=sentence, font_size=0.025*self.height, pos_hint={"center_x":.5,"center_y":.86})
+		self.lbl = Label(text=sentence, font_size="25sp", pos_hint={"center_x":.5,"center_y":.86})
 
 		self.inputi.bind(focus=lambda x, y: self.clear_field(1, y))
 		self.inputi_2.bind(focus=lambda x, y: self.clear_field(2, y))
@@ -2659,7 +2659,7 @@ class Core(BoxLayout):
 				self.texter = "  До\n"+str(each)
 			else:
 				self.texter = "  Until\n"+str(each)
-			self.btn = Button(text=self.texter, size_hint_y=None, height=0.09*self.height, font_size=0.035*self.height)
+			self.btn = Button(text=self.texter, size_hint_y=None, height=0.09*self.height, font_size="25sp")
 			self.grid.add_widget(self.btn)
 			self.btn.bind(on_release=self.entry_change)
 
@@ -2677,17 +2677,17 @@ class Core(BoxLayout):
 			tit = "Внимание!"
 			sentence = "Вы уверены что хотите внести изменения\n в артикул {}?".format(name)
 			layout = FloatLayout(size=(self.width, self.height))
-			btn1 = Button(id="one", text="Изменить", size_hint_y=None, size_hint_x=None, height=0.06*self.height, width=0.6*self.width, font_size=0.035*self.height, pos_hint={"center_x":.5,"center_y":.45}, on_release=lambda x:self.changes_selector())
-			btn2 = Button(id="one", text="Изменить для всех", size_hint_y=None, size_hint_x=None, height=0.06*self.height, width=0.6*self.width, font_size=0.035*self.height, pos_hint={"center_x":.5,"center_y":.15}, on_release=lambda x:self.changes_selector(True))
+			btn1 = Button(id="one", text="Изменить", size_hint_y=None, size_hint_x=None, height=0.06*self.height, width=0.6*self.width, font_size="25sp", pos_hint={"center_x":.5,"center_y":.45}, on_release=lambda x:self.changes_selector())
+			btn2 = Button(id="one", text="Изменить для всех", size_hint_y=None, size_hint_x=None, height=0.06*self.height, width=0.6*self.width, font_size="25sp", pos_hint={"center_x":.5,"center_y":.15}, on_release=lambda x:self.changes_selector(True))
 		else:
 			tit = "Warning!"
 			sentence = "Do you really want to\n change article {}?".format(name)
 			layout = FloatLayout(size=(self.width, self.height))
-			btn1 = Button(id="one", text="Change", size_hint_y=None, size_hint_x=None, height=0.06*self.height, width=0.6*self.width, font_size=0.035*self.height, pos_hint={"center_x":.5,"center_y":.45}, on_release=lambda x:self.changes_selector())
-			btn2 = Button(id="one", text="Change for everyone", size_hint_y=None, size_hint_x=None, height=0.06*self.height, width=0.6*self.width, font_size=0.035*self.height, pos_hint={"center_x":.5,"center_y":.15}, on_release=lambda x:self.changes_selector(True))
+			btn1 = Button(id="one", text="Change", size_hint_y=None, size_hint_x=None, height=0.06*self.height, width=0.6*self.width, font_size="25sp", pos_hint={"center_x":.5,"center_y":.45}, on_release=lambda x:self.changes_selector())
+			btn2 = Button(id="one", text="Change for everyone", size_hint_y=None, size_hint_x=None, height=0.06*self.height, width=0.6*self.width, font_size="25sp", pos_hint={"center_x":.5,"center_y":.15}, on_release=lambda x:self.changes_selector(True))
 
 
-		lbl = Label(text=sentence, font_size=0.025*self.height, pos_hint={"center_x":.5,"center_y":.82})
+		lbl = Label(text=sentence, font_size="25sp", pos_hint={"center_x":.5,"center_y":.82})
 
 		layout.add_widget(lbl)
 		layout.add_widget(btn1)
@@ -3010,22 +3010,22 @@ class Core(BoxLayout):
 				self.inputi_4 = TextInput(text=day, multiline=False, size_hint_x=.2, size_hint_y=0.12, pos_hint={"center_x":.2,"center_y":.83}, hint_text='День')
 				self.inputi_5 = TextInput(text=month, multiline=False, size_hint_x=.2, size_hint_y=0.12, pos_hint={"center_x":.4,"center_y":.83}, hint_text='Месяц')
 				self.inputi_6 = TextInput(text=year, multiline=False, size_hint_x=.4, size_hint_y=0.12, pos_hint={"center_x":.7,"center_y":.83}, hint_text='Год')
-				self.btn1 = Button(text="Изменить", size_hint_y=None, size_hint_x=None, height=0.06*self.height, width=0.6*self.width, font_size=0.035*self.height, pos_hint={"center_x":.5,"center_y":.65}, on_release=lambda x:self.save_entry())
-				self.btn1_2 = Button(text="Изменить для всех", size_hint_y=None, size_hint_x=None, height=0.06*self.height, width=0.6*self.width, font_size=0.035*self.height, pos_hint={"center_x":.5,"center_y":.48}, on_release=lambda x:self.save_entry(True))
-				self.btn2 = Button(text="Удалить", size_hint_y=None, size_hint_x=None, height=0.06*self.height, width=0.6*self.width, font_size=0.035*self.height, pos_hint={"center_x":.5,"center_y":.31}, on_release=lambda x:self.delete_entry())
-				self.btn3 = Button(text="Удалить для всех", size_hint_y=None, size_hint_x=None, height=0.06*self.height, width=0.6*self.width, font_size=0.035*self.height, pos_hint={"center_x":.5,"center_y":.14}, on_release=lambda x:self.delete_entry(True))
+				self.btn1 = Button(text="Изменить", size_hint_y=None, size_hint_x=None, height=0.06*self.height, width=0.6*self.width, font_size="25sp", pos_hint={"center_x":.5,"center_y":.65}, on_release=lambda x:self.save_entry())
+				self.btn1_2 = Button(text="Изменить для всех", size_hint_y=None, size_hint_x=None, height=0.06*self.height, width=0.6*self.width, font_size="25sp", pos_hint={"center_x":.5,"center_y":.48}, on_release=lambda x:self.save_entry(True))
+				self.btn2 = Button(text="Удалить", size_hint_y=None, size_hint_x=None, height=0.06*self.height, width=0.6*self.width, font_size="25sp", pos_hint={"center_x":.5,"center_y":.31}, on_release=lambda x:self.delete_entry())
+				self.btn3 = Button(text="Удалить для всех", size_hint_y=None, size_hint_x=None, height=0.06*self.height, width=0.6*self.width, font_size="25sp", pos_hint={"center_x":.5,"center_y":.14}, on_release=lambda x:self.delete_entry(True))
 			else:
 				tit = 'Edit'
 				self.layout = FloatLayout(size=(self.width, self.height))
 				self.inputi_4 = TextInput(text=day, multiline=False, size_hint_x=.2, size_hint_y=0.12, pos_hint={"center_x":.2,"center_y":.83}, hint_text='Day')
 				self.inputi_5 = TextInput(text=month, multiline=False, size_hint_x=.2, size_hint_y=0.12, pos_hint={"center_x":.4,"center_y":.83}, hint_text='Month')
 				self.inputi_6 = TextInput(text=year, multiline=False, size_hint_x=.4, size_hint_y=0.12, pos_hint={"center_x":.7,"center_y":.83}, hint_text='Year')
-				self.btn1 = Button(text="Change", size_hint_y=None, size_hint_x=None, height=0.06*self.height, width=0.6*self.width, font_size=0.035*self.height, pos_hint={"center_x":.5,"center_y":.65}, on_release=lambda x:self.save_entry())
-				self.btn1_2 = Button(text="Change for everyone", size_hint_y=None, size_hint_x=None, height=0.06*self.height, width=0.6*self.width, font_size=0.035*self.height, pos_hint={"center_x":.5,"center_y":.48}, on_release=lambda x:self.save_entry(True))
-				self.btn2 = Button(text="Delete", size_hint_y=None, size_hint_x=None, height=0.06*self.height, width=0.6*self.width, font_size=0.035*self.height, pos_hint={"center_x":.5,"center_y":.31}, on_release=lambda x:self.delete_entry())
-				self.btn3 = Button(text="Delete for everyone", size_hint_y=None, size_hint_x=None, height=0.06*self.height, width=0.6*self.width, font_size=0.035*self.height, pos_hint={"center_x":.5,"center_y":.14}, on_release=lambda x:self.delete_entry(True))
+				self.btn1 = Button(text="Change", size_hint_y=None, size_hint_x=None, height=0.06*self.height, width=0.6*self.width, font_size="25sp", pos_hint={"center_x":.5,"center_y":.65}, on_release=lambda x:self.save_entry())
+				self.btn1_2 = Button(text="Change for everyone", size_hint_y=None, size_hint_x=None, height=0.06*self.height, width=0.6*self.width, font_size="25sp", pos_hint={"center_x":.5,"center_y":.48}, on_release=lambda x:self.save_entry(True))
+				self.btn2 = Button(text="Delete", size_hint_y=None, size_hint_x=None, height=0.06*self.height, width=0.6*self.width, font_size="25sp", pos_hint={"center_x":.5,"center_y":.31}, on_release=lambda x:self.delete_entry())
+				self.btn3 = Button(text="Delete for everyone", size_hint_y=None, size_hint_x=None, height=0.06*self.height, width=0.6*self.width, font_size="25sp", pos_hint={"center_x":.5,"center_y":.14}, on_release=lambda x:self.delete_entry(True))
 						
-			self.lbl = Label(text=sentence, font_size=0.025*self.height, pos_hint={"center_x":.5,"center_y":.95})
+			self.lbl = Label(text=sentence, font_size="25sp", pos_hint={"center_x":.5,"center_y":.95})
 		else:
 			if self.lang == 'ru':
 				tit = 'Редактирование'
@@ -3033,19 +3033,19 @@ class Core(BoxLayout):
 				self.inputi_4 = TextInput(text=day, multiline=False, size_hint_x=.2, size_hint_y=0.15, pos_hint={"center_x":.2,"center_y":.63}, hint_text='День')
 				self.inputi_5 = TextInput(text=month, multiline=False, size_hint_x=.2, size_hint_y=0.15, pos_hint={"center_x":.4,"center_y":.63}, hint_text='Месяц')
 				self.inputi_6 = TextInput(text=year, multiline=False, size_hint_x=.4, size_hint_y=0.15, pos_hint={"center_x":.7,"center_y":.63}, hint_text='Год')
-				self.btn1 = Button(text="Изменить", size_hint_y=None, size_hint_x=None, height=0.06*self.height, width=0.6*self.width, font_size=0.035*self.height, pos_hint={"center_x":.5,"center_y":.40}, on_release=lambda x:self.save_entry())
-				self.btn2 = Button(text="Удалить", size_hint_y=None, size_hint_x=None, height=0.06*self.height, width=0.6*self.width, font_size=0.035*self.height, pos_hint={"center_x":.5,"center_y":.16}, on_release=lambda x:self.delete_entry())
+				self.btn1 = Button(text="Изменить", size_hint_y=None, size_hint_x=None, height=0.06*self.height, width=0.6*self.width, font_size="25sp", pos_hint={"center_x":.5,"center_y":.40}, on_release=lambda x:self.save_entry())
+				self.btn2 = Button(text="Удалить", size_hint_y=None, size_hint_x=None, height=0.06*self.height, width=0.6*self.width, font_size="25sp", pos_hint={"center_x":.5,"center_y":.16}, on_release=lambda x:self.delete_entry())
 			else:
 				tit = 'Edit'
 				self.layout = FloatLayout(size=(self.width, self.height))
 				self.inputi_4 = TextInput(text=day, multiline=False, size_hint_x=.2, size_hint_y=0.15, pos_hint={"center_x":.2,"center_y":.63}, hint_text='Day')
 				self.inputi_5 = TextInput(text=month, multiline=False, size_hint_x=.2, size_hint_y=0.15, pos_hint={"center_x":.4,"center_y":.63}, hint_text='Month')
 				self.inputi_6 = TextInput(text=year, multiline=False, size_hint_x=.4, size_hint_y=0.15, pos_hint={"center_x":.7,"center_y":.63}, hint_text='Year')
-				self.btn1 = Button(text="Change", size_hint_y=None, size_hint_x=None, height=0.06*self.height, width=0.6*self.width, font_size=0.035*self.height, pos_hint={"center_x":.5,"center_y":.40}, on_release=lambda x:self.save_entry())
-				self.btn2 = Button(text="Delete", size_hint_y=None, size_hint_x=None, height=0.06*self.height, width=0.6*self.width, font_size=0.035*self.height, pos_hint={"center_x":.5,"center_y":.16}, on_release=lambda x:self.delete_entry())
+				self.btn1 = Button(text="Change", size_hint_y=None, size_hint_x=None, height=0.06*self.height, width=0.6*self.width, font_size="25sp", pos_hint={"center_x":.5,"center_y":.40}, on_release=lambda x:self.save_entry())
+				self.btn2 = Button(text="Delete", size_hint_y=None, size_hint_x=None, height=0.06*self.height, width=0.6*self.width, font_size="25sp", pos_hint={"center_x":.5,"center_y":.16}, on_release=lambda x:self.delete_entry())
 
 
-			self.lbl = Label(text=sentence, font_size=0.025*self.height, pos_hint={"center_x":.5,"center_y":.85})
+			self.lbl = Label(text=sentence, font_size="25sp", pos_hint={"center_x":.5,"center_y":.85})
 
 		self.layout.add_widget(self.lbl)
 		self.layout.add_widget(self.inputi_4)
@@ -3330,15 +3330,15 @@ class Core(BoxLayout):
 			title = "Внимание!!!"
 			text = "Нажав на кнопку УДАЛИТЬ вы уничтожите\nвсе эффекты!"
 			self.lay = FloatLayout(size=(self.width, self.height))
-			self.btn1 = Button(background_normal="but_red.png", text="УДАЛИТЬ", size_hint_y=None, size_hint_x=None, height=0.13*self.height, width=0.8*self.width, font_size=0.035*self.height, pos_hint={"center_x":.5,"center_y":.34}, on_release=lambda x:self.exterminate_effect())
+			self.btn1 = Button(background_normal="but_red.png", text="УДАЛИТЬ", size_hint_y=None, size_hint_x=None, height=0.13*self.height, width=0.8*self.width, font_size="25sp", pos_hint={"center_x":.5,"center_y":.34}, on_release=lambda x:self.exterminate_effect())
 		else:
 			title = "Warning!!!"
 			text = "If you press DELETE button\nall effects will be deleted!"
 			self.lay = FloatLayout(size=(self.width, self.height))
-			self.btn1 = Button(background_normal="but_red.png", text="DELETE", size_hint_y=None, size_hint_x=None, height=0.13*self.height, width=0.8*self.width, font_size=0.035*self.height, pos_hint={"center_x":.5,"center_y":.34}, on_release=lambda x:self.exterminate_effect())
+			self.btn1 = Button(background_normal="but_red.png", text="DELETE", size_hint_y=None, size_hint_x=None, height=0.13*self.height, width=0.8*self.width, font_size="25sp", pos_hint={"center_x":.5,"center_y":.34}, on_release=lambda x:self.exterminate_effect())
 
 
-		self.lbl = Label(text=text, font_size=0.025*self.height, pos_hint={"center_x":.5,"center_y":.86})
+		self.lbl = Label(text=text, font_size="25sp", pos_hint={"center_x":.5,"center_y":.86})
 
 		self.lay.add_widget(self.lbl)
 		self.lay.add_widget(self.btn1)
@@ -3362,12 +3362,12 @@ class Core(BoxLayout):
 
 			self.btn1 = Button(background_normal="but_red.png", text="УДАЛИТЬ",
 			size_hint_y=None, size_hint_x=None, height=0.13*self.height,
-			width=0.8*self.width, font_size=0.035*self.height,
+			width=0.8*self.width, font_size="25sp",
 			pos_hint={"center_x":.5,"center_y":.50}, on_release=lambda x:self.exterminate(False))
 
 			self.btn2 = Button(background_normal="but_red.png", text="УДАЛИТЬ ДЛЯ ВСЕХ",
 			size_hint_y=None, size_hint_x=None, height=0.13*self.height,
-			width=0.8*self.width, font_size=0.035*self.height,
+			width=0.8*self.width, font_size="25sp",
 			pos_hint={"center_x":.5,"center_y":.17}, on_release=lambda x:self.exterminate(True))
 
 		else:
@@ -3378,16 +3378,16 @@ class Core(BoxLayout):
 			self.btn1 = Button(background_normal="but_red.png",
 				text="DELETE", size_hint_y=None, size_hint_x=None,
 				height=0.13*self.height, width=0.8*self.width,
-				font_size=0.035*self.height, pos_hint={"center_x":.5,"center_y":.34},
+				font_size="25sp", pos_hint={"center_x":.5,"center_y":.34},
 				on_release=lambda x:self.exterminate(False))
 
 			self.btn2 = Button(background_normal="but_red.png", text="Delete for everyone",
 			size_hint_y=None, size_hint_x=None, height=0.13*self.height,
-			width=0.8*self.width, font_size=0.035*self.height,
+			width=0.8*self.width, font_size="25sp",
 			pos_hint={"center_x":.5,"center_y":.14}, on_release=lambda x:self.exterminate(True))
 
 
-		self.lbl = Label(text=text, font_size=0.025*self.height, pos_hint={"center_x":.5,"center_y":.86})
+		self.lbl = Label(text=text, font_size="25sp", pos_hint={"center_x":.5,"center_y":.86})
 
 		self.lay.add_widget(self.lbl)
 		self.lay.add_widget(self.btn1)
@@ -3530,7 +3530,7 @@ class Core(BoxLayout):
 						self.texter = 'Удаление даты [color=#04d3ff]{}[/color] \nАртикула [color=#04d3ff]{}[/color]'.format(each[2], each[0])
 					else:
 						self.texter = 'Delete date [color=#04d3ff]{}[/color] \nArticle [color=#04d3ff]{}[/color]'.format(each[2], each[0])	
-				self.btn = Button(markup=True, halign='left', text=self.texter, size_hint_y=None, height=0.09*self.height, font_size=0.035*self.height, on_release=lambda x: self.popup_del_item_from_stop_list(x.text))
+				self.btn = Button(markup=True, halign='left', text=self.texter, size_hint_y=None, height=0.09*self.height, font_size="25sp", on_release=lambda x: self.popup_del_item_from_stop_list(x.text))
 				self.grid.add_widget(self.btn)
 
 	def popup_del_item_from_stop_list(self, data):
@@ -4297,10 +4297,10 @@ class Core(BoxLayout):
 			sentence = "Вы хотите удалить пользователя {}?".format(self.current_user)
 			self.layout = FloatLayout(size=(self.width, self.height))
 
-			self.btn1 = Button(text="Да", size_hint_y=.5, size_hint_x=.4, font_size=0.035*self.height,
+			self.btn1 = Button(text="Да", size_hint_y=.5, size_hint_x=.4, font_size="25sp",
 				pos_hint={"center_x":.29,"center_y":.3}, on_release=lambda x:self.delete_user1())
 
-			self.btn2 = Button(text="Нет", size_hint_y=.5, size_hint_x=.4, font_size=0.035*self.height,
+			self.btn2 = Button(text="Нет", size_hint_y=.5, size_hint_x=.4, font_size="25sp",
 				pos_hint={"center_x":.71,"center_y":.3}, on_release=lambda x:self.dont_delete_user())
 
 		else:
@@ -4308,13 +4308,13 @@ class Core(BoxLayout):
 			sentence = "Do you want to delete user {}?".format(self.current_user)
 			self.layout = FloatLayout(size=(self.width, self.height))
 			
-			self.btn1 = Button(text="Yes", size_hint_y=.5, size_hint_x=.4, font_size=0.035*self.height,
+			self.btn1 = Button(text="Yes", size_hint_y=.5, size_hint_x=.4, font_size="25sp",
 				pos_hint={"center_x":.29,"center_y":.3}, on_release=lambda x:self.delete_user1())
 
-			self.btn2 = Button(text="No", size_hint_y=.5, size_hint_x=.4, font_size=0.035*self.height,
+			self.btn2 = Button(text="No", size_hint_y=.5, size_hint_x=.4, font_size="25sp",
 				pos_hint={"center_x":.71,"center_y":.3}, on_release=lambda x:self.dont_delete_user())
 
-		self.lbl = Label(text=sentence, font_size=0.025*self.height, pos_hint={"center_x":.5,"center_y":.86})
+		self.lbl = Label(text=sentence, font_size="25sp", pos_hint={"center_x":.5,"center_y":.86})
 
 		self.layout.add_widget(self.lbl)
 		self.layout.add_widget(self.btn1)
@@ -4537,7 +4537,7 @@ Builder.load_string("""
 		text: 'exit'
 		pos_hint: {"center_x": .5,"center_y": 1}
 		size_hint: (.4, .1)
-		font_size: sp(25)
+		font_size: '25sp'
 		on_release: root.stop_cam("NO")
 	Label:
 		size_hint: None, None
@@ -4572,7 +4572,7 @@ Builder.load_string("""
 			text: root.t_we_have_expired
 			text_size: self.size
 			size_hint: (.8, 1)
-			font_size: sp(25)
+			font_size: "25sp"
 			pos_hint: {"center_x": .4,"center_y": 2}
 			on_press: root.ids.fi.state = 'normal'
 			on_press: root.ids.se.state = 'normal'
@@ -4598,7 +4598,7 @@ Builder.load_string("""
 			text: 'X'
 			text_size: self.size
 			size_hint: (.2, 1)
-			font_size: sp(25)
+			font_size: "25sp"
 			pos_hint: {"center_x": .9,"center_y": 2}
 			on_press: root.alarm_out()
 
@@ -4635,7 +4635,7 @@ Builder.load_string("""
 					text: root.worktext
 					text_size: self.size
 					size_hint: (.8, .15)
-					font_size: sp(25)
+					font_size: "25sp"
 					pos_hint:{"center_x": .5,"center_y":.92}
 
 				Label:
@@ -4651,7 +4651,7 @@ Builder.load_string("""
 					text: 'Неизвестный EAN! Введите артикул для ассоциации'
 					text_size: self.size
 					size_hint: (.8, .07)
-					font_size: sp(15)
+					font_size: "15sp"
 					pos_hint: root.pos_unknown_EAN
 
 				ToggleButton:
@@ -4699,28 +4699,28 @@ Builder.load_string("""
 
 
 				TextInput:
-					font_size: sp(65)
+					font_size: "65sp"
 					id: inputer
 					multiline: False
 					size_hint: (.8, .15)
 					pos_hint: root.g_input
 
 				TextInput:
-					font_size: sp(65)
+					font_size: "65sp"
 					id: ex_inputer
 					multiline: False
 					size_hint: (.2, .15)
 					pos_hint:root.ex_input1
 
 				TextInput:
-					font_size: sp(65)
+					font_size: "65sp"
 					id: ex_inputer2
 					multiline: False
 					size_hint: (.2, .15)
 					pos_hint: root.ex_input2
 
 				TextInput:
-					font_size: sp(65)
+					font_size: "65sp"
 					id: ex_inputer3
 					hint_text: root.yez
 					multiline: False
@@ -4783,40 +4783,51 @@ Builder.load_string("""
 							size: self.size
 					Button:
 						text: "1"
-						on_release:
-							root.type('1')
+						font_size: '40sp'
+						on_release: root.type('1')
 					Button:
 						text: "2"
+						font_size: '40sp'
 						on_release: root.type('2')
 					Button:
 						text: "3"
+						font_size: '40sp'
 						on_release: root.type('3')
 					Button:
 						text: "4"
+						font_size: '40sp'
 						on_release: root.type('4')
 					Button:
 						text: "5"
+						font_size: '40sp'
 						on_release: root.type('5')
 					Button:
 						text: "6"
+						font_size: '40sp'
 						on_release: root.type('6')
 					Button:
 						text: "7"
+						font_size: '40sp'
 						on_release: root.type('7')
 					Button:
 						text: "8"
+						font_size: '40sp'
 						on_release: root.type('8')
 					Button:
 						text: "9"
+						font_size: '40sp'
 						on_release: root.type('9')
 					Button:
 						text: "CLS"
+						font_size: '40sp'
 						on_release: root.type('CLS')
 					Button:
 						text: "0"
+						font_size: '40sp'
 						on_release: root.type('0')
 					Button:
 						text: "<<"
+						font_size: '40sp'
 						on_release: root.type('<<')
 
 
@@ -4848,7 +4859,7 @@ Builder.load_string("""
 					root.get_them(0)
 
 			TextInput:
-				font_size: 28
+				font_size: "28sp"
 				hint_text: root.t_search
 				id: searcher
 				multiline: False
@@ -4935,7 +4946,7 @@ Builder.load_string("""
 					on_press: root.define_today_art('range')
 
 				TextInput:
-					font_size: 28
+					font_size: "28sp"
 					id: to_d1
 					hint_text: root.t_dd
 					multiline: False
@@ -4944,7 +4955,7 @@ Builder.load_string("""
 					on_text: root.extra_checker('dd')
 
 				TextInput:
-					font_size: 28
+					font_size: "28sp"
 					id: to_d2
 					hint_text: root.t_mm
 					multiline: False
@@ -4953,7 +4964,7 @@ Builder.load_string("""
 					on_text: root.extra_checker('mm')
 
 				TextInput:
-					font_size: 28
+					font_size: "28sp"
 					id: to_d3
 					hint_text: root.current_year
 					multiline: False
@@ -4962,7 +4973,7 @@ Builder.load_string("""
 					on_text: root.extra_checker('yy')
 ##################################################################################
 				TextInput:
-					font_size: 18
+					font_size: "18sp"
 					id: to_range1
 					hint_text: root.t_dd
 					multiline: False
@@ -4971,7 +4982,7 @@ Builder.load_string("""
 					on_text: root.extra_checker2('1dd')
 
 				TextInput:
-					font_size: 18
+					font_size: "18sp"
 					id: to_range2
 					hint_text: root.t_mm
 					multiline: False
@@ -4980,7 +4991,7 @@ Builder.load_string("""
 					on_text: root.extra_checker2('1mm')
 
 				TextInput:
-					font_size: 18
+					font_size: "18sp"
 					id: to_range3
 					hint_text: root.current_year
 					multiline: False
@@ -4989,7 +5000,7 @@ Builder.load_string("""
 					on_text: root.extra_checker2('1yy')
 
 				TextInput:
-					font_size: 18
+					font_size: "18sp"
 					id: to_range4
 					hint_text: root.t_dd
 					multiline: False
@@ -4998,7 +5009,7 @@ Builder.load_string("""
 					on_text: root.extra_checker2('2dd')
 
 				TextInput:
-					font_size: 18
+					font_size: "18sp"
 					id: to_range5
 					hint_text: root.t_mm
 					multiline: False
@@ -5007,7 +5018,7 @@ Builder.load_string("""
 					on_text: root.extra_checker2('2mm')
 
 				TextInput:
-					font_size: 18
+					font_size: "18sp"
 					id: to_range6
 					hint_text: root.current_year
 					multiline: False
@@ -5017,7 +5028,7 @@ Builder.load_string("""
 
 				Button:
 					border: 0,0,0,0
-					font_size: 28
+					font_size: "28sp"
 					text: root.t_find
 					size_hint: (.31, .11)
 					pos_hint: root.ranger7
@@ -5032,7 +5043,7 @@ Builder.load_string("""
 						Rectangle: 
 							pos: self.pos 
 							size: self.size
-					font_size: 18
+					font_size: "18sp"
 					text: root.t_ot + ':'
 					size_hint: (.1, .05)
 					pos_hint: root.ranger8
@@ -5044,7 +5055,7 @@ Builder.load_string("""
 						Rectangle: 
 							pos: self.pos 
 							size: self.size
-					font_size: 18
+					font_size: "18sp"
 					text: root.t_do + ':'
 					size_hint: (.1, .05)
 					pos_hint: root.ranger9
@@ -5076,7 +5087,7 @@ Builder.load_string("""
 				Label:
 					pos_hint: {'center_x': .5, 'center_y': .5}
 					text: root.sp_text
-					font_size: sp(20)
+					font_size: "20sp"
 					size_hint: (.8, .3)
 					canvas.before: 
 						Color: 
@@ -5108,26 +5119,26 @@ Builder.load_string("""
 					id: ghost
 					size: self.texture_size
 					text: "Нажмите обновить"
-					font_size: sp(60)
+					font_size: "60sp"
 					pos_hint:{"center_x":.5,"center_y":.88}
 
 				Label:
 					id: ghost2
 					size: self.texture_size
 					text: ""
-					font_size: sp(30)
+					font_size: "30sp"
 					pos_hint:{"center_x":.5,"center_y":.80}
 				Label:
 					id: ghost4
 					size: self.texture_size
 					text: ""
-					font_size: sp(30)
+					font_size: "30sp"
 					pos_hint:{"center_x":.5,"center_y":.75}
 				Label:
 					id: ghost5
 					size: self.texture_size
 					text: ''
-					font_size: sp(30)
+					font_size: "30sp"
 					pos_hint: {"center_x":.5, "center_y":.70}
 
 				ScrollView:
@@ -5176,7 +5187,7 @@ Builder.load_string("""
 				Label:
 					size: self.texture_size
 					text: root.t_edit
-					font_size: sp(40)
+					font_size: "40sp"
 					pos_hint:{"center_x":.5,"center_y":.9}
 
 				TextInput:
@@ -5203,7 +5214,7 @@ Builder.load_string("""
 				Button:
 					border: 0,0,0,0
 					text: root.t_save
-					font_size: sp(22)
+					font_size: "22sp"
 					pos_hint: {'center_x': .75, 'center_y': .8}
 					size_hint: (.4, .10)
 					background_normal: "but.png"
@@ -5213,7 +5224,7 @@ Builder.load_string("""
 				Button:
 					border: 0,0,0,0
 					text: root.t_add_date
-					font_size: sp(16)
+					font_size: "16sp"
 					pos_hint: {'center_x': .75, 'center_y': .7}
 					size_hint: (.4, .10)
 					background_normal: "but.png"
@@ -5223,7 +5234,7 @@ Builder.load_string("""
 				Button:
 					border: 0,0,0,0
 					text: root.t_manage_ean
-					font_size: sp(16)
+					font_size: "16sp"
 					pos_hint: {'center_x': .75, 'center_y': .6}
 					size_hint: (.4, .10)
 					background_normal: "but.png"
@@ -5234,7 +5245,7 @@ Builder.load_string("""
 				Button:
 					border: 0,0,0,0
 					text: root.t_delete_article
-					font_size: sp(18)
+					font_size: "18sp"
 					pos_hint: {'center_x': .75, 'center_y': .1}
 					size_hint: (.5, .12)
 					background_normal: "but.png"
@@ -5283,7 +5294,7 @@ Builder.load_string("""
 				Button:
 					border: 0,0,0,0
 					text: root.t_language
-					font_size: sp(22)
+					font_size: "22sp"
 					pos_hint: {'center_x': .5, 'center_y': .8}
 					size_hint: (.65, .12)
 					background_normal: "but.png"
@@ -5293,7 +5304,7 @@ Builder.load_string("""
 				Button:
 					border: 0,0,0,0
 					text: root.t_sync
-					font_size: sp(22)
+					font_size: "22sp"
 					pos_hint: {'center_x': .5, 'center_y': .68}
 					size_hint: (.65, .12)
 					background_normal: "but.png"
@@ -5304,7 +5315,7 @@ Builder.load_string("""
 				Button:
 					border: 0,0,0,0
 					text: root.t_delete_database
-					font_size: sp(22)
+					font_size: "22sp"
 					pos_hint: {'center_x': .5, 'center_y': .56}
 					size_hint: (.65, .12)
 					background_normal: "but.png"
@@ -5315,7 +5326,7 @@ Builder.load_string("""
 				Button:
 					border: 0,0,0,0
 					text: root.t_delete_effects
-					font_size: sp(22)
+					font_size: "22sp"
 					pos_hint: {'center_x': .5, 'center_y': .44}
 					size_hint: (.65, .12)
 					background_normal: "but.png"
@@ -5375,7 +5386,7 @@ Builder.load_string("""
 
 
 				TextInput:
-					font_size: sp(24)
+					font_size: "24sp"
 					id: group_name
 					hint_text: root.t_group_name
 					multiline: False
@@ -5383,7 +5394,7 @@ Builder.load_string("""
 					pos_hint: {'center_x': .5, 'center_y': .75}
 
 				TextInput:
-					font_size: sp(24)
+					font_size: "24sp"
 					id: group_password
 					password: True
 					hint_text: root.t_password
@@ -5394,7 +5405,7 @@ Builder.load_string("""
 				Button:
 					border: 0,0,0,0
 					text: root.t_enter
-					font_size: sp(22)
+					font_size: "22sp"
 					pos_hint: {'center_x': .5, 'center_y': .5}
 					size_hint: (.65, .1)
 					background_normal: "but.png"
@@ -5405,7 +5416,7 @@ Builder.load_string("""
 				Button:
 					border: 0,0,0,0
 					text: root.t_create_group
-					font_size: sp(22)
+					font_size: "22sp"
 					pos_hint: {'center_x': .5, 'center_y': .4}
 					size_hint: (.65, .1)
 					background_normal: "but.png"
@@ -5426,7 +5437,7 @@ Builder.load_string("""
 
 			TextInput:
 
-				font_size: sp(24)
+				font_size: "24sp"
 				id: new_nickname
 				hint_text: root.t_create_user
 				multiline: False
@@ -5437,7 +5448,7 @@ Builder.load_string("""
 
 				text: root.t_create
 				border: 0,0,0,0
-				font_size: sp(22)
+				font_size: "22sp"
 				pos_hint: {'center_x': .5, 'center_y': .65}
 				size_hint: (.65, .1)
 				background_normal: "but.png"
@@ -5458,7 +5469,7 @@ Builder.load_string("""
 
 			TextInput:
 
-				font_size: sp(24)
+				font_size: "24sp"
 				id: nickname
 				hint_text: root.t_user_name
 				multiline: False
@@ -5469,7 +5480,7 @@ Builder.load_string("""
 
 				text: root.t_enter
 				border: 0,0,0,0
-				font_size: sp(22)
+				font_size: "22sp"
 				pos_hint: {'center_x': .5, 'center_y': .65}
 				size_hint: (.65, .1)
 				background_normal: "but.png"
@@ -5481,7 +5492,7 @@ Builder.load_string("""
 
 				text: root.t_create
 				border: 0,0,0,0
-				font_size: sp(22)
+				font_size: "22sp"
 				pos_hint: {'center_x': .5, 'center_y': .55}
 				size_hint: (.65, .1)
 				background_normal: "but.png"
@@ -5511,7 +5522,7 @@ Builder.load_string("""
 
 					size_hint: (.95, .5)
 					pos_hint:{"center_x":.5,"center_y":.5}
-					font_size: sp(25)
+					font_size: "25sp"
 
 				Label:
 					canvas.before:
@@ -5537,7 +5548,7 @@ Builder.load_string("""
 					pos_hint:{"center_x":.5,"center_y":.79}
 					text: root.t_your_sync
 					color: 1,0,1,1
-					font_size: sp(25)
+					font_size: "25sp"
 
 				ScrollView:
 					size_hint_x: .95
@@ -5559,27 +5570,27 @@ Builder.load_string("""
 				Label:
 					size: self.texture_size
 					text: root.current_group
-					font_size: sp(40)
+					font_size: "40sp"
 					pos_hint:{"center_x":.5,"center_y":.9}
 
 				Label:
 					size: self.texture_size
 					text: root.t_group
 					color: 1,0,1,1
-					font_size: sp(25)
+					font_size: "25sp"
 					pos_hint:{"center_x":.5,"center_y":.95}
 
 				Label:
 					size: self.texture_size
 					text: root.current_user
 					color: 1,0,1,1
-					font_size: sp(21)
+					font_size: "21sp"
 					pos_hint:{"center_x":.5,"center_y":.85}
 
 				Button:
 					text: root.t_sync
 					border: 0,0,0,0
-					font_size: sp(22)
+					font_size: "22sp"
 					pos_hint: {'center_x': .5, 'center_y': .19}
 					size_hint: (.65, .1)
 					background_normal: "but.png"
@@ -5590,7 +5601,7 @@ Builder.load_string("""
 				Button:
 					text: root.t_exit
 					border: 0,0,0,0
-					font_size: sp(22)
+					font_size: "22sp"
 					pos_hint: {'center_x': .32, 'center_y': .09}
 					size_hint: (.325, .1)
 					background_normal: "but.png"
@@ -5600,7 +5611,7 @@ Builder.load_string("""
 				Button:
 					text: root.t_delete
 					border: 0,0,0,0
-					font_size: sp(22)
+					font_size: "22sp"
 					pos_hint: {'center_x': .68, 'center_y': .09}
 					size_hint: (.325, .1)
 					background_normal: "but_red.png"
