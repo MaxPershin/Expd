@@ -117,7 +117,7 @@ class Core(BoxLayout):
 	pos_el4 = ObjectProperty({"center_x":-5,"center_y":.795})
 	pos_el5 = ObjectProperty({'center_x':.5, 'center_y': .1})
 
-	pos_init_cam = ObjectProperty({'center_x': .5, 'center_y': .8})
+	pos_init_cam = ObjectProperty({'center_x': .785, 'center_y': .68})
 
 	container1 = ObjectProperty(10)
 	container2 = ObjectProperty(10)
@@ -150,6 +150,7 @@ class Core(BoxLayout):
 	new_users = ''
 	auth_key = "HqpU7WbJBeA4wN058kf9nPo9PZAAiUiEBrC3ZvP5"
 	url = 'https://avocado-a066c.firebaseio.com/'
+	buttons_color = (0, 0, 0, 1)
 
 	r = None
 
@@ -1238,7 +1239,7 @@ class Core(BoxLayout):
 		if action == 'hide':
 			self.pos_init_cam = {'center_x': -2, 'center_y': .8}
 		else:
-			self.pos_init_cam = {'center_x': .5, 'center_y': .8}
+			self.pos_init_cam = {'center_x': .785, 'center_y': .68}
 			self.show_unknown_ean('hide')
 
 	def work2(self):
@@ -2071,7 +2072,7 @@ class Core(BoxLayout):
 
 		self.manage_ean_popup.open()
 
-	#bookmark
+
 
 	def change_ean(self, button):
 		self.manage_ean_popup.dismiss()
@@ -4256,7 +4257,7 @@ class Core(BoxLayout):
 		self.popup.dismiss()
 
 	def delete_user1(self):
-		#bookmark
+		
 
 		data = self.read_from_base()
 		names = data['Users']
@@ -4615,21 +4616,21 @@ Builder.load_string("""
 			FloatLayout:
 				id: summertime
 				canvas:
-					Color: 
-						rgb: 1, 1, 1
+					Color: 	
+						rgb: .886, .949, .671
 
 					Rectangle:
-						source: 'back.png'
 						size: self.size
 						pos: self.pos
 				Label:
 					canvas.before:
 						Color: 
-							rgb: 0, .8, .4
+							rgba: 0, .8, .4, 0
 						Rectangle:
 							size: self.size
 							pos: self.pos
 
+					color: 255, 255, 255, 1
 					halign: 'center'
 					valign: "middle"
 					text: root.worktext
@@ -4660,6 +4661,7 @@ Builder.load_string("""
 					state: 'down'
 					text: root.t_ot
 					size_hint: (.3, .06)
+					background_down: 'w_b.png'
 					pos_hint: root.pos_before_after1
 					on_press: root.switch_before_after('before')
 
@@ -4668,6 +4670,7 @@ Builder.load_string("""
 					group: 'before_after'
 					text: root.t_do
 					size_hint: (.3, .06)
+					background_down: 'w_b.png'
 					pos_hint: root.pos_before_after2
 					on_press: root.switch_before_after('after')
 
@@ -4678,6 +4681,7 @@ Builder.load_string("""
 					state: 'down'
 					text: root.t_day
 					size_hint: (.3, .06)
+					background_down: 'w_b.png'
 					pos_hint: root.pos_day_month_year1
 					on_press: root.day_or_what_changer('day')
 
@@ -4686,6 +4690,7 @@ Builder.load_string("""
 					group: 'day_month_year'
 					text: root.t_month
 					size_hint: (.3, .06)
+					background_down: 'w_b.png'
 					pos_hint: root.pos_day_month_year2
 					on_press: root.day_or_what_changer('month')
 
@@ -4694,6 +4699,7 @@ Builder.load_string("""
 					group: 'day_month_year'
 					text: root.t_year
 					size_hint: (.3, .06)
+					background_down: 'w_b.png'
 					pos_hint: root.pos_day_month_year3
 					on_press: root.day_or_what_changer('year')
 
@@ -4729,40 +4735,53 @@ Builder.load_string("""
 
 
 				Button:
+					font_name: 'mp.ttf'
+					text: '>'
+					font_size: '70sp'
 					border: 0,0,0,0
 					pos_hint: {'center_x': .72, 'center_y': .53}
 					size_hint: (.24, .15)
-					background_normal: "arrow_next.png"
-					background_down: "butp.png"
+					background_normal: "edit.png"
+					background_down: "edit.png"
 					on_release:
 						root.press += 1
 						root.catch_art()
 
 
 				Button:
+					font_name: 'mp.ttf'
+					text: 'R'
+					font_size: '70sp'
 					border: 0,0,0,0
 					pos_hint: {'center_x': .5, 'center_y': .53}
 					size_hint: (.24, .15)
-					background_normal: "arrow_repeat.png"
-					background_down: "butp.png"
+					background_normal: "edit.png"
+					background_down: "edit.png"
 					on_release:
 						root.repeat()
 
+				#bookmark
 				Button:
-					text: "Initiate cam"
-					border: 0,0,0,0
+					background_down: 'w_b.png'
+					color: 1,1,1,1
+					font_size: '90sp'
+					text: "A"
+					font_name: 'mp.ttf'
 					pos_hint: root.pos_init_cam
-					size_hint: (.24, .07)
+					size_hint: (.23, .148)
 					on_release:
 						root.go_cam()
 
 
 				Button:
+					font_name: 'mp.ttf'
+					text: '<'
+					font_size: '70sp'
 					pos_hint: {'center_x': .28, 'center_y': .53}
 					border: 0,0,0,0
 					size_hint: (.24, .15)
-					background_normal: "arrow_previous.png"
-					background_down: "butp.png"
+					background_normal: "edit.png"
+					background_down: "edit.png"
 					on_release: root.previous()
 					on_release: root.dater_invisible()
 					on_release: root.show_buttons_before_after('hide')
@@ -4775,58 +4794,70 @@ Builder.load_string("""
 					size_hint_y: .4
 					size_hint_x: .8
 					pos_hint: {'center_x': .5, 'center_y': .25}
-					canvas.before: 
+					canvas: 
 						Color: 
-							rgb: 0, .8, 0 
+							rgba: root.buttons_color
 						Rectangle: 
 							pos: self.pos 
 							size: self.size
 					Button:
 						text: "1"
+						background_down: 'w_b.png'
 						font_size: '40sp'
 						on_release: root.type('1')
 					Button:
 						text: "2"
+						background_down: 'w_b.png'
 						font_size: '40sp'
 						on_release: root.type('2')
 					Button:
 						text: "3"
+						background_down: 'w_b.png'
 						font_size: '40sp'
 						on_release: root.type('3')
 					Button:
 						text: "4"
+						background_down: 'w_b.png'
 						font_size: '40sp'
 						on_release: root.type('4')
 					Button:
 						text: "5"
+						background_down: 'w_b.png'
 						font_size: '40sp'
 						on_release: root.type('5')
 					Button:
 						text: "6"
+						background_down: 'w_b.png'
 						font_size: '40sp'
 						on_release: root.type('6')
 					Button:
 						text: "7"
+						background_down: 'w_b.png'
 						font_size: '40sp'
 						on_release: root.type('7')
 					Button:
 						text: "8"
+						background_down: 'w_b.png'
 						font_size: '40sp'
 						on_release: root.type('8')
 					Button:
 						text: "9"
+						background_down: 'w_b.png'
 						font_size: '40sp'
 						on_release: root.type('9')
 					Button:
 						text: "CLS"
+						background_down: 'w_b.png'
 						font_size: '40sp'
 						on_release: root.type('CLS')
 					Button:
 						text: "0"
+						background_down: 'w_b.png'
 						font_size: '40sp'
 						on_release: root.type('0')
 					Button:
 						text: "<<"
+						background_down: 'w_b.png'
 						font_size: '40sp'
 						on_release: root.type('<<')
 
@@ -4835,26 +4866,43 @@ Builder.load_string("""
 			name: 'database'
 			FloatLayout:
 				canvas:
+					Color: 	
+						rgb: .886, .949, .671
+
 					Rectangle:
 						size: self.size
 						pos: self.pos
-						source: 'back.png'
+						
+			Label:
+
+				halign: 'center'
+				valign: "middle"
+				text: 'База данных'
+				text_size: self.size
+				size_hint: (.8, .07)
+				color: 0, 0, 0, 1
+				font_size: "28sp"
+				pos_hint: {'center_x': .5, 'center_y': .93}
 
 			Button:
+				text: '+'
+				font_name: 'mp.ttf'
+				font_size: '75sp'
 				border: 0,0,0,0
-				pos_hint: {'center_x': .5, 'center_y': .1}
+				pos_hint: {'center_x': .5, 'center_y': .07}
 				size_hint: (.24, .15)
-				background_normal: "plus.png"
-				background_down: "butp.png"
+				background_normal: "edit.png"
+				background_down: "edit.png"
 				on_release:
 					root.create_new()
 
 			Button:
-				border: 0,0,0,0
-				pos_hint: {'center_x': .85, 'center_y': .9}
-				size_hint: (.24, .15)
-				background_normal: "find.png"
-				background_down: "butp.png"
+				pos_hint: {'center_x': .848, 'center_y': .8}
+				size_hint: (.2, .113)
+				text: 's'
+				font_name: 'mp.ttf'
+				font_size: '60sp'
+				background_normal: 'w_b.png'
 				on_release:
 					root.get_them(0)
 
@@ -4863,13 +4911,13 @@ Builder.load_string("""
 				hint_text: root.t_search
 				id: searcher
 				multiline: False
-				size_hint: (.7, .08)
-				pos_hint:{"center_x":.40,"center_y":.9}
+				size_hint: (.7, .11)
+				pos_hint:{"center_x":.40,"center_y":.8}
 
 			ScrollView:
 				size_hint_x: .95
-				size_hint_y: .65
-				pos_hint: {'center_x': .5, 'center_y': .5}
+				size_hint_y: .58
+				pos_hint: {'center_x': .5, 'center_y': .435}
 				GridLayout:
 					id: griddy
 					canvas:
@@ -4886,6 +4934,8 @@ Builder.load_string("""
 			name: 'today'
 			FloatLayout:
 				canvas:
+					Color: 	
+						rgb: .886, .949, .671
 					Rectangle:
 						size: self.size
 						pos: self.pos
@@ -4908,10 +4958,10 @@ Builder.load_string("""
 					on_press: root.put_trash()
 
 				ToggleButton:
-					border: 0,0,0,0
 					id: bom_bom_bom
 					allow_no_selection: False
 					state: 'down'
+					background_down: 'w_b.png'
 					group: 'which_trash'
 					state: 'down'
 					text: root.t_today
@@ -4922,10 +4972,10 @@ Builder.load_string("""
 					on_press: root.define_today_art('today')
 
 				ToggleButton:
-					border: 0,0,0,0
 					id: bom_bom_bom2
 					allow_no_selection: False
 					group: 'which_trash'
+					background_down: 'w_b.png'
 					text: root.t_random
 					size_hint: (.3, .06)
 					pos_hint: {"center_x": .5,"center_y":.9}
@@ -4934,10 +4984,10 @@ Builder.load_string("""
 					on_press: root.define_today_art('another')
 
 				ToggleButton:
-					border: 0,0,0,0
 					id: bom_bom_bom3
 					allow_no_selection: False
 					group: 'which_trash'
+					background_down: 'w_b.png'
 					text: root.t_period
 					size_hint: (.3, .06)
 					pos_hint: {"center_x": .8,"center_y":.9}
@@ -5027,9 +5077,10 @@ Builder.load_string("""
 					on_text: root.extra_checker2('2yy')
 
 				Button:
-					border: 0,0,0,0
-					font_size: "28sp"
-					text: root.t_find
+					font_size: "60sp"
+					font_name: 'mp.ttf'
+					text: 's'
+					background_down: 'w_b.png'
 					size_hint: (.31, .11)
 					pos_hint: root.ranger7
 					on_release: root.ranger_main()
@@ -5038,9 +5089,9 @@ Builder.load_string("""
 
 				Label:
 					canvas.before: 
-						Color: 
-							rgb: 0, .8, 0 
-						Rectangle: 
+						Color:
+							rgb: .58, .84, 0 
+						Rectangle:
 							pos: self.pos 
 							size: self.size
 					font_size: "18sp"
@@ -5051,7 +5102,7 @@ Builder.load_string("""
 				Label:
 					canvas.before: 
 						Color: 
-							rgb: 0, .8, 0 
+							rgb: .58, .84, 0
 						Rectangle: 
 							pos: self.pos 
 							size: self.size
@@ -5061,9 +5112,11 @@ Builder.load_string("""
 					pos_hint: root.ranger9
 
 				Button:
-					border: 0,0,0,0
-					text: root.t_find
+					font_name: 'mp.ttf'
+					text: 's'
+					font_size: '60sp'
 					size_hint: (.3, .08)
+					background_down: 'w_b.png'
 					pos_hint: root.pos_el4
 					on_press: root.define_another_art()
 
@@ -5110,10 +5163,12 @@ Builder.load_string("""
 			FloatLayout:
 				id: info_canvas
 				canvas:
+					Color: 	
+						rgb: .886, .949, .671
 					Rectangle:
 						size: self.size
 						pos: self.pos
-						source: 'back.png'
+						
 
 				Label:
 					id: ghost
@@ -5180,10 +5235,12 @@ Builder.load_string("""
 			FloatLayout:
 				id: canvas
 				canvas:
+					Color: 	
+						rgb: .886, .949, .671
 					Rectangle:
 						size: self.size
 						pos: self.pos
-						source: 'back.png'
+						
 				Label:
 					size: self.texture_size
 					text: root.t_edit
@@ -5286,10 +5343,12 @@ Builder.load_string("""
 
 				id: canvas
 				canvas:
+					Color: 	
+						rgb: .886, .949, .671
 					Rectangle:
 						size: self.size
 						pos: self.pos
-						source: 'back.png'
+						
 
 				Button:
 					border: 0,0,0,0
@@ -5340,10 +5399,12 @@ Builder.load_string("""
 
 				id: canvas
 				canvas:
+					Color: 	
+						rgb: .886, .949, .671
 					Rectangle:
 						size: self.size
 						pos: self.pos
-						source: 'back.png'
+						
 
 
 				ScrollView:
@@ -5354,10 +5415,11 @@ Builder.load_string("""
 						orientation: "vertical"
 						id: griddy_trash
 						canvas:
+							Color: 	
+								rgb: .886, .949, .671
 							Rectangle:
 								pos: self.pos
 								size: self.size
-								source: "cleanbl.png"
 						spacing: 2
 						cols: 1
 						size_hint_y: None
@@ -5379,10 +5441,12 @@ Builder.load_string("""
 			FloatLayout:
 				id: canvas
 				canvas:
+					Color: 	
+						rgb: .886, .949, .671
 					Rectangle:
 						size: self.size
 						pos: self.pos
-						source: 'back.png'
+						
 
 
 				TextInput:
@@ -5430,10 +5494,12 @@ Builder.load_string("""
 			FloatLayout:
 				id: canvas
 				canvas:
+					Color: 	
+						rgb: .886, .949, .671
 					Rectangle:
 						size: self.size
 						pos: self.pos
-						source: 'back.png'
+						
 
 			TextInput:
 
@@ -5462,10 +5528,12 @@ Builder.load_string("""
 			FloatLayout:
 				id: canvas
 				canvas:
+					Color: 	
+						rgb: .886, .949, .671
 					Rectangle:
 						size: self.size
 						pos: self.pos
-						source: 'back.png'
+						
 
 			TextInput:
 
@@ -5506,10 +5574,12 @@ Builder.load_string("""
 			FloatLayout:
 				id: float_group_home
 				canvas:
+					Color: 	
+						rgb: .886, .949, .671
 					Rectangle:
 						size: self.size
 						pos: self.pos
-						source: 'back.png'
+						
 
 				Label:
 					id: nothing_to_show
@@ -5558,10 +5628,12 @@ Builder.load_string("""
 						orientation: "vertical"
 						id: grid_internet_change
 						canvas:
+							Color: 	
+								rgb: .886, .949, .671
 							Rectangle:
 								pos: self.pos
 								size: self.size
-								source: "cleanbl.png"
+								
 						spacing: 2
 						cols: 1
 						size_hint_y: None
@@ -5623,10 +5695,12 @@ Builder.load_string("""
 
 			FloatLayout:
 				canvas:
+					Color: 	
+						rgb: .886, .949, .671
 					Rectangle:
 						size: self.size
 						pos: self.pos
-						source: 'back.png'
+						
 
 				ToggleButton:
 					id: russian_button

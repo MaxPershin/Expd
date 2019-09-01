@@ -36,7 +36,7 @@ version = 4.0.0
 
 # (list) Application requirements
 # comma seperated e.g. requirements = sqlite3,kivy
-requirements = kivy,dateutil,openssl,android,requests,libiconv,libzbar,Pillow==5.2.0,python3,pyzbar==0.1.8,png
+requirements = kivy,dateutil,openssl,android,requests,libiconv,libzbar,Pillow==5.2.0,python3,pyzbar==0.1.8,png,ttf
 
 # (str) Custom source folders for requirements
 # Sets custom source for any requirements with recipes
