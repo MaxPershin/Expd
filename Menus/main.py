@@ -126,6 +126,9 @@ class Core(BoxLayout):
 
 	stop_list =ObjectProperty([])
 
+	shx_today_scroll = ObjectProperty(.95)
+	shy_today_scroll = ObjectProperty(.72)
+	ph_today_scroll = ObjectProperty({'center_x': .5, 'center_y': .5})
 
 	ranger1 = ObjectProperty({"center_x":-5,"center_y":.795})
 	ranger2 = ObjectProperty({"center_x":-5,"center_y":.795})
@@ -301,6 +304,16 @@ class Core(BoxLayout):
 		t_user_name = ObjectProperty('User name')
 		t_we_have_expired = ObjectProperty('Expired articles found!')
 		t_manage_ean = ObjectProperty('Manage EAN')
+
+	def reshape_today_scroll(self, data):
+		if data == 'today':
+			self.shx_today_scroll = .95
+			self.shy_today_scroll = .72
+			self.ph_today_scroll = {'center_x': .5, 'center_y': .5}
+		if data == 'any' or data == 'range':
+			self.shx_today_scroll = .95
+			self.shy_today_scroll = .72
+			self.ph_today_scroll = {'center_x': .5, 'center_y': .375}
 
 	def show_unknown_ean(self, action):
 		if action == 'hide':
@@ -780,7 +793,7 @@ class Core(BoxLayout):
 			self.pos_el3 = ({"center_x":-5,"center_y":.795})
 			self.pos_el4 = ({"center_x":-5,"center_y":.795})
 
-			self.pos_el5 = ({'center_x': .5, 'center_y': .1})
+			self.pos_el5 = ({'center_x': .5, 'center_y': .08})
 
 	def day_or_what_changer(self, data):
 		if data != self.day_or_what:
@@ -4530,16 +4543,18 @@ Builder.load_string("""
 		Rectangle:
 			pos: self.pos 
 			size: self.size
+
 	ZBarCam:
 		id: zbarcam
 		code_types: ZBarSymbol.QRCODE, ZBarSymbol.EAN13
+
 	Button:
-		border: 0,0,0,0
 		text: 'exit'
 		pos_hint: {"center_x": .5,"center_y": 1}
 		size_hint: (.4, .1)
 		font_size: '25sp'
 		on_release: root.stop_cam("NO")
+
 	Label:
 		size_hint: None, None
 		size: self.texture_size[0], 50
@@ -4760,7 +4775,7 @@ Builder.load_string("""
 					on_release:
 						root.repeat()
 
-				#bookmark
+				
 				Button:
 					background_down: 'w_b.png'
 					color: 1,1,1,1
@@ -4941,6 +4956,16 @@ Builder.load_string("""
 						pos: self.pos
 						source: 'back.png'
 
+				Label:
+					halign: 'center'
+					valign: "middle"
+					text: 'Сроки годности'
+					text_size: self.size
+					size_hint: (.8, .07)
+					color: 0, 0, 0, 1
+					font_size: "28sp"
+					pos_hint: {'center_x': .5, 'center_y': .965}
+
 				Button:
 					id: posrok_button
 					border: 0,0,0,0
@@ -4957,6 +4982,7 @@ Builder.load_string("""
 					on_press: root.ids.mana.current = "old_arts"
 					on_press: root.put_trash()
 
+				#togglers
 				ToggleButton:
 					id: bom_bom_bom
 					allow_no_selection: False
@@ -4970,6 +4996,7 @@ Builder.load_string("""
 					on_press: root.show_rangers(False)
 					on_press: root.show_el(False)
 					on_press: root.define_today_art('today')
+					on_press: root.reshape_today_scroll('today')
 
 				ToggleButton:
 					id: bom_bom_bom2
@@ -4982,6 +5009,7 @@ Builder.load_string("""
 					on_press: root.show_rangers(False)
 					on_press: root.show_el(True)
 					on_press: root.define_today_art('another')
+					on_press: root.reshape_today_scroll('any')
 
 				ToggleButton:
 					id: bom_bom_bom3
@@ -4994,6 +5022,7 @@ Builder.load_string("""
 					on_press: root.show_rangers(True)
 					on_press: root.show_el(False)
 					on_press: root.define_today_art('range')
+					on_press: root.reshape_today_scroll('range')
 
 				TextInput:
 					font_size: "28sp"
@@ -5121,9 +5150,9 @@ Builder.load_string("""
 					on_press: root.define_another_art()
 
 				ScrollView:
-					size_hint_x: .95
-					size_hint_y: .72
-					pos_hint: {'center_x': .5, 'center_y': .375}
+					size_hint_x: root.shx_today_scroll
+					size_hint_y: root.shy_today_scroll
+					pos_hint: root.ph_today_scroll
 					BoxLayout:
 						orientation: "vertical"
 						id: griddy4
@@ -5149,12 +5178,15 @@ Builder.load_string("""
 							pos: self.pos 
 							size: self.size
 
+
+				#bookmark
 				Button:
-					border: 0,0,0,0
+					background_down: 'w_b.png'
+					font_name: 'mp.ttf'
+					text: 'I'
+					font_size: '60sp'
 					pos_hint: root.pos_el5
-					size_hint: (.25, .2)
-					background_normal: "trash.png"
-					background_down: "butp.png"
+					size_hint: (.3, .113)
 					on_release:
 						root.trash_out()
 
@@ -5348,7 +5380,15 @@ Builder.load_string("""
 					Rectangle:
 						size: self.size
 						pos: self.pos
-						
+				Label:		
+					halign: 'center'
+					valign: "middle"
+					text: 'Настройки'
+					text_size: self.size
+					size_hint: (.8, .07)
+					color: 0, 0, 0, 1
+					font_size: "28sp"
+					pos_hint: {'center_x': .5, 'center_y': .93}
 
 				Button:
 					border: 0,0,0,0
@@ -5732,9 +5772,8 @@ Builder.load_string("""
 		size_hint_y: 8
 		canvas.before:
 			Color: 
-				rgb: 1, 1, 1, 
+				rgba: .733, .855, .463, .95
 			Rectangle:
-				source: 'bar.png'
 				pos: self.pos 
 				size: self.size
 
@@ -5769,6 +5808,7 @@ Builder.load_string("""
 			on_press: root.ids.bom_bom_bom2.state = 'normal'
 			on_press: root.ids.bom_bom_bom3.state = 'normal'
 			on_press: root.show_el(False)
+			on_press: root.reshape_today_scroll('today')
 			on_press: root.define_today_art('today')
 
 		ToggleButton:

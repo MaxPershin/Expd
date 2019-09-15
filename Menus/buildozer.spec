@@ -13,7 +13,7 @@ package.domain = org.menuapp
 source.dir = .
 
 # (list) Source files to include (let empty to include all the files)
-source.include_exts = py,png,jpg,kv,atlas,
+source.include_exts = py,png,jpg,kv,atlas,ttf,
 
 # (list) List of inclusions using pattern matching
 #source.include_patterns = assets/*,images/*.png
@@ -36,7 +36,7 @@ version = 4.0.0
 
 # (list) Application requirements
 # comma seperated e.g. requirements = sqlite3,kivy
-requirements = kivy,dateutil,openssl,android,requests,libiconv,libzbar,Pillow==5.2.0,python3,pyzbar==0.1.8,png,ttf
+requirements = kivy,dateutil,openssl,android,requests,libiconv,libzbar,Pillow==5.2.0,python3,pyzbar==0.1.8
 
 # (str) Custom source folders for requirements
 # Sets custom source for any requirements with recipes
