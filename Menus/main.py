@@ -19,8 +19,10 @@ from kivy.uix.gridlayout import GridLayout
 from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.floatlayout import FloatLayout
 from kivy.uix.textinput import TextInput
+from kivy.uix.widget import Widget
 from kivy.factory import Factory
 from kivy.lang import Builder
+from kivy.uix.behaviors import ButtonBehavior
 
 from kivy.properties import NumericProperty, BooleanProperty, ObjectProperty
 from kivy.uix.popup import Popup
@@ -51,6 +53,13 @@ allmonth = {"01": 0, "02": 31, "03": 59+extra,
 "07": 181+extra, "08": 212+extra, "09": 243+extra,
 "10": 273+extra, "11": 304+extra, "12": 334+extra, "13": 365+extra}
 
+class MyWidget(ButtonBehavior, BoxLayout):
+
+	def __init__(self, **kwargs):
+		super(MyWidget, self).__init__(**kwargs)
+
+	def on_press(self, *args):
+		print('Pressed')
 
 class SuppaLabel(Label):
 
@@ -4522,6 +4531,63 @@ Builder.load_string("""
 #:import NoTransition kivy.uix.screenmanager.NoTransition
 #:import ZBarSymbol pyzbar.pyzbar.ZBarSymbol
 
+<MyWidget>:
+	canvas.before:
+		Color: 
+			rgb: 0, 0, 0 
+		Rectangle: 
+			pos: self.pos 
+			size: self.size
+	size_hint_x: .8
+	size_hint_y: .15
+	pos_hint: {"center_x":.5,"center_y":.2}
+	orientation: "horizontal"
+	cols: 2
+	spacing: 1
+
+	BoxLayout:
+		orientation: "vertical"
+		raws: 2
+		size_hint_x: .3
+		spacing: 1
+		Label:
+			canvas.before:
+				Color: 
+					rgb: .694, .812, .439 
+				Rectangle: 
+					pos: self.pos 
+					size: self.size
+
+			text: '93999'
+			font_size: "25sp"
+			pos_hint:{"center_x": .5,"center_y":.5}
+
+		Label:
+			canvas.before:
+				Color: 
+					rgb: .694, .812, .439 
+				Rectangle: 
+					pos: self.pos 
+					size: self.size
+			text: '16/2'
+			font_size: "25sp"
+			pos_hint:{"center_x": .5,"center_y":.5}
+	Label:
+		canvas.before:
+			Color: 
+				rgb: .694, .812, .439 
+			Rectangle: 
+				pos: self.pos 
+				size: self.size
+
+		text: 'Cool Name wich in long enough to get yo up my friend yo mama haha'
+		text_size: self.width - 5, self.height
+		valign: 'center'
+		font_size: "15sp"
+		pos_hint:{"center_x": .5,"center_y":.5}
+		size_hint_x: .7
+
+
 <SuppaLabel>:
 	canvas.before:
 		Color: 
@@ -4637,6 +4703,8 @@ Builder.load_string("""
 					Rectangle:
 						size: self.size
 						pos: self.pos
+
+
 				Label:
 					canvas.before:
 						Color: 
@@ -5380,6 +5448,8 @@ Builder.load_string("""
 					Rectangle:
 						size: self.size
 						pos: self.pos
+
+				MyWidget:
 				Label:		
 					halign: 'center'
 					valign: "middle"
