@@ -4588,8 +4588,9 @@ Builder.load_string("""
 			size: self.size
 
 	size_hint_x: .8
-	size_hint_y: None
+	size_hint_y: 1
 	pos_hint: {"center_x":.5,"center_y":.2}
+
 	orientation: "horizontal"
 	cols: 2
 	spacing: 1
@@ -4639,7 +4640,7 @@ Builder.load_string("""
 		text_size: self.width - 8, None
 		valign: 'top'
 		halign: 'left'
-		font_size: 40
+		font_size: '40sp'
 		pos_hint:{"center_x": .5,"center_y":.5}
 		size_hint_x: .7
 
@@ -5064,6 +5065,8 @@ Builder.load_string("""
 							pos: self.pos
 							size: self.size
 							source: "cleanbl.png"
+
+					row_default_height: root.height/6 #row size control
 					spacing: 2
 					cols: 1
 					size_hint_y: None
