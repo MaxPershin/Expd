@@ -55,11 +55,33 @@ allmonth = {"01": 0, "02": 31, "03": 59+extra,
 
 class MyWidget(ButtonBehavior, BoxLayout):
 
-	def __init__(self, **kwargs):
+	def __init__(self, data, **kwargs):
 		super(MyWidget, self).__init__(**kwargs)
+		self.ids.name.text = data['name']
+		self.ids.article.text = data['art']
+		try:
+			y, m, d = str(data['nearest_date']).split('-')
+			self.ids.date.text = "{}.{}.{}".format(d, m, y)
+		except:
+			self.ids.date.text = "N/A"
+
+		self.scale()
+
 
 	def on_press(self, *args):
-		print('Pressed')
+		pass
+
+	def scale(self):
+		self.ids.name.texture_update()
+		real = self.ids.name.size[1]
+		box = self.ids.name.texture_size[1]
+
+		if real < box - 150:
+			self.scale_down()
+
+	def scale_down(self):
+		self.ids.name.font_size -= 1
+		return self.scale()
 
 class SuppaLabel(Label):
 
@@ -1864,10 +1886,33 @@ class Core(BoxLayout):
 					for each in art_names:
 						top = "{} {}".format(each, art_names[each])
 						if search.lower() in top.lower():
-							self.info = "{} {}".format(each, art_names[each])
-							self.btn = Button(text=self.info, size_hint_y=None, height=0.09*self.height, font_size="25sp")
-							self.search_grid.add_widget(self.btn)
-							self.btn.bind(on_release=self.infor)
+
+							date_storage = []
+
+							if each in entries:
+
+								hound = [i for i,x in enumerate(entries) if x==each]
+
+								for eaz in hound:
+
+									date_storage.append(entries[eaz-1])
+
+								n_stor = []
+
+								for d in date_storage:
+									if d:
+										m_year, m_month, m_day = d[4:],d[2:4],d[:2]
+
+										n_stor.append(date(int(m_year), int(m_month), int(m_day)))
+
+								n_stor = sorted(n_stor)
+							else:
+								n_stor = 'N/A'
+
+
+							self.wi = MyWidget({'name':art_names[each],'art':each, 'nearest_date':n_stor[0]})
+							self.search_grid.add_widget(self.wi)
+							self.wi.bind(on_release=self.infor)
 
 	def popup(self, title, text):
 		popup = Popup(title=title,
@@ -1884,6 +1929,9 @@ class Core(BoxLayout):
 		words = []
 		do_we = False
 
+		inf_art = button.ids.article.text
+
+		'''
 		for each in button.text:
 			if each.isdigit() and do_we == False:
 				numbers.append(each)
@@ -1895,7 +1943,7 @@ class Core(BoxLayout):
 		art_names[inf_art] = "".join(words)
 		if art_names[inf_art][0] == " ":
 			art_names[inf_art] = art_names[inf_art][1:]
-
+'''
 		self.start_one()
 
 ###########################---INFORMATION---##################################
@@ -4538,12 +4586,14 @@ Builder.load_string("""
 		Rectangle: 
 			pos: self.pos 
 			size: self.size
+
 	size_hint_x: .8
-	size_hint_y: .15
+	size_hint_y: None
 	pos_hint: {"center_x":.5,"center_y":.2}
 	orientation: "horizontal"
 	cols: 2
 	spacing: 1
+	padding: 1
 
 	BoxLayout:
 		orientation: "vertical"
@@ -4551,6 +4601,7 @@ Builder.load_string("""
 		size_hint_x: .3
 		spacing: 1
 		Label:
+			id: article
 			canvas.before:
 				Color: 
 					rgb: .694, .812, .439 
@@ -4558,21 +4609,23 @@ Builder.load_string("""
 					pos: self.pos 
 					size: self.size
 
-			text: '93999'
-			font_size: "25sp"
+			text: ''
+			font_size: "21sp"
 			pos_hint:{"center_x": .5,"center_y":.5}
 
 		Label:
+			id: date
 			canvas.before:
 				Color: 
 					rgb: .694, .812, .439 
 				Rectangle: 
 					pos: self.pos 
 					size: self.size
-			text: '16/2'
-			font_size: "25sp"
+			text: 'N/A'
+			font_size: "21sp"
 			pos_hint:{"center_x": .5,"center_y":.5}
 	Label:
+		id: name
 		canvas.before:
 			Color: 
 				rgb: .694, .812, .439 
@@ -4580,10 +4633,13 @@ Builder.load_string("""
 				pos: self.pos 
 				size: self.size
 
-		text: 'Cool Name wich in long enough to get yo up my friend yo mama haha'
-		text_size: self.width - 5, self.height
-		valign: 'center'
-		font_size: "15sp"
+
+		
+		text: ''
+		text_size: self.width - 8, None
+		valign: 'top'
+		halign: 'left'
+		font_size: 40
 		pos_hint:{"center_x": .5,"center_y":.5}
 		size_hint_x: .7
 
@@ -5449,7 +5505,6 @@ Builder.load_string("""
 						size: self.size
 						pos: self.pos
 
-				MyWidget:
 				Label:		
 					halign: 'center'
 					valign: "middle"
