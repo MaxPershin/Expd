@@ -80,7 +80,8 @@ class MyWidget(ButtonBehavior, BoxLayout):
 			self.scale_down()
 
 	def scale_down(self):
-		self.ids.name.font_size -= 1
+		new_size = self.ids.name.font_size - int(str(int(self.ids.name.font_size))[0])
+		self.ids.name.font_size = '{}sp'.format(new_size)
 		return self.scale()
 
 class SuppaLabel(Label):
@@ -89,7 +90,7 @@ class SuppaLabel(Label):
 	container2 = ObjectProperty(10)
 
 class Reader(BoxLayout):
-	hinter = ObjectProperty({"center_x": .5,"center_y": .9})
+	hinter = ObjectProperty({"center_x": .5,"center_y": .5})
 
 	def stop_cam(self, text):
 		if text:
@@ -134,6 +135,7 @@ class Core(BoxLayout):
 	before_after = ObjectProperty('before')
 
 	pos_unknown_EAN = ObjectProperty({"center_x": -5,"center_y":.80})
+	pos_scanned_EAN = ObjectProperty({"center_x": -5,"center_y":.85})
 
 	pos_before_after1 = ObjectProperty({"center_x": -5,"center_y":.8}) #{"center_x": .35,"center_y":.8}
 	pos_before_after2 = ObjectProperty({"center_x": -5,"center_y":.8}) #{"center_x": .65,"center_y":.8}
@@ -173,6 +175,7 @@ class Core(BoxLayout):
 	group_home_nothing_color = ObjectProperty((.1, .1, .1, .0))
 
 	prosrochka_button = ObjectProperty({"center_x": -5,"center_y":.9625})
+	scanned_EAN_text = ObjectProperty('Scanned article is: N/A')
 
 	current_year = str(datetime.now().year)
 
@@ -346,6 +349,12 @@ class Core(BoxLayout):
 			self.shy_today_scroll = .72
 			self.ph_today_scroll = {'center_x': .5, 'center_y': .375}
 
+	def show_scanned_ean(self, action):
+		if action == 'hide':
+			self.pos_scanned_EAN = {"center_x": -5,"center_y":.85}
+		else:
+			self.pos_scanned_EAN = {"center_x": .5,"center_y":.85}
+
 	def show_unknown_ean(self, action):
 		if action == 'hide':
 			self.pos_unknown_EAN = {"center_x": -5,"center_y":.92}
@@ -359,26 +368,30 @@ class Core(BoxLayout):
 			self.r = Reader()
 			self.ids.summertime.add_widget(self.r)
 		else:
-			self.r.hinter = {"center_x": .5,"center_y": .9}
+			self.r.hinter = {"center_x": .5,"center_y": .5}
 			self.r.ids.zbarcam.start()
 
 	def stop_cam(self, text):
 		self.r.ids.zbarcam.stop()
-		self.r.hinter = {"center_x": -2,"center_y": .9}
+		self.r.hinter = {"center_x": -2,"center_y": .5}
 		if text != "NO":
 			text = text.split("'")[1]
+			self.scanned_EAN_text = 'EAN: ' + text
 			self.compare_barcode(text)
 		else:
 			return
 
+	#imma here
 	def compare_barcode(self, texter):
 		
 		for each in art_bars:
 			if texter in art_bars[each]:
 				self.ids.inputer.text = str(each)
+				self.show_scanned_ean('show')
 				return
 
 		self.new_barcode = texter
+		self.show_scanned_ean('show')
 		self.show_unknown_ean('show')
 
 	def show_prosrok(self, data):
@@ -1261,6 +1274,7 @@ class Core(BoxLayout):
 				self.save_ean(article)
 
 			self.show_unknown_ean('hide')
+			self.show_scanned_ean('hide')
 
 			global last_art
 			last_art = self.ids.inputer.text
@@ -1285,6 +1299,7 @@ class Core(BoxLayout):
 		else:
 			self.pos_init_cam = {'center_x': .785, 'center_y': .68}
 			self.show_unknown_ean('hide')
+			self.show_scanned_ean('hide')
 
 	def work2(self):
 		global cudate
@@ -4634,13 +4649,11 @@ Builder.load_string("""
 				pos: self.pos 
 				size: self.size
 
-
-		
 		text: ''
 		text_size: self.width - 8, None
 		valign: 'top'
 		halign: 'left'
-		font_size: '40sp'
+		font_size: '26sp'
 		pos_hint:{"center_x": .5,"center_y":.5}
 		size_hint_x: .7
 
@@ -4778,6 +4791,23 @@ Builder.load_string("""
 					size_hint: (.8, .15)
 					font_size: "25sp"
 					pos_hint:{"center_x": .5,"center_y":.92}
+
+
+				Label:
+					canvas.before:
+						Color: 
+							rgb: 0, .8, .4
+						Rectangle:
+							size: self.size
+							pos: self.pos
+
+					halign: 'center'
+					valign: "middle"
+					text: root.scanned_EAN_text
+					text_size: self.size
+					size_hint: (.8, .07)
+					font_size: "15sp"
+					pos_hint: root.pos_scanned_EAN
 
 				Label:
 					canvas.before:
