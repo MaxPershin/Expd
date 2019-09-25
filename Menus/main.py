@@ -32,7 +32,6 @@ from kivy.uix.image import Image
 from kivy.uix.togglebutton import ToggleButton
 from datetime import date, timedelta, datetime
 from dateutil.relativedelta import relativedelta
-import gc
 from kivy.animation import Animation
 from kivy.clock import Clock
 import threading
@@ -53,6 +52,8 @@ allmonth = {"01": 0, "02": 31, "03": 59+extra,
 "07": 181+extra, "08": 212+extra, "09": 243+extra,
 "10": 273+extra, "11": 304+extra, "12": 334+extra, "13": 365+extra}
 
+
+
 class MyWidget(ButtonBehavior, BoxLayout):
 
 	def __init__(self, data, **kwargs):
@@ -65,24 +66,25 @@ class MyWidget(ButtonBehavior, BoxLayout):
 		except:
 			self.ids.date.text = "N/A"
 
-		self.scale()
-
-
 	def on_press(self, *args):
 		pass
 
-	def scale(self):
-		self.ids.name.texture_update()
-		real = self.ids.name.size[1]
-		box = self.ids.name.texture_size[1]
 
-		if real < box - 150:
-			self.scale_down()
+	class Scaler():
 
-	def scale_down(self):
-		new_size = self.ids.name.font_size - int(str(int(self.ids.name.font_size))[0])
-		self.ids.name.font_size = '{}sp'.format(new_size)
-		return self.scale()
+		@staticmethod
+		def scale(obj):
+			obj.texture_update()
+
+			if obj.size[1] < obj.texture_size[1]:
+				MyWidget.Scaler.scale_down(obj)
+
+		@staticmethod
+		def scale_down(obj):
+			new_size = obj.font_size - int(str(int(obj.font_size))[0])
+			obj.font_size = '{}sp'.format(new_size)
+			return MyWidget.Scaler.scale(obj)
+
 
 class SuppaLabel(Label):
 
@@ -93,18 +95,13 @@ class Reader(BoxLayout):
 	hinter = ObjectProperty({"center_x": .5,"center_y": .5})
 
 	def stop_cam(self, text):
-		if text:
-			for obj in gc.get_objects():
-				try: #This way I could find an instance ;)
-					if isinstance(obj, Core):
-						mine = obj
-						break
-				except:
-					pass
-
-			mine.stop_cam(text)
+		ProtoApp.static_holder.stop_cam(text)
 
 class Core(BoxLayout):
+	def __init__(self, **kwargs):
+		super(Core, self).__init__(**kwargs)
+		ProtoApp.static_holder = self
+
 	lang = 'ru'
 	col = ObjectProperty((.1, .1, .1, .0))
 	sp_text = ObjectProperty("")
@@ -1928,6 +1925,7 @@ class Core(BoxLayout):
 							self.wi = MyWidget({'name':art_names[each],'art':each, 'nearest_date':n_stor[0]})
 							self.search_grid.add_widget(self.wi)
 							self.wi.bind(on_release=self.infor)
+							
 
 	def popup(self, title, text):
 		popup = Popup(title=title,
@@ -4504,25 +4502,21 @@ class Core(BoxLayout):
 
 ###########################---App_Classes---##################################
 class ProtoApp(App):
+
+	static_holder = None
+
 	def on_start(self):
-		mine = ''
-		for obj in gc.get_objects(): #This way I could find an instance ;)
-			if isinstance(obj, Core):
-				mine = obj
-				break
+		mine = ProtoApp.static_holder
 
 		Clock.schedule_once(mine.get_lang, 0.1)
 		Clock.schedule_once(mine.alarm, 2)
 		Clock.schedule_once(mine.get_settings, 1)
 
 	def build(self):
-		self.coreid = Core()
-		return self.coreid
+		return Core()
 
 class ScreenManagement(ScreenManager):
 	pass
-
-
 
 def sync():
 	try:
@@ -4612,6 +4606,7 @@ Builder.load_string("""
 	padding: 1
 
 	BoxLayout:
+		id: suppaboxer
 		orientation: "vertical"
 		raws: 2
 		size_hint_x: .3
@@ -4656,6 +4651,7 @@ Builder.load_string("""
 		font_size: '26sp'
 		pos_hint:{"center_x": .5,"center_y":.5}
 		size_hint_x: .7
+		on_size: root.Scaler.scale(self)
 
 
 <SuppaLabel>:
