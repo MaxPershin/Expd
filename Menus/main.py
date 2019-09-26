@@ -66,25 +66,8 @@ class MyWidget(ButtonBehavior, BoxLayout):
 		except:
 			self.ids.date.text = "N/A"
 
-	def on_press(self, *args):
-		pass
-
-
-	class Scaler():
-
-		@staticmethod
-		def scale(obj):
-			obj.texture_update()
-
-			if obj.size[1] < obj.texture_size[1]:
-				MyWidget.Scaler.scale_down(obj)
-
-		@staticmethod
-		def scale_down(obj):
-			new_size = obj.font_size - int(str(int(obj.font_size))[0])
-			obj.font_size = '{}sp'.format(new_size)
-			return MyWidget.Scaler.scale(obj)
-
+	def scaleAdapter(self, obj):
+		ProtoApp.static_holder.Scaler.scale(obj)
 
 class SuppaLabel(Label):
 
@@ -188,10 +171,24 @@ class Core(BoxLayout):
 
 	r = None
 
+	class Scaler():
+
+		@staticmethod
+		def scale(obj):
+			obj.texture_update()
+
+			if obj.size[1] < obj.texture_size[1]:
+				ProtoApp.static_holder.Scaler.scale_down(obj)
+
+		@staticmethod
+		def scale_down(obj):
+			new_size = obj.font_size - int(str(int(obj.font_size))[0])
+			obj.font_size = '{}sp'.format(new_size)
+			return ProtoApp.static_holder.Scaler.scale(obj)
 
 	#translation
-
 	def to_russian(self):
+
 		self.t_delete = 'Удалить'
 		self.t_ot = 'От'
 		self.t_do = 'До'
@@ -4651,7 +4648,7 @@ Builder.load_string("""
 		font_size: '26sp'
 		pos_hint:{"center_x": .5,"center_y":.5}
 		size_hint_x: .7
-		on_size: root.Scaler.scale(self)
+		on_size: root.scaleAdapter(self)
 
 
 <SuppaLabel>:
