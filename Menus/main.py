@@ -22,7 +22,7 @@ from kivy.uix.textinput import TextInput
 from kivy.uix.widget import Widget
 from kivy.factory import Factory
 from kivy.lang import Builder
-from kivy.uix.behaviors import ButtonBehavior
+from kivy.uix.behaviors import ButtonBehavior, ToggleButtonBehavior
 
 from kivy.properties import NumericProperty, BooleanProperty, ObjectProperty
 from kivy.uix.popup import Popup
@@ -52,12 +52,29 @@ allmonth = {"01": 0, "02": 31, "03": 59+extra,
 "07": 181+extra, "08": 212+extra, "09": 243+extra,
 "10": 273+extra, "11": 304+extra, "12": 334+extra, "13": 365+extra}
 
-
-
-class MyWidget(ButtonBehavior, BoxLayout):
+class UtilWidget(ToggleButtonBehavior, BoxLayout):
 
 	def __init__(self, data, **kwargs):
-		super(MyWidget, self).__init__(**kwargs)
+		super(UtilWidget, self).__init__(**kwargs)
+		self.number, self.article, self.name = data.split(' ', 2)
+		self.number = self.number.split('.')[0]
+		self.ids.art.text = self.article
+		self.ids.name.text = self.name
+
+	def get_number(self):
+		return self.number
+
+	def scaleAdapter(self, obj):
+		print('ADAPTER FROM UTIL')
+		ProtoApp.static_holder.Scaler.scale(obj)
+
+class CheckLabel(Label):
+	pass 
+
+class SearchWidget(ButtonBehavior, BoxLayout):
+
+	def __init__(self, data, **kwargs):
+		super(SearchWidget, self).__init__(**kwargs)
 		self.ids.name.text = data['name']
 		self.ids.article.text = data['art']
 		try:
@@ -176,13 +193,17 @@ class Core(BoxLayout):
 		@staticmethod
 		def scale(obj):
 			obj.texture_update()
-
+			if obj.texture_size[1] > 1000: #TODO FIX IT UP - AT FIRST TEXTURE_SIZE IS TOO HIGH
+				return
 			if obj.size[1] < obj.texture_size[1]:
 				ProtoApp.static_holder.Scaler.scale_down(obj)
 
 		@staticmethod
 		def scale_down(obj):
-			new_size = obj.font_size - int(str(int(obj.font_size))[0])
+			if int(obj.font_size) >= 10:
+				new_size = obj.font_size - int(str(int(obj.font_size))[0])
+			else:
+				new_size = obj.font_size - 1
 			obj.font_size = '{}sp'.format(new_size)
 			return ProtoApp.static_holder.Scaler.scale(obj)
 
@@ -395,7 +416,7 @@ class Core(BoxLayout):
 			self.prosrochka_button = {"center_x": -5,"center_y":.9625}
 
 	def old_trash_out(self):
-
+		#bookmark
 		master = []
 
 		for each in self.arch:
@@ -473,7 +494,7 @@ class Core(BoxLayout):
 			self.alarm()
 
 	def put_trash(self):
-
+		#bookmark
 		list_temp = []
 		temp = []
 
@@ -552,52 +573,35 @@ class Core(BoxLayout):
 					m_label.text = 'Просрок до {}.{}.{}'.format(dayr, monthr, each[0].year)
 				else:
 					m_label.text = 'Expired at {}.{}.{}'.format(dayr, monthr, each[0].year)
-				m_label.container1 = 0.06*self.height
+				m_label.container1 = 0.09*self.height
 				m_label.container2 = 0.035*self.height
 				self.grid.add_widget(m_label)
 			else:
 				pass
 
+			#working AREA!!! - Implement beautiful old_trash widgets
 			self.texter = str(counter)+'. ' + each[1] + ' ' + art_names[each[1]]
-			self.btn = ToggleButton(text=self.texter, size_hint_y=None, height=0.09*self.height, font_size="25sp")
+			self.btn = UtilWidget(self.texter)
 			self.grid.add_widget(self.btn)
 			self.btn.bind(on_press=self.check_status2)
 
 	def check_status2(self, button):
-
 		if button.state == 'down':
-			flat = button.text.split(' ')
-			number = flat[0]
-			article = flat[1]
-			name = flat[2]
-
-			number = number.replace(' ', '')
-			article = article.replace(' ', '')
-			name = name.replace(' ', '')
-
-			number = number.replace('.', '')
-
-			mem_date = self.memory[int(number)-1]
-
-			self.arch.append('{}.{}.{}'.format(article, name, mem_date))
+			button.my_remove_checker = CheckLabel() 
+			button.add_widget(button.my_remove_checker)
+			mem_date = self.memory[int(button.number)-1]
+			self.arch.append('{}.{}.{}'.format(button.article, button.name, mem_date))
 		else:
-			flat = button.text.split(' ')
-			number = flat[0]
-			article = flat[1]
-			name = flat[2]
+			print('should remove it')
+			button.remove_widget(button.my_remove_checker)
+			mem_date = self.memory[int(button.number)-1]
 
-			number = number.replace(' ', '')
-			article = article.replace(' ', '')
-			name = name.replace(' ', '')
-
-			number = number.replace('.', '')
-
-			mem_date = self.memory[int(number)-1]
-
-			searching_for = '{}.{}.{}'.format(article, name, mem_date)
+			searching_for = '{}.{}.{}'.format(button.article, button.name, mem_date)
 			self.arch.remove(searching_for)
 
 	memory = []
+
+
 	arch = []
 
 	def alarm_out(self, *args):
@@ -1919,7 +1923,7 @@ class Core(BoxLayout):
 								n_stor = 'N/A'
 
 
-							self.wi = MyWidget({'name':art_names[each],'art':each, 'nearest_date':n_stor[0]})
+							self.wi = SearchWidget({'name':art_names[each],'art':each, 'nearest_date':n_stor[0]})
 							self.search_grid.add_widget(self.wi)
 							self.wi.bind(on_release=self.infor)
 							
@@ -4585,7 +4589,63 @@ Builder.load_string("""
 #:import NoTransition kivy.uix.screenmanager.NoTransition
 #:import ZBarSymbol pyzbar.pyzbar.ZBarSymbol
 
-<MyWidget>:
+<UtilWidget>:
+	canvas.before:
+		Color: 
+			rgb: 0, 0, 0 
+		Rectangle: 
+			pos: self.pos 
+			size: self.size
+
+	orientation: "horizontal"
+	cols: 3
+	spacing: 1
+	padding: 1
+	row_default_height: root.height
+
+	Label:
+		id: art
+		canvas.before:
+			Color: 
+				rgb: .694, .812, .439 
+			Rectangle: 
+				pos: self.pos 
+				size: self.size
+		text: '12345'
+		size_hint_x: .3
+		font_size: "21sp"
+
+	Label:
+		id: name
+		canvas.before:
+			Color: 
+				rgb: .694, .812, .439 
+			Rectangle: 
+				pos: self.pos 
+				size: self.size
+		text: ''
+		text_size: self.width - 8, None
+		valign: 'top'
+		halign: 'left'
+		font_size: "24sp"
+		pos_hint:{"center_x": .5,"center_y":.5}
+		size_hint_x: .7
+		on_size: root.scaleAdapter(self)
+
+<CheckLabel>:
+	id: checker
+	canvas.before:
+		Color: 
+			rgb: .3, .812, .439 
+		Rectangle: 
+			pos: self.pos 
+			size: self.size
+	text: 'x'
+	font_name: 'mp.ttf'
+	size_hint_x: .1
+	font_size: "30sp"
+
+<SearchWidget>:
 	canvas.before:
 		Color: 
 			rgb: 0, 0, 0 
@@ -4776,7 +4836,7 @@ Builder.load_string("""
 							size: self.size
 							pos: self.pos
 
-					color: 255, 255, 255, 1
+					color: 0, 0, 0
 					halign: 'center'
 					valign: "middle"
 					text: root.worktext
@@ -5329,7 +5389,6 @@ Builder.load_string("""
 							size: self.size
 
 
-				#bookmark
 				Button:
 					background_down: 'w_b.png'
 					font_name: 'mp.ttf'
@@ -5584,6 +5643,7 @@ Builder.load_string("""
 					on_release:
 						root.delete_effect()
 
+
 		Screen:
 			name: 'old_arts'
 			FloatLayout:
@@ -5595,14 +5655,22 @@ Builder.load_string("""
 					Rectangle:
 						size: self.size
 						pos: self.pos
-						
-
+				Label:
+					halign: 'center'
+					valign: "middle"
+					text: 'Просроченные артикулы'
+					text_size: self.size
+					size_hint: (.8, .07)
+					color: 0, 0, 0, 1
+					font_size: "28sp"
+					pos_hint: {'center_x': .5, 'center_y': .97}
 
 				ScrollView:
 					size_hint_x: .95
 					size_hint_y: .8
 					pos_hint: {'center_x': .5, 'center_y': .55}
-					BoxLayout:
+
+					GridLayout:
 						orientation: "vertical"
 						id: griddy_trash
 						canvas:
@@ -5611,18 +5679,16 @@ Builder.load_string("""
 							Rectangle:
 								pos: self.pos
 								size: self.size
-						spacing: 2
+
+						row_default_height: root.height/10
+						spacing: 1
 						cols: 1
 						size_hint_y: None
-						height: 0
-
+						height:0
 
 				Button:
-					border: 0,0,0,0
 					pos_hint: {'center_x':.5, 'center_y': .1}
-					size_hint: (.25, .2)
-					background_normal: "trash.png"
-					background_down: "butp.png"
+					size_hint: (.5, .12)
 					on_release:
 						root.old_trash_out()
 
