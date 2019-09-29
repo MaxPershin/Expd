@@ -65,8 +65,7 @@ class UtilWidget(ToggleButtonBehavior, BoxLayout):
 		return self.number
 
 	def scaleAdapter(self, obj):
-		print('ADAPTER FROM UTIL')
-		ProtoApp.static_holder.Scaler.scale(obj)
+		ProtoApp.static_holder.Scaler.scale(obj, 'util')
 
 class CheckLabel(Label):
 	pass 
@@ -84,7 +83,8 @@ class SearchWidget(ButtonBehavior, BoxLayout):
 			self.ids.date.text = "N/A"
 
 	def scaleAdapter(self, obj):
-		ProtoApp.static_holder.Scaler.scale(obj)
+		ProtoApp.static_holder.Scaler.scale(obj, 'search')
+		print(obj.size, obj.text)
 
 class SuppaLabel(Label):
 
@@ -189,12 +189,24 @@ class Core(BoxLayout):
 	r = None
 
 	class Scaler():
+		search_widget_first_time = True
+		util_widget_first_time = True
 
 		@staticmethod
-		def scale(obj):
+		def scale(obj, who):
+			if who == 'search':
+				if ProtoApp.static_holder.Scaler.search_widget_first_time == True:
+					ProtoApp.static_holder.Scaler.search_widget_first_time = False
+					return
+			if who == 'util':
+				if ProtoApp.static_holder.Scaler.util_widget_first_time == True:
+					ProtoApp.static_holder.Scaler.util_widget_first_time = False
+					return
+
+			ProtoApp.static_holder.Scaler.do_it(obj)
+
+		def do_it(obj):
 			obj.texture_update()
-			if obj.texture_size[1] > 1000: #TODO FIX IT UP - AT FIRST TEXTURE_SIZE IS TOO HIGH
-				return
 			if obj.size[1] < obj.texture_size[1]:
 				ProtoApp.static_holder.Scaler.scale_down(obj)
 
@@ -205,7 +217,7 @@ class Core(BoxLayout):
 			else:
 				new_size = obj.font_size - 1
 			obj.font_size = '{}sp'.format(new_size)
-			return ProtoApp.static_holder.Scaler.scale(obj)
+			return ProtoApp.static_holder.Scaler.scale(obj, None)
 
 	#translation
 	def to_russian(self):
