@@ -1492,7 +1492,7 @@ class Core(BoxLayout):
 		f.close()
 
 		f = open("artname.txt", "a")
-		f.write(str((self.cuart + "$" + self.standartname + "$")))
+		f.write(str((self.cuart + "$" + Core().convert_to_safe_sentence(self.standartname) + "$")))
 		f.close()
 
 		sync()
@@ -1829,7 +1829,7 @@ class Core(BoxLayout):
 					self.if_recreated(self.inputi.text, 'deleteART', None)
 
 					f = open("artname.txt", "a")
-					f.write(str((self.inputi.text + "$" + self.inputi2.text + "$")))
+					f.write(str((self.inputi.text + "$" + Core.convert_to_safe_sentence(self.inputi2.text) + "$")))
 					f.close()
 
 					f = open("daysoflife.txt", "a")
@@ -2421,7 +2421,7 @@ class Core(BoxLayout):
 
 		with open("artname.txt", "w") as f:
 			for each in dawread:
-				f.write(str(each + "$"))
+				f.write(str(Core().convert_to_safe_sentence(each) + "$"))
 
 		#Lets delete from STANDART DATE
 
@@ -2857,7 +2857,7 @@ class Core(BoxLayout):
 
 		with open("artname.txt", "w") as f:
 			for each in dawread:
-				f.write(str(each + "$"))
+				f.write(str(Core().convert_to_safe_sentence(each) + "$"))
 
 		#Lets kill copies in STANDARTDATES
 
@@ -2911,7 +2911,7 @@ class Core(BoxLayout):
 
 		with open("artname.txt", "w") as f:
 			for each in dawread:
-				f.write(str(each + "$"))
+				f.write(str(Core().convert_to_safe_sentence(each) + "$"))
 
 		sync()
 
@@ -2987,7 +2987,7 @@ class Core(BoxLayout):
 
 		with open("artname.txt", "w") as f:
 			for each in dawread:
-				f.write(str(each + "$"))
+				f.write(str(Core().convert_to_safe_sentence(each) + "$"))
 
 		f = open("daysoflife.txt", "r+")
 		dawread = f.read()
@@ -3036,7 +3036,7 @@ class Core(BoxLayout):
 
 		with open("artname.txt", "w") as f:
 			for each in dawread:
-				f.write(str(each + "$"))
+				f.write(str(Core.convert_to_safe_sentence(each) + "$"))
 
 		f = open("daysoflife.txt", "r+")
 		dawread = f.read()
@@ -3070,6 +3070,15 @@ class Core(BoxLayout):
 		sync()
 
 		inf_art = article
+
+	@staticmethod
+	def convert_to_safe_sentence(text):
+		return text.replace("'", '#sq').replace('"', '#dq').replace('.', '#dot').replace(',', '#point').replace('$', '#dol')
+
+	@staticmethod
+	def convert_to_unsafe_sentence(text):
+		return text.replace('#sq', "'").replace("#dq", '"').replace('#dot', '.').replace('#point', ',').replace('#dol', "$")
+
 
 	def entry_change(self, button):
 		cont = []
@@ -3329,7 +3338,6 @@ class Core(BoxLayout):
 				with open("saver.txt", "w") as f:
 					for each in dawread:
 						f.write(str(each + "$"))
-
 
 				if args:
 					self.stop_list.append((inf_art, 'deleteDate', self.date))
@@ -4098,7 +4106,7 @@ class Core(BoxLayout):
 
 		with open("artname.txt", "w+") as f:
 			for x in names_to_stop:
-				f.write(str(x + "$"))
+				f.write(str(Core().convert_to_safe_sentence(x) + "$"))
 
 		with open("daysoflife.txt", "w+") as f:
 			for x in days_to_stop:
@@ -4302,7 +4310,7 @@ class Core(BoxLayout):
 
 			with open("artname.txt", "w") as f:
 				for each in updated_names_to_phone:
-					f.write(str(each + "$"))
+					f.write(str(Core().convert_to_safe_sentence(each) + "$"))
 
 			with open("daysoflife.txt", "w") as f:
 				for each in updated_days_of_life:
@@ -4561,7 +4569,7 @@ def sync():
 		counter = 0
 
 		while counter < (len(templ)-1):
-			art_names[templ[counter]] = templ[counter+1]
+			art_names[templ[counter]] = Core.convert_to_unsafe_sentence(templ[counter+1])
 			counter += 2
 	except:
 		f = open("artname.txt", "w+")
