@@ -6,51 +6,55 @@ from kivy.config import Config
 Config.set('graphics', 'resizable', False)
 Config.set('graphics', 'width', '414')
 Config.set('graphics', 'height', '736')
+
 from zbarcam import ZBarCam
 
 from kivy.app import App
-from kivy.lang import Builder
-from kivy.uix.screenmanager import ScreenManager, Screen, NoTransition
+from kivy.uix.screenmanager import ScreenManager
 from kivy.uix.label import Label
-import os
-from time import strftime
 from kivy.uix.scrollview import ScrollView
 from kivy.uix.gridlayout import GridLayout
 from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.floatlayout import FloatLayout
 from kivy.uix.textinput import TextInput
-from kivy.uix.widget import Widget
-from kivy.factory import Factory
 from kivy.lang import Builder
 from kivy.uix.behaviors import ButtonBehavior, ToggleButtonBehavior
-
-from kivy.properties import NumericProperty, BooleanProperty, ObjectProperty
+from kivy.properties import NumericProperty, ObjectProperty
 from kivy.uix.popup import Popup
 from kivy.uix.button import Button
-from kivy.uix.checkbox import CheckBox
 from kivy.uix.image import Image
 from kivy.uix.togglebutton import ToggleButton
-from datetime import date, timedelta, datetime
-from dateutil.relativedelta import relativedelta
 from kivy.animation import Animation
 from kivy.clock import Clock
-import threading
 
+from datetime import date, timedelta, datetime
+from dateutil.relativedelta import relativedelta
+from time import strftime
+import threading
 import json
 import requests
 
-from kivy.core.window import Window
+import os
+abs_path = os.path.dirname(os.path.abspath(__file__))
 
 year = int(strftime("%Y"))
 if year % 4 == 0:
  	extra = 1
 else:
- 	extra = 0
+	extra = 0
 
-allmonth = {"01": 0, "02": 31, "03": 59+extra, 
-"04": 90+extra, "05": 120+extra, "06": 151+extra, 
+allmonth = {"01": 0, "02": 31, "03": 59+extra,
+"04": 90+extra, "05": 120+extra, "06": 151+extra,
 "07": 181+extra, "08": 212+extra, "09": 243+extra,
 "10": 273+extra, "11": 304+extra, "12": 334+extra, "13": 365+extra}
+
+class ScalableLabel(Label):
+
+	def __init__(self, **kwargs):
+		super(ScalableLabel, self).__init__(**kwargs)
+
+	def scaleAdapter(self, obj):
+		ProtoApp.static_holder.Scaler.scale(obj, None)
 
 class UtilWidget(ToggleButtonBehavior, BoxLayout):
 
@@ -68,7 +72,7 @@ class UtilWidget(ToggleButtonBehavior, BoxLayout):
 		ProtoApp.static_holder.Scaler.scale(obj, 'util')
 
 class CheckLabel(Label):
-	pass 
+	pass
 
 class SearchWidget(ButtonBehavior, BoxLayout):
 
@@ -82,9 +86,11 @@ class SearchWidget(ButtonBehavior, BoxLayout):
 		except:
 			self.ids.date.text = "N/A"
 
+		self.sid= 'search'
+
 	def scaleAdapter(self, obj):
-		ProtoApp.static_holder.Scaler.scale(obj, 'search')
-		print(obj.size, obj.text)
+		ProtoApp.static_holder.Scaler.scale(obj, self.sid)
+
 
 class SuppaLabel(Label):
 
@@ -189,25 +195,25 @@ class Core(BoxLayout):
 	r = None
 
 	class Scaler():
-		search_widget_first_time = True
-		util_widget_first_time = True
+
+		whos_in = []
 
 		@staticmethod
 		def scale(obj, who):
-			if who == 'search':
-				if ProtoApp.static_holder.Scaler.search_widget_first_time == True:
-					ProtoApp.static_holder.Scaler.search_widget_first_time = False
-					return
-			if who == 'util':
-				if ProtoApp.static_holder.Scaler.util_widget_first_time == True:
-					ProtoApp.static_holder.Scaler.util_widget_first_time = False
-					return
+			print(who, obj.text, obj.size)
+			ProtoApp.static_holder.Scaler.do_it(obj, who)
 
-			ProtoApp.static_holder.Scaler.do_it(obj)
-
-		def do_it(obj):
+		def do_it(obj, who):
 			obj.texture_update()
+
 			if obj.size[1] < obj.texture_size[1]:
+
+				if who not in ProtoApp.static_holder.Scaler.whos_in:
+					print('BLOCKED - ', who)
+
+					ProtoApp.static_holder.Scaler.whos_in.append(who)
+					return
+
 				ProtoApp.static_holder.Scaler.scale_down(obj)
 
 		@staticmethod
@@ -217,7 +223,7 @@ class Core(BoxLayout):
 			else:
 				new_size = obj.font_size - 1
 			obj.font_size = '{}sp'.format(new_size)
-			return ProtoApp.static_holder.Scaler.scale(obj, None)
+			return ProtoApp.static_holder.Scaler.scale(obj, obj.sid)
 
 	#translation
 	def to_russian(self):
@@ -292,7 +298,7 @@ class Core(BoxLayout):
 		self.t_user_name = 'User name'
 		self.t_we_have_expired = 'Expired articles found!'
 		self.t_manage_ean = 'Manage EAN'
-	
+
 	if lang == 'ru':
 		t_delete = ObjectProperty('Удалить')
 		t_ot = ObjectProperty('От')
@@ -410,7 +416,7 @@ class Core(BoxLayout):
 
 	#imma here
 	def compare_barcode(self, texter):
-		
+
 		for each in art_bars:
 			if texter in art_bars[each]:
 				self.ids.inputer.text = str(each)
@@ -440,7 +446,7 @@ class Core(BoxLayout):
 			return
 		else:
 
-			f = open("saver.txt", "r+")
+			f = open(abs_path+"/src/data/saver.txt", "r+")
 			dawread = f.read()
 			f.close()
 			dawread = dawread.split("$")
@@ -482,7 +488,7 @@ class Core(BoxLayout):
 				soviet.append(first)
 				soviet.append(second)
 
-			with open("saver.txt", "w") as f:
+			with open(abs_path+"/src/data/saver.txt", "w") as f:
 				for each in soviet:
 					f.write(str(each + "$"))
 
@@ -599,12 +605,11 @@ class Core(BoxLayout):
 
 	def check_status2(self, button):
 		if button.state == 'down':
-			button.my_remove_checker = CheckLabel() 
+			button.my_remove_checker = CheckLabel()
 			button.add_widget(button.my_remove_checker)
 			mem_date = self.memory[int(button.number)-1]
 			self.arch.append('{}.{}.{}'.format(button.article, button.name, mem_date))
 		else:
-			print('should remove it')
 			button.remove_widget(button.my_remove_checker)
 			mem_date = self.memory[int(button.number)-1]
 
@@ -660,7 +665,7 @@ class Core(BoxLayout):
 			self.grid.clear_widgets()
 		except:
 			None
-			
+
 		try:
 			start_date = date(int(self.ids.to_range3.text), int(self.ids.to_range2.text), int(self.ids.to_range1.text))
 			end_date = date(int(self.ids.to_range6.text), int(self.ids.to_range5.text), int(self.ids.to_range4.text))
@@ -734,7 +739,7 @@ class Core(BoxLayout):
 					self.texter = eaz + ' ' + art_names[eaz]
 					self.btn = Button(text=self.texter, size_hint_y=None, height=0.09*self.height, font_size="25sp")
 					self.grid.add_widget(self.btn)
-		
+
 
 	def show_rangers(self, data):
 		if data == True:
@@ -890,7 +895,7 @@ class Core(BoxLayout):
 
 		if self.step == 1:
 			current_lenght = len(self.ids.ex_inputer.text) + len(self.ids.ex_inputer2.text) + len(self.ids.ex_inputer3.text)
-			
+
 			if current_lenght == 0:
 				if data == 'CLS':
 					pass
@@ -960,11 +965,11 @@ class Core(BoxLayout):
 			if len(day) < 2:
 				day = '0'+day
 			if len(month) < 2:
-				month = '0'+month 
+				month = '0'+month
 
 			tommorow = '{}{}{}'.format(day, month, year)
 
-			f = open("saver.txt", "r+")
+			f = open(abs_path+"/src/data/saver.txt", "r+")
 			dawread = f.read()
 			f.close()
 			dawread = dawread.split("$")
@@ -990,7 +995,7 @@ class Core(BoxLayout):
 
 				del dawread[each]
 
-			with open("saver.txt", "w") as f:
+			with open(abs_path+"/src/data/saver.txt", "w") as f:
 				for each in dawread:
 					f.write(str(each + "$"))
 
@@ -1219,7 +1224,7 @@ class Core(BoxLayout):
 			if self.lang == 'ru':
 				self.worktext = "Введите срок годности"
 			else:
-				self.worktext = 'Enter article shelf life' 
+				self.worktext = 'Enter article shelf life'
 			self.press = 99
 
 			if self.lang == 'ru':
@@ -1251,7 +1256,7 @@ class Core(BoxLayout):
 
 		self.pos_day_month_visible(False)
 
-		f = open("daysoflife.txt", "a")
+		f = open(abs_path+"/src/data/daysoflife.txt", "a")
 		f.write(str((self.cuart + "$" + self.standartdate + "$")))
 		f.close()
 
@@ -1297,7 +1302,7 @@ class Core(BoxLayout):
 
 	def save_ean(self, article):
 		self.if_recreated(article, 'deleteEAN', self.new_barcode)
-		f = open("barcode.txt", "a", newline='')
+		f = open(abs_path+"/src/data/barcode.txt", "a", newline='')
 		f.write(str((article + "$" + self.new_barcode + "$")))
 		f.close()
 		self.new_barcode = None
@@ -1334,7 +1339,7 @@ class Core(BoxLayout):
 
 		ask = '{}{}'.format(day, mon)
 
-		if ask.isalnum(): 
+		if ask.isalnum():
 			if len(ask) == 4:
 				if ask[0].isalpha() == False and ask[1].isalpha() == False and ask[2].isalpha() == False and ask[3].isalpha() == False:
 					if int(ask[2:]) <= 12 and int(ask[2:]) >= 1 and int(ask[:2]) <= 31 and int(ask[:2]) >= 1:
@@ -1396,7 +1401,7 @@ class Core(BoxLayout):
 									global standartdate
 									self.ids.inputer.focus = True
 
-									if self.lang == 'ru':	
+									if self.lang == 'ru':
 										self.worktext = 'Введите название артикула'
 									else:
 										self.worktext = 'Enter article name'
@@ -1472,7 +1477,7 @@ class Core(BoxLayout):
 				if self.lang == 'ru':
 					self.worktext = "Введите срок годности"
 				else:
-					self.worktext = 'Enter shelf life' 
+					self.worktext = 'Enter shelf life'
 				self.press = 99
 
 				if self.lang == 'ru':
@@ -1499,11 +1504,11 @@ class Core(BoxLayout):
 
 	def define_name(self):
 
-		f = open("daysoflife.txt", "a")
+		f = open(abs_path+"/src/data/daysoflife.txt", "a")
 		f.write(str((self.cuart + "$" + self.standartdate + "$")))
 		f.close()
 
-		f = open("artname.txt", "a")
+		f = open(abs_path+"/src/data/artname.txt", "a")
 		f.write(str((self.cuart + "$" + Core().convert_to_safe_sentence(self.standartname) + "$")))
 		f.close()
 
@@ -1685,7 +1690,7 @@ class Core(BoxLayout):
 			ent = '{}{}{}'.format(day, month, year)
 
 			todayer = date.today()
-			
+
 			if c <= todayer:
 				self.enter_prosrok(ent)
 			else:
@@ -1704,7 +1709,7 @@ class Core(BoxLayout):
 				self.ids.inputer.text = ""
 				self.press = 0
 				self.show_cam_button('show')
-			
+
 		else:
 			if self.lang == 'ru':
 				popup("Внимание", "Некорректное количество дней")
@@ -1714,10 +1719,10 @@ class Core(BoxLayout):
 	def check2(self, ask):
 		try:
 			dayz = ask[:2]
-			month = ask[2:]       
+			month = ask[2:]
 			digidayz = int(dayz)
 			digimonth = int(month)
-			newmonth = "0%d" % (digimonth + 1)  
+			newmonth = "0%d" % (digimonth + 1)
 			realdayz = allmonth[month]
 			if len(newmonth) == 2:
 				result = allmonth[newmonth] - realdayz
@@ -1758,7 +1763,7 @@ class Core(BoxLayout):
 			self.press = 0
 			self.show_cam_button('show')
 		else:
-			f = open("saver.txt", "a")
+			f = open(abs_path+"/src/data/saver.txt", "a")
 			f.write(str((ent + "$" + article + "$")))
 			f.close()
 			sync()
@@ -1837,14 +1842,14 @@ class Core(BoxLayout):
 						popup('Warning!', 'This article is already in a database')
 					return
 				else:
-					
+
 					self.if_recreated(self.inputi.text, 'deleteART', None)
 
-					f = open("artname.txt", "a")
+					f = open(abs_path+"/src/data/artname.txt", "a")
 					f.write(str((self.inputi.text + "$" + Core.convert_to_safe_sentence(self.inputi2.text) + "$")))
 					f.close()
 
-					f = open("daysoflife.txt", "a")
+					f = open(abs_path+"/src/data/daysoflife.txt", "a")
 					f.write(str((self.inputi.text + "$" + self.inputi3.text + "$")))
 					f.close()
 
@@ -1873,7 +1878,7 @@ class Core(BoxLayout):
 
 	def deleteEAN_check(self, article, value):
 		tester = (article, 'deleteEAN', value)
-		
+
 		if tester in self.stop_list:
 			self.stop_list.remove(tester)
 			self.set_stop_list()
@@ -1882,7 +1887,7 @@ class Core(BoxLayout):
 
 	def deleteDate_check(self, article, value):
 		tester = (article, 'deleteDate', value)
-		
+
 		if tester in self.stop_list:
 			self.stop_list.remove(tester)
 			self.set_stop_list()
@@ -1938,7 +1943,7 @@ class Core(BoxLayout):
 							self.wi = SearchWidget({'name':art_names[each],'art':each, 'nearest_date':n_stor[0]})
 							self.search_grid.add_widget(self.wi)
 							self.wi.bind(on_release=self.infor)
-							
+
 
 	def popup(self, title, text):
 		popup = Popup(title=title,
@@ -1988,11 +1993,11 @@ class Core(BoxLayout):
 
 		self.if_recreated(inf_art, 'deleteEAN', n_ean)
 
-		f = open("barcode.txt", "a", newline='')
+		f = open(abs_path+"/src/data/barcode.txt", "a", newline='')
 		f.write(str((inf_art + "$" + n_ean + "$")))
 		f.close()
 		sync()
-		
+
 
 	def new_ean(self):
 		try:
@@ -2007,8 +2012,8 @@ class Core(BoxLayout):
 					pos_hint={"center_x":.5,"center_y":.28}, halign='center',
 					valign="middle", on_release=lambda x:self.create_ean())
 
-		self.ean_input = TextInput(id='hola', multiline=False, size_hint_x=.75, size_hint_y=0.35, 
-			pos_hint={"center_x":.5,"center_y":.7}, hint_text='Enter EAN', font_size='27sp') 
+		self.ean_input = TextInput(id='hola', multiline=False, size_hint_x=.75, size_hint_y=0.35,
+			pos_hint={"center_x":.5,"center_y":.7}, hint_text='Enter EAN', font_size='27sp')
 
 		self.layout.add_widget(self.button1)
 		self.layout.add_widget(self.ean_input)
@@ -2064,7 +2069,7 @@ class Core(BoxLayout):
 
 	def change2_ean(self, args):
 		local = []
-		
+
 		if self.ean_input.text in art_bars[inf_art]:
 			self.manage_ean_popup.dismiss()
 			self.manage_eans()
@@ -2081,7 +2086,7 @@ class Core(BoxLayout):
 			self.stop_list.append((inf_art, 'deleteEAN', self.current_button))
 			self.set_stop_list()
 
-		f = open("barcode.txt", "r+")
+		f = open(abs_path+"/src/data/barcode.txt", "r+")
 		dawread = f.read()
 		f.close()
 		global art_bars
@@ -2093,7 +2098,7 @@ class Core(BoxLayout):
 			if templ[each+1] == self.current_button:
 				templ[each+1] = self.ean_input.text
 
-				with open("barcode.txt", "w") as f:
+				with open(abs_path+"/src/data/barcode.txt", "w") as f:
 					for each in templ:
 						f.write(str(each + "$"))
 				sync()
@@ -2108,7 +2113,7 @@ class Core(BoxLayout):
 
 		self.if_recreated(article, 'deleteEAN', barcode)
 
-		f = open("barcode.txt", "r+")
+		f = open(abs_path+"/src/data/barcode.txt", "r+")
 		dawread = f.read()
 		f.close()
 		global art_bars
@@ -2121,7 +2126,7 @@ class Core(BoxLayout):
 				del templ[each]
 				del templ[each]
 
-				with open("barcode.txt", "w") as f:
+				with open(abs_path+"/src/data/barcode.txt", "w") as f:
 					for each in templ:
 						f.write(str(each + "$"))
 
@@ -2145,7 +2150,7 @@ class Core(BoxLayout):
 
 		self.layout = FloatLayout(size=(self.width, self.height))
 
-		self.lbl = Label(text="You want to delete EAN?", font_size="25sp", 
+		self.lbl = Label(text="You want to delete EAN?", font_size="25sp",
 				pos_hint={"center_x":.5,"center_y":.86})
 
 		self.button1 = Button(text='Yes', size_hint_y=None, size_hint_x=None,
@@ -2188,7 +2193,7 @@ class Core(BoxLayout):
 			delete_eve = 'Delete for everyone'
 
 		if self.current_user:
-			self.ean_input = TextInput(text=button.text, multiline=False, size_hint_x=.75, size_hint_y=0.15, 
+			self.ean_input = TextInput(text=button.text, multiline=False, size_hint_x=.75, size_hint_y=0.15,
 			pos_hint={"center_x":.5,"center_y":.8}, hint_text='Enter EAN', font_size='27sp')
 
 			self.button1 = Button(text=change, size_hint_y=None, size_hint_x=None,
@@ -2222,7 +2227,7 @@ class Core(BoxLayout):
 			size_hint=(.8, .5))
 
 		else:
-			self.ean_input = TextInput(text=button.text, multiline=False, size_hint_x=.75, size_hint_y=0.25, 
+			self.ean_input = TextInput(text=button.text, multiline=False, size_hint_x=.75, size_hint_y=0.25,
 			pos_hint={"center_x":.5,"center_y":.7}, hint_text='Enter EAN', font_size='27sp')
 
 			self.button1 = Button(text='Change', size_hint_y=None, size_hint_x=None,
@@ -2422,7 +2427,7 @@ class Core(BoxLayout):
 
 		# Lets delete from names
 
-		f = open("artname.txt", "r+")
+		f = open(abs_path+"/src/data/artname.txt", "r+")
 		dawread = f.read()
 		f.close()
 		dawread = dawread.split("$")
@@ -2431,13 +2436,13 @@ class Core(BoxLayout):
 		del dawread[worker]
 		del dawread[worker]
 
-		with open("artname.txt", "w") as f:
+		with open(abs_path+"/src/data/artname.txt", "w") as f:
 			for each in dawread:
 				f.write(str(Core().convert_to_safe_sentence(each) + "$"))
 
 		#Lets delete from STANDART DATE
 
-		f = open("daysoflife.txt", "r+")
+		f = open(abs_path+"/src/data/daysoflife.txt", "r+")
 		dawread = f.read()
 		f.close()
 		dawread = dawread.split("$")
@@ -2446,13 +2451,13 @@ class Core(BoxLayout):
 		del dawread[worker]
 		del dawread[worker]
 
-		with open("daysoflife.txt", "w") as f:
+		with open(abs_path+"/src/data/daysoflife.txt", "w") as f:
 			for each in dawread:
 				f.write(str(each + "$"))
 
 		#Finally lets delete all entries for it
 
-		f = open("saver.txt", "r+")
+		f = open(abs_path+"/src/data/saver.txt", "r+")
 		dawread = f.read()
 		f.close()
 		dawread = dawread.split("$")
@@ -2469,13 +2474,13 @@ class Core(BoxLayout):
 			del dawread[each]
 			del dawread[each]
 
-		with open("saver.txt", "w") as f:
+		with open(abs_path+"/src/data/saver.txt", "w") as f:
 			for each in dawread:
 				f.write(str(each + "$"))
 
 		#lets delete all eans
 
-		f = open("barcode.txt", "r+")
+		f = open(abs_path+"/src/data/barcode.txt", "r+")
 		dawread = f.read()
 		f.close()
 		dawread = dawread.split("$")
@@ -2493,7 +2498,7 @@ class Core(BoxLayout):
 			del dawread[each-1]
 			del dawread[each-1]
 
-		with open("barcode.txt", "w") as f:
+		with open(abs_path+"/src/data/barcode.txt", "w") as f:
 			for each in dawread:
 				f.write(str(each + "$"))
 
@@ -2579,7 +2584,7 @@ class Core(BoxLayout):
 		self.if_recreated(inf_art, 'deleteART', None)
 		self.if_recreated(inf_art, 'deleteDate', boomb)
 
-		f = open("saver.txt", "a")
+		f = open(abs_path+"/src/data/saver.txt", "a")
 		f.write(str((boomb + "$" + inf_art + "$")))
 		f.close()
 		sync()
@@ -2681,7 +2686,7 @@ class Core(BoxLayout):
 
 					self.if_recreated(inf_art, 'deleteDate', boomb)
 
-					f = open("saver.txt", "a")
+					f = open(abs_path+"/src/data/saver.txt", "a")
 					f.write(str((boomb + "$" + inf_art + "$")))
 					f.close()
 					sync()
@@ -2711,7 +2716,7 @@ class Core(BoxLayout):
 		self.grid = self.ids.griddy2
 		self.grid.bind(minimum_height=self.grid.setter("height"))
 		self.grid.clear_widgets()
-		
+
 		hound = [i for i,x in enumerate(entries) if x==inf_art]
 		leisu = []
 		for each in hound:
@@ -2833,7 +2838,7 @@ class Core(BoxLayout):
 			ch_closer()
 			self.change_popup_name(False)
 			return
-		
+
 		if article != inf_art:
 			if article in art_names:
 				self.popup.dismiss()
@@ -2856,7 +2861,7 @@ class Core(BoxLayout):
 	def do_clean_stuff(self, new_art):
 
 		#Lets kill copies in NAMES if they are here
-		f = open("artname.txt", "r+")
+		f = open(abs_path+"/src/data/artname.txt", "r+")
 		dawread = f.read()
 		f.close()
 		dawread = dawread.split("$")
@@ -2867,13 +2872,13 @@ class Core(BoxLayout):
 			del dawread[worker[0]]
 			del dawread[worker[0]]
 
-		with open("artname.txt", "w") as f:
+		with open(abs_path+"/src/data/artname.txt", "w") as f:
 			for each in dawread:
 				f.write(str(Core().convert_to_safe_sentence(each) + "$"))
 
 		#Lets kill copies in STANDARTDATES
 
-		f = open("daysoflife.txt", "r+")
+		f = open(abs_path+"/src/data/daysoflife.txt", "r+")
 		dawread = f.read()
 		f.close()
 		dawread = dawread.split("$")
@@ -2891,7 +2896,7 @@ class Core(BoxLayout):
 
 	def work_out_st_date(self, st_date, *args):
 
-		f = open("daysoflife.txt", "r+")
+		f = open(abs_path+"/src/data/daysoflife.txt", "r+")
 		dawread = f.read()
 		f.close()
 		dawread = dawread.split("$")
@@ -2900,7 +2905,7 @@ class Core(BoxLayout):
 		worker += 1
 		dawread[worker] = st_date
 
-		with open("daysoflife.txt", "w") as f:
+		with open(abs_path+"/src/data/daysoflife.txt", "w") as f:
 			for each in dawread:
 				f.write(str(each + "$"))
 
@@ -2912,7 +2917,7 @@ class Core(BoxLayout):
 
 	def work_out_name(self, name):
 
-		f = open("artname.txt", "r+")
+		f = open(abs_path+"/src/data/artname.txt", "r+")
 		dawread = f.read()
 		f.close()
 		dawread = dawread.split("$")
@@ -2921,7 +2926,7 @@ class Core(BoxLayout):
 		worker += 1
 		dawread[worker] = name
 
-		with open("artname.txt", "w") as f:
+		with open(abs_path+"/src/data/artname.txt", "w") as f:
 			for each in dawread:
 				f.write(str(Core().convert_to_safe_sentence(each) + "$"))
 
@@ -2958,7 +2963,7 @@ class Core(BoxLayout):
 		self.my_pop.dismiss()
 
 	def do_merge(self, article):
-		
+
 		self.my_pop.dismiss()
 
 		entries_copy = entries[:]
@@ -2984,11 +2989,11 @@ class Core(BoxLayout):
 				entries_copy.append(eaz)
 
 
-		with open("saver.txt", "w") as f:
+		with open(abs_path+"/src/data/saver.txt", "w") as f:
 			for each in entries_copy:
 				f.write(str(each + "$"))
 
-		f = open("artname.txt", "r+")
+		f = open(abs_path+"/src/data/artname.txt", "r+")
 		dawread = f.read()
 		f.close()
 		dawread = dawread.split("$")
@@ -2997,11 +3002,11 @@ class Core(BoxLayout):
 		del dawread[worker]
 		del dawread[worker]
 
-		with open("artname.txt", "w") as f:
+		with open(abs_path+"/src/data/artname.txt", "w") as f:
 			for each in dawread:
 				f.write(str(Core().convert_to_safe_sentence(each) + "$"))
 
-		f = open("daysoflife.txt", "r+")
+		f = open(abs_path+"/src/data/daysoflife.txt", "r+")
 		dawread = f.read()
 		f.close()
 		dawread = dawread.split("$")
@@ -3010,7 +3015,7 @@ class Core(BoxLayout):
 		del dawread[worker]
 		del dawread[worker]
 
-		with open("daysoflife.txt", "w") as f:
+		with open(abs_path+"/src/data/daysoflife.txt", "w") as f:
 			for each in dawread:
 				f.write(str(each + "$"))
 
@@ -3038,7 +3043,7 @@ class Core(BoxLayout):
 	def work_out_article(self, article, *args):
 		global inf_art
 
-		f = open("artname.txt", "r+")
+		f = open(abs_path+"/src/data/artname.txt", "r+")
 		dawread = f.read()
 		f.close()
 		dawread = dawread.split("$")
@@ -3046,11 +3051,11 @@ class Core(BoxLayout):
 		worker = dawread.index(inf_art)
 		dawread[worker] = article
 
-		with open("artname.txt", "w") as f:
+		with open(abs_path+"/src/data/artname.txt", "w") as f:
 			for each in dawread:
 				f.write(str(Core.convert_to_safe_sentence(each) + "$"))
 
-		f = open("daysoflife.txt", "r+")
+		f = open(abs_path+"/src/data/daysoflife.txt", "r+")
 		dawread = f.read()
 		f.close()
 		dawread = dawread.split("$")
@@ -3058,11 +3063,11 @@ class Core(BoxLayout):
 		worker = dawread.index(inf_art)
 		dawread[worker] = article
 
-		with open("daysoflife.txt", "w") as f:
+		with open(abs_path+"/src/data/daysoflife.txt", "w") as f:
 			for each in dawread:
 				f.write(str(each + "$"))
 
-		f = open("saver.txt", "r+")
+		f = open(abs_path+"/src/data/saver.txt", "r+")
 		dawread = f.read()
 		f.close()
 		dawread = dawread.split("$")
@@ -3071,7 +3076,7 @@ class Core(BoxLayout):
 		for each in worker:
 			dawread[each] = article
 
-		with open("saver.txt", "w") as f:
+		with open(abs_path+"/src/data/saver.txt", "w") as f:
 			for each in dawread:
 				f.write(str(each + "$"))
 
@@ -3130,7 +3135,7 @@ class Core(BoxLayout):
 				self.btn1_2 = Button(text="Change for everyone", size_hint_y=None, size_hint_x=None, height=0.06*self.height, width=0.6*self.width, font_size="25sp", pos_hint={"center_x":.5,"center_y":.48}, on_release=lambda x:self.save_entry(True))
 				self.btn2 = Button(text="Delete", size_hint_y=None, size_hint_x=None, height=0.06*self.height, width=0.6*self.width, font_size="25sp", pos_hint={"center_x":.5,"center_y":.31}, on_release=lambda x:self.delete_entry())
 				self.btn3 = Button(text="Delete for everyone", size_hint_y=None, size_hint_x=None, height=0.06*self.height, width=0.6*self.width, font_size="25sp", pos_hint={"center_x":.5,"center_y":.14}, on_release=lambda x:self.delete_entry(True))
-						
+
 			self.lbl = Label(text=sentence, font_size="25sp", pos_hint={"center_x":.5,"center_y":.95})
 		else:
 			if self.lang == 'ru':
@@ -3208,7 +3213,7 @@ class Core(BoxLayout):
 	def delete_entry(self, *args):
 		self.popup.dismiss()
 
-		f = open("saver.txt", "r+")
+		f = open(abs_path+"/src/data/saver.txt", "r+")
 		dawread = f.read()
 		f.close()
 		dawread = dawread.split("$")
@@ -3222,7 +3227,7 @@ class Core(BoxLayout):
 				break
 
 
-		with open("saver.txt", "w") as f:
+		with open(abs_path+"/src/data/saver.txt", "w") as f:
 			for each in dawread:
 				f.write(str(each + "$"))
 
@@ -3239,7 +3244,7 @@ class Core(BoxLayout):
 
 #######################################################################################
 	def save_anyway3(self, boomb):
-		f = open("saver.txt", "r+")
+		f = open(abs_path+"/src/data/saver.txt", "r+")
 		dawread = f.read()
 		f.close()
 		dawread = dawread.split("$")
@@ -3253,7 +3258,7 @@ class Core(BoxLayout):
 			if dawread[each-1] == self.date:
 				dawread[each-1] = boomb
 
-		with open("saver.txt", "w") as f:
+		with open(abs_path+"/src/data/saver.txt", "w") as f:
 			for each in dawread:
 				f.write(str(each + "$"))
 
@@ -3336,7 +3341,7 @@ class Core(BoxLayout):
 
 				self.popup.dismiss()
 
-				f = open("saver.txt", "r+")
+				f = open(abs_path+"/src/data/saver.txt", "r+")
 				dawread = f.read()
 				f.close()
 				dawread = dawread.split("$")
@@ -3347,7 +3352,7 @@ class Core(BoxLayout):
 					if dawread[each-1] == self.date:
 						dawread[each-1] = boomb
 
-				with open("saver.txt", "w") as f:
+				with open(abs_path+"/src/data/saver.txt", "w") as f:
 					for each in dawread:
 						f.write(str(each + "$"))
 
@@ -3378,7 +3383,7 @@ class Core(BoxLayout):
 			else:
 				popup('Warning!', 'Year should have 4 digits')
 			return
-		if ask.isalnum(): 
+		if ask.isalnum():
 			if len(ask) == 4:
 				if ask[0].isalpha() == False and ask[1].isalpha() == False and ask[2].isalpha() == False and ask[3].isalpha() == False:
 					if int(ask[2:]) <= 12 and int(ask[2:]) >= 1 and int(ask[:2]) <= 31 and int(ask[:2]) >= 1:
@@ -3412,10 +3417,10 @@ class Core(BoxLayout):
 
 	def check666(self, ask, year):
 		dayz = ask[:2]
-		month = ask[2:]       
+		month = ask[2:]
 		digidayz = int(dayz)
 		digimonth = int(month)
-		newmonth = "0%d" % (digimonth + 1)  
+		newmonth = "0%d" % (digimonth + 1)
 		realdayz = allmonth[month]
 		if len(newmonth) == 2:
 			result = allmonth[newmonth] - realdayz
@@ -3435,12 +3440,12 @@ class Core(BoxLayout):
 			title = "Внимание!!!"
 			text = "Нажав на кнопку УДАЛИТЬ вы уничтожите\nвсе эффекты!"
 			self.lay = FloatLayout(size=(self.width, self.height))
-			self.btn1 = Button(background_normal="but_red.png", text="УДАЛИТЬ", size_hint_y=None, size_hint_x=None, height=0.13*self.height, width=0.8*self.width, font_size="25sp", pos_hint={"center_x":.5,"center_y":.34}, on_release=lambda x:self.exterminate_effect())
+			self.btn1 = Button(background_normal="src/img/but_red.png", text="УДАЛИТЬ", size_hint_y=None, size_hint_x=None, height=0.13*self.height, width=0.8*self.width, font_size="25sp", pos_hint={"center_x":.5,"center_y":.34}, on_release=lambda x:self.exterminate_effect())
 		else:
 			title = "Warning!!!"
 			text = "If you press DELETE button\nall effects will be deleted!"
 			self.lay = FloatLayout(size=(self.width, self.height))
-			self.btn1 = Button(background_normal="but_red.png", text="DELETE", size_hint_y=None, size_hint_x=None, height=0.13*self.height, width=0.8*self.width, font_size="25sp", pos_hint={"center_x":.5,"center_y":.34}, on_release=lambda x:self.exterminate_effect())
+			self.btn1 = Button(background_normal="src/img/but_red.png", text="DELETE", size_hint_y=None, size_hint_x=None, height=0.13*self.height, width=0.8*self.width, font_size="25sp", pos_hint={"center_x":.5,"center_y":.34}, on_release=lambda x:self.exterminate_effect())
 
 
 		self.lbl = Label(text=text, font_size="25sp", pos_hint={"center_x":.5,"center_y":.86})
@@ -3465,12 +3470,12 @@ class Core(BoxLayout):
 			text = "Нажав на кнопку УДАЛИТЬ вы уничтожите\nвсю базу данных безвозвратно!"
 			self.lay = FloatLayout(size=(self.width, self.height))
 
-			self.btn1 = Button(background_normal="but_red.png", text="УДАЛИТЬ",
+			self.btn1 = Button(background_normal="src/img/but_red.png", text="УДАЛИТЬ",
 			size_hint_y=None, size_hint_x=None, height=0.13*self.height,
 			width=0.8*self.width, font_size="25sp",
 			pos_hint={"center_x":.5,"center_y":.50}, on_release=lambda x:self.exterminate(False))
 
-			self.btn2 = Button(background_normal="but_red.png", text="УДАЛИТЬ ДЛЯ ВСЕХ",
+			self.btn2 = Button(background_normal="src/img/but_red.png", text="УДАЛИТЬ ДЛЯ ВСЕХ",
 			size_hint_y=None, size_hint_x=None, height=0.13*self.height,
 			width=0.8*self.width, font_size="25sp",
 			pos_hint={"center_x":.5,"center_y":.17}, on_release=lambda x:self.exterminate(True))
@@ -3480,13 +3485,13 @@ class Core(BoxLayout):
 			text = "If you press DELETE button\nwhole database will be deleted!"
 			self.lay = FloatLayout(size=(self.width, self.height))
 
-			self.btn1 = Button(background_normal="but_red.png",
+			self.btn1 = Button(background_normal="src/img/but_red.png",
 				text="DELETE", size_hint_y=None, size_hint_x=None,
 				height=0.13*self.height, width=0.8*self.width,
 				font_size="25sp", pos_hint={"center_x":.5,"center_y":.34},
 				on_release=lambda x:self.exterminate(False))
 
-			self.btn2 = Button(background_normal="but_red.png", text="Delete for everyone",
+			self.btn2 = Button(background_normal="src/img/but_red.png", text="Delete for everyone",
 			size_hint_y=None, size_hint_x=None, height=0.13*self.height,
 			width=0.8*self.width, font_size="25sp",
 			pos_hint={"center_x":.5,"center_y":.14}, on_release=lambda x:self.exterminate(True))
@@ -3540,7 +3545,7 @@ class Core(BoxLayout):
 
 			to_database = json.loads(text)
 			url = "https://avocado-a066c.firebaseio.com/{}/Users.json".format(self.current_group)
-		
+
 			try:
 				requests.patch(url=url, json=to_database)
 			except:
@@ -3556,19 +3561,19 @@ class Core(BoxLayout):
 
 		none = ""
 
-		f = open("daysoflife.txt", "w")
+		f = open(abs_path+"/src/data/daysoflife.txt", "w")
 		f.write(none)
 		f.close()
 
-		f = open("artname.txt", "w")
+		f = open(abs_path+"/src/data/artname.txt", "w")
 		f.write(none)
 		f.close()
 
-		f = open("saver.txt", "w")
+		f = open(abs_path+"/src/data/saver.txt", "w")
 		f.write(none)
 		f.close()
 
-		f = open("barcode.txt", "w")
+		f = open(abs_path+"/src/data/barcode.txt", "w")
 		f.write(none)
 		f.close()
 
@@ -3603,7 +3608,7 @@ class Core(BoxLayout):
 
 		self.is_user_already_logged()
 
-		with open('data.json', 'w') as outfile:
+		with open(abs_path+"/src/data/data.json", 'w') as outfile:
 			json.dump('', outfile)
 
 	def load_group_home(self):
@@ -3634,7 +3639,7 @@ class Core(BoxLayout):
 					if self.lang == 'ru':
 						self.texter = 'Удаление даты [color=#04d3ff]{}[/color] \nАртикула [color=#04d3ff]{}[/color]'.format(each[2], each[0])
 					else:
-						self.texter = 'Delete date [color=#04d3ff]{}[/color] \nArticle [color=#04d3ff]{}[/color]'.format(each[2], each[0])	
+						self.texter = 'Delete date [color=#04d3ff]{}[/color] \nArticle [color=#04d3ff]{}[/color]'.format(each[2], each[0])
 				self.btn = Button(markup=True, halign='left', text=self.texter, size_hint_y=None, height=0.09*self.height, font_size="25sp", on_release=lambda x: self.popup_del_item_from_stop_list(x.text))
 				self.grid.add_widget(self.btn)
 
@@ -3706,14 +3711,14 @@ class Core(BoxLayout):
 
 	def while_loading(self):
 		self.loading = self.ids.float_group_home
-		self.loading_image = Image(source='load.png', size_hint=(1, 1))
+		self.loading_image = Image(source='src/img/load.png', size_hint=(1, 1))
 		self.loading.add_widget(self.loading_image)
 
 	def destroy_loading(self):
 		self.ids.float_group_home.remove_widget(self.loading_image)
 
 	def is_user_already_logged(self):
-	
+
 		if self.current_user:
 			self.load_group_home()
 			self.ids.mana.current = "group_home"
@@ -3836,7 +3841,7 @@ class Core(BoxLayout):
 					self.ids.group_password.text = ''
 					self.ids.group_name.text = ''
 					self.ids.mana.current = 'ask_nickname'
-		
+
 
 	def check_user_name(self):
 		for each in self.current_data['Users']:
@@ -3847,7 +3852,7 @@ class Core(BoxLayout):
 
 
 	def check_password(self):
-		
+
 		if self.current_data['Password'] == self.current_password:
 			return True
 		else:
@@ -3871,7 +3876,7 @@ class Core(BoxLayout):
 				else:
 					popup('Warning!', 'Group do not exist')
 				return False
-		
+
 			return anwser
 		except:
 			if self.lang == 'ru':
@@ -3922,7 +3927,7 @@ class Core(BoxLayout):
 				popup('Warning', 'Check your internet connection')
 
 	def stop_list_activity(self, days_server, names_server, saves_server, eans_server):
-		
+
 		for each in self.stop_list:
 
 			if each[1] == 'deleteART':
@@ -4032,7 +4037,7 @@ class Core(BoxLayout):
 
 		to_database = json.loads(text)
 		url = "https://avocado-a066c.firebaseio.com/{}/Users.json".format(self.current_group)
-		
+
 		try:
 			requests.patch(url=url, json=to_database)
 		except:
@@ -4043,26 +4048,26 @@ class Core(BoxLayout):
 
 	def stop_my_data(self, mozzie):
 
-		f = open("daysoflife.txt", "r+")
+		f = open(abs_path+"/src/data/daysoflife.txt", "r+")
 		rawread = f.read()
 		f.close()
 
 		days_to_stop = rawread.split('$')[:-1]
 
 
-		f = open("artname.txt", "r+")
+		f = open(abs_path+"/src/data/artname.txt", "r+")
 		rawread = f.read()
 		f.close()
 
 		names_to_stop = rawread.split('$')[:-1]
 
-		f = open("saver.txt", "r+")
+		f = open(abs_path+"/src/data/saver.txt", "r+")
 		rawread = f.read()
 		f.close()
 
 		saves_to_stop = rawread.split('$')[:-1]
 
-		f = open("barcode.txt", "r+")
+		f = open(abs_path+"/src/data/barcode.txt", "r+")
 		rawread = f.read()
 		f.close()
 
@@ -4116,24 +4121,24 @@ class Core(BoxLayout):
 							del eans_to_stop[eaz-1]
 
 
-		with open("artname.txt", "w+") as f:
+		with open(abs_path+"/src/data/artname.txt", "w+") as f:
 			for x in names_to_stop:
 				f.write(str(Core().convert_to_safe_sentence(x) + "$"))
 
-		with open("daysoflife.txt", "w+") as f:
+		with open(abs_path+"/src/data/daysoflife.txt", "w+") as f:
 			for x in days_to_stop:
 				f.write(str(x + "$"))
 
-		with open("saver.txt", "w+") as f:
+		with open(abs_path+"/src/data/saver.txt", "w+") as f:
 			for x in saves_to_stop:
 				f.write(str(x + "$"))
 
-		with open("barcode.txt", "w+") as f:
+		with open(abs_path+"/src/data/barcode.txt", "w+") as f:
 			for x in eans_to_stop:
 				f.write(str(x + "$"))
 
 		sync()
-		
+
 	def prepare_to_internet_sync(self):
 
 		my_thread = threading.Thread(target=self.internet_sync)
@@ -4154,7 +4159,7 @@ class Core(BoxLayout):
 			self.stop_list_activity(days_of_life_from_server, names_from_server, saves_from_server, eans_from_server)
 			self.send_stop_list(data)
 
-			f = open("daysoflife.txt", "r+")
+			f = open(abs_path+"/src/data/daysoflife.txt", "r+")
 			rawread = f.read()
 			f.close()
 
@@ -4176,11 +4181,11 @@ class Core(BoxLayout):
 				for each in articles_only:
 					if each not in updated_days_of_life:
 						updated_days_of_life.append(each)
-						updated_days_of_life.append(days_of_life_local[days_of_life_local.index(each)+1])	
+						updated_days_of_life.append(days_of_life_local[days_of_life_local.index(each)+1])
 
 			#_______--We update names--_________________#
 
-			f = open("artname.txt", "r+")
+			f = open(abs_path+"/src/data/artname.txt", "r+")
 			rawread = f.read()
 			f.close()
 
@@ -4210,7 +4215,7 @@ class Core(BoxLayout):
 
 			#______--We update dates--________________#
 
-			f = open("saver.txt", "r+")
+			f = open(abs_path+"/src/data/saver.txt", "r+")
 			rawread = f.read()
 			f.close()
 
@@ -4237,7 +4242,7 @@ class Core(BoxLayout):
 
 
 				for x in range(len(articles_only)):
-					
+
 					if articles_only[x] not in final_hub:
 						final_hub[articles_only[x]] = [dates_only[x]]
 					else:
@@ -4261,9 +4266,9 @@ class Core(BoxLayout):
 			if len(updated_saves) == 0:
 				updated_saves = ''
 
-			# We update EANs 
+			# We update EANs
 
-			f = open("barcode.txt", "r+")
+			f = open(abs_path+"/src/data/barcode.txt", "r+")
 			rawread = f.read()
 			f.close()
 
@@ -4290,7 +4295,7 @@ class Core(BoxLayout):
 
 
 				for x in range(len(articles_only)):
-					
+
 					if articles_only[x] not in final_hub:
 						final_hub[articles_only[x]] = [eans_only[x]]
 					else:
@@ -4316,19 +4321,19 @@ class Core(BoxLayout):
 			if len(updated_eans) == 0:
 				updated_eans = ''
 
-			with open("barcode.txt", "w") as f:
+			with open(abs_path+"/src/data/barcode.txt", "w") as f:
 				for each in updated_eans:
 					f.write(str(each + "$"))
 
-			with open("artname.txt", "w") as f:
+			with open(abs_path+"/src/data/artname.txt", "w") as f:
 				for each in updated_names_to_phone:
 					f.write(str(Core().convert_to_safe_sentence(each) + "$"))
 
-			with open("daysoflife.txt", "w") as f:
+			with open(abs_path+"/src/data/daysoflife.txt", "w") as f:
 				for each in updated_days_of_life:
 					f.write(str(each + "$"))
 
-			with open("saver.txt", "w") as f:
+			with open(abs_path+"/src/data/saver.txt", "w") as f:
 				for each in updated_saves:
 					f.write(str(each + "$"))
 
@@ -4361,7 +4366,7 @@ class Core(BoxLayout):
 		self.popup.dismiss()
 
 	def delete_user1(self):
-		
+
 
 		data = self.read_from_base()
 		names = data['Users']
@@ -4372,11 +4377,11 @@ class Core(BoxLayout):
 			saver = json.loads(sent)
 			url = "https://avocado-a066c.firebaseio.com/{}.json".format(self.current_group)
 			requests.patch(url=url, json=saver)
-			
-			
+
+
 			for each in names:
 				name = each
-				val = names[each] 
+				val = names[each]
 
 				text = '{'+ '"{}"'.format(name) + ': "{}"'.format(val) + '}'
 
@@ -4386,7 +4391,7 @@ class Core(BoxLayout):
 
 				requests.patch(url=url, json=to_database)
 
-			self.popup.dismiss()	
+			self.popup.dismiss()
 			self.exit_group()
 		except:
 			if self.lang == 'ru':
@@ -4412,7 +4417,7 @@ class Core(BoxLayout):
 			tit = 'Deletion'
 			sentence = "Do you want to delete user {}?".format(self.current_user)
 			self.layout = FloatLayout(size=(self.width, self.height))
-			
+
 			self.btn1 = Button(text="Yes", size_hint_y=.5, size_hint_x=.4, font_size="25sp",
 				pos_hint={"center_x":.29,"center_y":.3}, on_release=lambda x:self.delete_user1())
 
@@ -4432,13 +4437,13 @@ class Core(BoxLayout):
 
 	def set_settings(self, data):
 
-		with open('data.json', 'w') as outfile:
+		with open(abs_path+"/src/data/data.json", 'w') as outfile:
 			json.dump(data, outfile)
 
 	def get_settings(self, *args):
 
 		try:
-			with open('data.json') as data_file:
+			with open(abs_path+"/src/data/data.json") as data_file:
 
 				data = json.loads(data_file.read())
 				self.current_group = data['group']
@@ -4450,27 +4455,27 @@ class Core(BoxLayout):
 
 	def get_stop_list(self):
 		try:
-			with open('stop_list.txt', 'r') as f:
+			with open(abs_path+"/src/data/stop_list.txt", 'r') as f:
 				data = f.read()
 				data = data.split('$')
 				del data[-1]
-				
+
 				for each in data:
 					first,second,third = each.split(',')
 					if third == 'None':
 						third = None
 					self.stop_list.append((first, second, third))
-					
+
 
 		except:
-			f = open("stop_list.txt", "w+")
+			f = open(abs_path+"/src/data/stop_list.txt", "w+")
 			f.close()
 
 	def get_lang(self, *args):
 		try:
-			with open('lang.txt', 'r') as f:
+			with open(abs_path+"/src/data/lang.txt", 'r') as f:
 				data = f.read()
-				
+
 				self.lang = data
 
 				if self.lang == 'ru':
@@ -4484,19 +4489,19 @@ class Core(BoxLayout):
 					self.ids.russian_button.state = 'normal'
 					self.ids.english_button.state = 'down'
 		except:
-			f = open("lang.txt", "w+")
+			f = open(abs_path+"/src/data/lang.txt", "w+")
 			f.close()
 
 			self.lang = 'ru'
 			self.to_russian()
 
 	def set_lang(self, data):
-		with open("lang.txt", "w") as f:
+		with open(abs_path+"/src/data/lang.txt", "w") as f:
 			f.write(data)
 
 
 	def set_stop_list(self):
-		with open("stop_list.txt", "w") as f:
+		with open(abs_path+"/src/data/stop_list.txt", "w") as f:
 			for each in self.stop_list:
 				f.write(str(each[0])+','+str(each[1])+ ','+ str(each[2]) + '$')
 
@@ -4541,7 +4546,7 @@ class ScreenManagement(ScreenManager):
 
 def sync():
 	try:
-		f = open("barcode.txt", "r+")
+		f = open(abs_path+"/src/data/barcode.txt", "r+")
 		dawread = f.read()
 		f.close()
 		global art_bars
@@ -4549,7 +4554,7 @@ def sync():
 		templ = dawread.split("$")
 		counter = 0
 		while counter < (len(templ)-1):
-			
+
 			if templ[counter] in art_bars:
 				art_bars[templ[counter]].append(templ[counter+1])
 			else:
@@ -4559,20 +4564,20 @@ def sync():
 			counter += 2
 
 	except:
-		f = open("barcode.txt", "w+")
+		f = open(abs_path+"/src/data/barcode.txt", "w+")
 		f.close()
 
 	try:
-		f = open("saver.txt", "r+")
+		f = open(abs_path+"/src/data/saver.txt", "r+")
 		rawread = f.read()
 		f.close()
 		global entries
 		entries = rawread.split("$")
 	except:
-		f = open("saver.txt", "w+")
+		f = open(abs_path+"/src/data/saver.txt", "w+")
 		f.close()
 	try:
-		f = open("artname.txt", "r+")
+		f = open(abs_path+"/src/data/artname.txt", "r+")
 		dawread = f.read()
 		f.close()
 		global art_names
@@ -4584,11 +4589,11 @@ def sync():
 			art_names[templ[counter]] = Core.convert_to_unsafe_sentence(templ[counter+1])
 			counter += 2
 	except:
-		f = open("artname.txt", "w+")
+		f = open(abs_path+"/src/data/artname.txt", "w+")
 		f.close()
 
 	try:
-		f = open("daysoflife.txt", "r+")
+		f = open(abs_path+"/src/data/daysoflife.txt", "r+")
 		dawread = f.read()
 		f.close()
 		global days_of_life
@@ -4600,1463 +4605,9 @@ def sync():
 			days_of_life[templ[counter]] = templ[counter+1]
 			counter += 2
 	except:
-		f = open("daysoflife.txt", "w+")
+		f = open(abs_path+"/src/data/daysoflife.txt", "w+")
 		f.close()
 
-
-
-Builder.load_string("""
-#:import NoTransition kivy.uix.screenmanager.NoTransition
-#:import ZBarSymbol pyzbar.pyzbar.ZBarSymbol
-
-<UtilWidget>:
-	canvas.before:
-		Color: 
-			rgb: 0, 0, 0 
-		Rectangle: 
-			pos: self.pos 
-			size: self.size
-
-	orientation: "horizontal"
-	cols: 3
-	spacing: 1
-	padding: 1
-	row_default_height: root.height
-
-	Label:
-		id: art
-		canvas.before:
-			Color: 
-				rgb: .694, .812, .439 
-			Rectangle: 
-				pos: self.pos 
-				size: self.size
-		text: '12345'
-		size_hint_x: .3
-		font_size: "21sp"
-
-	Label:
-		id: name
-		canvas.before:
-			Color: 
-				rgb: .694, .812, .439 
-			Rectangle: 
-				pos: self.pos 
-				size: self.size
-		text: ''
-		text_size: self.width - 8, None
-		valign: 'top'
-		halign: 'left'
-		font_size: "24sp"
-		pos_hint:{"center_x": .5,"center_y":.5}
-		size_hint_x: .7
-		on_size: root.scaleAdapter(self)
-
-<CheckLabel>:
-	id: checker
-	canvas.before:
-		Color: 
-			rgb: .3, .812, .439 
-		Rectangle: 
-			pos: self.pos 
-			size: self.size
-	text: 'x'
-	font_name: 'mp.ttf'
-	size_hint_x: .1
-	font_size: "30sp"
-
-<SearchWidget>:
-	canvas.before:
-		Color: 
-			rgb: 0, 0, 0 
-		Rectangle: 
-			pos: self.pos 
-			size: self.size
-
-	size_hint_x: .8
-	size_hint_y: 1
-	pos_hint: {"center_x":.5,"center_y":.2}
-
-	orientation: "horizontal"
-	cols: 2
-	spacing: 1
-	padding: 1
-
-	BoxLayout:
-		id: suppaboxer
-		orientation: "vertical"
-		raws: 2
-		size_hint_x: .3
-		spacing: 1
-		Label:
-			id: article
-			canvas.before:
-				Color: 
-					rgb: .694, .812, .439 
-				Rectangle: 
-					pos: self.pos 
-					size: self.size
-
-			text: ''
-			font_size: "21sp"
-			pos_hint:{"center_x": .5,"center_y":.5}
-
-		Label:
-			id: date
-			canvas.before:
-				Color: 
-					rgb: .694, .812, .439 
-				Rectangle: 
-					pos: self.pos 
-					size: self.size
-			text: 'N/A'
-			font_size: "21sp"
-			pos_hint:{"center_x": .5,"center_y":.5}
-	Label:
-		id: name
-		canvas.before:
-			Color: 
-				rgb: .694, .812, .439 
-			Rectangle: 
-				pos: self.pos 
-				size: self.size
-
-		text: ''
-		text_size: self.width - 8, None
-		valign: 'top'
-		halign: 'left'
-		font_size: '26sp'
-		pos_hint:{"center_x": .5,"center_y":.5}
-		size_hint_x: .7
-		on_size: root.scaleAdapter(self)
-
-
-<SuppaLabel>:
-	canvas.before:
-		Color: 
-			rgb: 0, .8, .4, 
-		Rectangle: 
-			pos: self.pos 
-			size: self.size
-	text: 'LMAO'
-	size_hint_y: None
-	height: root.container1
-	font_size: root.container2
-
-<Reader>:
-	orientation: 'vertical'
-	pos_hint: root.hinter
-	canvas.before: 
-		Color: 
-			rgb: 1, .65, .18
-		Rectangle:
-			pos: self.pos 
-			size: self.size
-
-	ZBarCam:
-		id: zbarcam
-		code_types: ZBarSymbol.QRCODE, ZBarSymbol.EAN13
-
-	Button:
-		text: 'exit'
-		pos_hint: {"center_x": .5,"center_y": 1}
-		size_hint: (.4, .1)
-		font_size: '25sp'
-		on_release: root.stop_cam("NO")
-
-	Label:
-		size_hint: None, None
-		size: self.texture_size[0], 50
-		text: ', '.join([str(symbol.data) for symbol in zbarcam.symbols])
-		on_text: root.stop_cam(self.text)
-
-<Core>:
-	orientation: "vertical"
-	FloatLayout:
-		canvas.before: 
-			Color: 
-				rgb: 1, .65, .18
-			Rectangle:
-				pos: self.pos 
-				size: self.size
-
-		size_hint_y: 10
-
-		Image:
-			source: 'head.png'
-			size_hint: (1, 1)
-			pos_hint: {"center_x": .5,"center_y": .5}
-
-		Button:
-			id: warner
-			border: 0,0,0,0
-			background_normal: ''
-			background_color: 1, .35, .35, 1
-			halign: 'center'
-			valign: "middle"
-			text: root.t_we_have_expired
-			text_size: self.size
-			size_hint: (.8, 1)
-			font_size: "25sp"
-			pos_hint: {"center_x": .4,"center_y": 2}
-			on_press: root.ids.fi.state = 'normal'
-			on_press: root.ids.se.state = 'normal'
-			on_press: root.ids.th.state = 'normal'
-			on_press: root.ids.fo.state = 'normal'
-			on_press: root.ids.mana.current = "old_arts"
-			on_press: root.alarm_out()
-			on_press: root.put_trash()
-
-		Button:
-			canvas.before:
-		        Color:
-					rgba: 0, 0, 0, 1
-				Line:
-					width: 2
-					rectangle: self.x, self.y, 0, self.height
-			id: warner2
-			border: 0,0,0,0
-			background_normal: ''
-			background_color: 1, .35, .35, 1
-			halign: 'center'
-			valign: "middle"
-			text: 'X'
-			text_size: self.size
-			size_hint: (.2, 1)
-			font_size: "25sp"
-			pos_hint: {"center_x": .9,"center_y": 2}
-			on_press: root.alarm_out()
-
-
-
-	ScreenManagement:
-		transition: NoTransition()
-		id: mana
-		size_hint_y: 82
-
-
-		Screen:
-			name: 'work'
-			FloatLayout:
-				id: summertime
-				canvas:
-					Color: 	
-						rgb: .886, .949, .671
-
-					Rectangle:
-						size: self.size
-						pos: self.pos
-
-
-				Label:
-					canvas.before:
-						Color: 
-							rgba: 0, .8, .4, 0
-						Rectangle:
-							size: self.size
-							pos: self.pos
-
-					color: 0, 0, 0
-					halign: 'center'
-					valign: "middle"
-					text: root.worktext
-					text_size: self.size
-					size_hint: (.8, .15)
-					font_size: "25sp"
-					pos_hint:{"center_x": .5,"center_y":.92}
-
-
-				Label:
-					canvas.before:
-						Color: 
-							rgb: 0, .8, .4
-						Rectangle:
-							size: self.size
-							pos: self.pos
-
-					halign: 'center'
-					valign: "middle"
-					text: root.scanned_EAN_text
-					text_size: self.size
-					size_hint: (.8, .07)
-					font_size: "15sp"
-					pos_hint: root.pos_scanned_EAN
-
-				Label:
-					canvas.before:
-						Color: 
-							rgb: 0, .8, .4
-						Rectangle:
-							size: self.size
-							pos: self.pos
-
-					halign: 'center'
-					valign: "middle"
-					text: 'Неизвестный EAN! Введите артикул для ассоциации'
-					text_size: self.size
-					size_hint: (.8, .07)
-					font_size: "15sp"
-					pos_hint: root.pos_unknown_EAN
-
-				ToggleButton:
-					allow_no_selection: False
-					group: 'before_after'
-					state: 'down'
-					text: root.t_ot
-					size_hint: (.3, .06)
-					background_down: 'w_b.png'
-					pos_hint: root.pos_before_after1
-					on_press: root.switch_before_after('before')
-
-				ToggleButton:
-					allow_no_selection: False
-					group: 'before_after'
-					text: root.t_do
-					size_hint: (.3, .06)
-					background_down: 'w_b.png'
-					pos_hint: root.pos_before_after2
-					on_press: root.switch_before_after('after')
-
-				ToggleButton:
-					allow_no_selection: False
-					state: 'down'
-					group: 'day_month_year'
-					state: 'down'
-					text: root.t_day
-					size_hint: (.3, .06)
-					background_down: 'w_b.png'
-					pos_hint: root.pos_day_month_year1
-					on_press: root.day_or_what_changer('day')
-
-				ToggleButton:
-					allow_no_selection: False
-					group: 'day_month_year'
-					text: root.t_month
-					size_hint: (.3, .06)
-					background_down: 'w_b.png'
-					pos_hint: root.pos_day_month_year2
-					on_press: root.day_or_what_changer('month')
-
-				ToggleButton:
-					allow_no_selection: False
-					group: 'day_month_year'
-					text: root.t_year
-					size_hint: (.3, .06)
-					background_down: 'w_b.png'
-					pos_hint: root.pos_day_month_year3
-					on_press: root.day_or_what_changer('year')
-
-
-				TextInput:
-					font_size: "65sp"
-					id: inputer
-					multiline: False
-					size_hint: (.8, .15)
-					pos_hint: root.g_input
-
-				TextInput:
-					font_size: "65sp"
-					id: ex_inputer
-					multiline: False
-					size_hint: (.2, .15)
-					pos_hint:root.ex_input1
-
-				TextInput:
-					font_size: "65sp"
-					id: ex_inputer2
-					multiline: False
-					size_hint: (.2, .15)
-					pos_hint: root.ex_input2
-
-				TextInput:
-					font_size: "65sp"
-					id: ex_inputer3
-					hint_text: root.yez
-					multiline: False
-					size_hint: (.4, .15)
-					pos_hint: root.ex_input3
-
-
-				Button:
-					font_name: 'mp.ttf'
-					text: '>'
-					font_size: '70sp'
-					border: 0,0,0,0
-					pos_hint: {'center_x': .72, 'center_y': .53}
-					size_hint: (.24, .15)
-					background_normal: "edit.png"
-					background_down: "edit.png"
-					on_release:
-						root.press += 1
-						root.catch_art()
-
-
-				Button:
-					font_name: 'mp.ttf'
-					text: 'R'
-					font_size: '70sp'
-					border: 0,0,0,0
-					pos_hint: {'center_x': .5, 'center_y': .53}
-					size_hint: (.24, .15)
-					background_normal: "edit.png"
-					background_down: "edit.png"
-					on_release:
-						root.repeat()
-
-				
-				Button:
-					background_down: 'w_b.png'
-					color: 1,1,1,1
-					font_size: '90sp'
-					text: "A"
-					font_name: 'mp.ttf'
-					pos_hint: root.pos_init_cam
-					size_hint: (.23, .148)
-					on_release:
-						root.go_cam()
-
-
-				Button:
-					font_name: 'mp.ttf'
-					text: '<'
-					font_size: '70sp'
-					pos_hint: {'center_x': .28, 'center_y': .53}
-					border: 0,0,0,0
-					size_hint: (.24, .15)
-					background_normal: "edit.png"
-					background_down: "edit.png"
-					on_release: root.previous()
-					on_release: root.dater_invisible()
-					on_release: root.show_buttons_before_after('hide')
-					on_release: root.ids.ex_inputer.text = ''
-					on_release: root.ids.ex_inputer2.text = ''
-					on_release: root.step = 0
-
-				GridLayout:
-					cols: 3
-					size_hint_y: .4
-					size_hint_x: .8
-					pos_hint: {'center_x': .5, 'center_y': .25}
-					canvas: 
-						Color: 
-							rgba: root.buttons_color
-						Rectangle: 
-							pos: self.pos 
-							size: self.size
-					Button:
-						text: "1"
-						background_down: 'w_b.png'
-						font_size: '40sp'
-						on_release: root.type('1')
-					Button:
-						text: "2"
-						background_down: 'w_b.png'
-						font_size: '40sp'
-						on_release: root.type('2')
-					Button:
-						text: "3"
-						background_down: 'w_b.png'
-						font_size: '40sp'
-						on_release: root.type('3')
-					Button:
-						text: "4"
-						background_down: 'w_b.png'
-						font_size: '40sp'
-						on_release: root.type('4')
-					Button:
-						text: "5"
-						background_down: 'w_b.png'
-						font_size: '40sp'
-						on_release: root.type('5')
-					Button:
-						text: "6"
-						background_down: 'w_b.png'
-						font_size: '40sp'
-						on_release: root.type('6')
-					Button:
-						text: "7"
-						background_down: 'w_b.png'
-						font_size: '40sp'
-						on_release: root.type('7')
-					Button:
-						text: "8"
-						background_down: 'w_b.png'
-						font_size: '40sp'
-						on_release: root.type('8')
-					Button:
-						text: "9"
-						background_down: 'w_b.png'
-						font_size: '40sp'
-						on_release: root.type('9')
-					Button:
-						text: "CLS"
-						background_down: 'w_b.png'
-						font_size: '40sp'
-						on_release: root.type('CLS')
-					Button:
-						text: "0"
-						background_down: 'w_b.png'
-						font_size: '40sp'
-						on_release: root.type('0')
-					Button:
-						text: "<<"
-						background_down: 'w_b.png'
-						font_size: '40sp'
-						on_release: root.type('<<')
-
-
-		Screen:
-			name: 'database'
-			FloatLayout:
-				canvas:
-					Color: 	
-						rgb: .886, .949, .671
-
-					Rectangle:
-						size: self.size
-						pos: self.pos
-						
-			Label:
-
-				halign: 'center'
-				valign: "middle"
-				text: 'База данных'
-				text_size: self.size
-				size_hint: (.8, .07)
-				color: 0, 0, 0, 1
-				font_size: "28sp"
-				pos_hint: {'center_x': .5, 'center_y': .93}
-
-			Button:
-				text: '+'
-				font_name: 'mp.ttf'
-				font_size: '75sp'
-				border: 0,0,0,0
-				pos_hint: {'center_x': .5, 'center_y': .07}
-				size_hint: (.24, .15)
-				background_normal: "edit.png"
-				background_down: "edit.png"
-				on_release:
-					root.create_new()
-
-			Button:
-				pos_hint: {'center_x': .848, 'center_y': .8}
-				size_hint: (.2, .113)
-				text: 's'
-				font_name: 'mp.ttf'
-				font_size: '60sp'
-				background_normal: 'w_b.png'
-				on_release:
-					root.get_them(0)
-
-			TextInput:
-				font_size: "28sp"
-				hint_text: root.t_search
-				id: searcher
-				multiline: False
-				size_hint: (.7, .11)
-				pos_hint:{"center_x":.40,"center_y":.8}
-
-			ScrollView:
-				size_hint_x: .95
-				size_hint_y: .58
-				pos_hint: {'center_x': .5, 'center_y': .435}
-				GridLayout:
-					id: griddy
-					canvas:
-						Rectangle:
-							pos: self.pos
-							size: self.size
-							source: "cleanbl.png"
-
-					row_default_height: root.height/6 #row size control
-					spacing: 2
-					cols: 1
-					size_hint_y: None
-					height: 0
-
-		Screen:
-			name: 'today'
-			FloatLayout:
-				canvas:
-					Color: 	
-						rgb: .886, .949, .671
-					Rectangle:
-						size: self.size
-						pos: self.pos
-						source: 'back.png'
-
-				Label:
-					halign: 'center'
-					valign: "middle"
-					text: 'Сроки годности'
-					text_size: self.size
-					size_hint: (.8, .07)
-					color: 0, 0, 0, 1
-					font_size: "28sp"
-					pos_hint: {'center_x': .5, 'center_y': .965}
-
-				Button:
-					id: posrok_button
-					border: 0,0,0,0
-					text: root.t_expired
-					size_hint: (.3, .06)
-					background_normal: ''
-					background_color: .92, 0, 0, 1
-					pos_hint: root.prosrochka_button
-					on_press: root.ids.fi.state = 'normal'
-					on_press: root.ids.se.state = 'normal'
-					on_press: root.ids.th.state = 'normal'
-					on_press: root.ids.fo.state = 'normal'
-
-					on_press: root.ids.mana.current = "old_arts"
-					on_press: root.put_trash()
-
-				#togglers
-				ToggleButton:
-					id: bom_bom_bom
-					allow_no_selection: False
-					state: 'down'
-					background_down: 'w_b.png'
-					group: 'which_trash'
-					state: 'down'
-					text: root.t_today
-					size_hint: (.3, .06)
-					pos_hint: {"center_x": .2,"center_y":.9}
-					on_press: root.show_rangers(False)
-					on_press: root.show_el(False)
-					on_press: root.define_today_art('today')
-					on_press: root.reshape_today_scroll('today')
-
-				ToggleButton:
-					id: bom_bom_bom2
-					allow_no_selection: False
-					group: 'which_trash'
-					background_down: 'w_b.png'
-					text: root.t_random
-					size_hint: (.3, .06)
-					pos_hint: {"center_x": .5,"center_y":.9}
-					on_press: root.show_rangers(False)
-					on_press: root.show_el(True)
-					on_press: root.define_today_art('another')
-					on_press: root.reshape_today_scroll('any')
-
-				ToggleButton:
-					id: bom_bom_bom3
-					allow_no_selection: False
-					group: 'which_trash'
-					background_down: 'w_b.png'
-					text: root.t_period
-					size_hint: (.3, .06)
-					pos_hint: {"center_x": .8,"center_y":.9}
-					on_press: root.show_rangers(True)
-					on_press: root.show_el(False)
-					on_press: root.define_today_art('range')
-					on_press: root.reshape_today_scroll('range')
-
-				TextInput:
-					font_size: "28sp"
-					id: to_d1
-					hint_text: root.t_dd
-					multiline: False
-					size_hint: (.11, .08)
-					pos_hint: root.pos_el1
-					on_text: root.extra_checker('dd')
-
-				TextInput:
-					font_size: "28sp"
-					id: to_d2
-					hint_text: root.t_mm
-					multiline: False
-					size_hint: (.11, .08)
-					pos_hint: root.pos_el2
-					on_text: root.extra_checker('mm')
-
-				TextInput:
-					font_size: "28sp"
-					id: to_d3
-					hint_text: root.current_year
-					multiline: False
-					size_hint: (.2, .08)
-					pos_hint: root.pos_el3
-					on_text: root.extra_checker('yy')
-##################################################################################
-				TextInput:
-					font_size: "18sp"
-					id: to_range1
-					hint_text: root.t_dd
-					multiline: False
-					size_hint: (.11, .05)
-					pos_hint: root.ranger1
-					on_text: root.extra_checker2('1dd')
-
-				TextInput:
-					font_size: "18sp"
-					id: to_range2
-					hint_text: root.t_mm
-					multiline: False
-					size_hint: (.11, .05)
-					pos_hint: root.ranger2
-					on_text: root.extra_checker2('1mm')
-
-				TextInput:
-					font_size: "18sp"
-					id: to_range3
-					hint_text: root.current_year
-					multiline: False
-					size_hint: (.2, .05)
-					pos_hint: root.ranger3
-					on_text: root.extra_checker2('1yy')
-
-				TextInput:
-					font_size: "18sp"
-					id: to_range4
-					hint_text: root.t_dd
-					multiline: False
-					size_hint: (.11, .05)
-					pos_hint: root.ranger4
-					on_text: root.extra_checker2('2dd')
-
-				TextInput:
-					font_size: "18sp"
-					id: to_range5
-					hint_text: root.t_mm
-					multiline: False
-					size_hint: (.11, .05)
-					pos_hint: root.ranger5
-					on_text: root.extra_checker2('2mm')
-
-				TextInput:
-					font_size: "18sp"
-					id: to_range6
-					hint_text: root.current_year
-					multiline: False
-					size_hint: (.2, .05)
-					pos_hint: root.ranger6
-					on_text: root.extra_checker2('2yy')
-
-				Button:
-					font_size: "60sp"
-					font_name: 'mp.ttf'
-					text: 's'
-					background_down: 'w_b.png'
-					size_hint: (.31, .11)
-					pos_hint: root.ranger7
-					on_release: root.ranger_main()
-
-######################################################################################
-
-				Label:
-					canvas.before: 
-						Color:
-							rgb: .58, .84, 0 
-						Rectangle:
-							pos: self.pos 
-							size: self.size
-					font_size: "18sp"
-					text: root.t_ot + ':'
-					size_hint: (.1, .05)
-					pos_hint: root.ranger8
-
-				Label:
-					canvas.before: 
-						Color: 
-							rgb: .58, .84, 0
-						Rectangle: 
-							pos: self.pos 
-							size: self.size
-					font_size: "18sp"
-					text: root.t_do + ':'
-					size_hint: (.1, .05)
-					pos_hint: root.ranger9
-
-				Button:
-					font_name: 'mp.ttf'
-					text: 's'
-					font_size: '60sp'
-					size_hint: (.3, .08)
-					background_down: 'w_b.png'
-					pos_hint: root.pos_el4
-					on_press: root.define_another_art()
-
-				ScrollView:
-					size_hint_x: root.shx_today_scroll
-					size_hint_y: root.shy_today_scroll
-					pos_hint: root.ph_today_scroll
-					BoxLayout:
-						orientation: "vertical"
-						id: griddy4
-						canvas:
-							Rectangle:
-								pos: self.pos
-								size: self.size
-								source: "cleanbl.png"
-						spacing: 2
-						cols: 1
-						size_hint_y: None
-						height: 0
-
-				Label:
-					pos_hint: {'center_x': .5, 'center_y': .5}
-					text: root.sp_text
-					font_size: "20sp"
-					size_hint: (.8, .3)
-					canvas.before: 
-						Color: 
-							rgba: root.col
-						Rectangle:
-							pos: self.pos 
-							size: self.size
-
-
-				Button:
-					background_down: 'w_b.png'
-					font_name: 'mp.ttf'
-					text: 'I'
-					font_size: '60sp'
-					pos_hint: root.pos_el5
-					size_hint: (.3, .113)
-					on_release:
-						root.trash_out()
-
-		Screen:
-			name: 'information'
-			FloatLayout:
-				id: info_canvas
-				canvas:
-					Color: 	
-						rgb: .886, .949, .671
-					Rectangle:
-						size: self.size
-						pos: self.pos
-						
-
-				Label:
-					id: ghost
-					size: self.texture_size
-					text: "Нажмите обновить"
-					font_size: "60sp"
-					pos_hint:{"center_x":.5,"center_y":.88}
-
-				Label:
-					id: ghost2
-					size: self.texture_size
-					text: ""
-					font_size: "30sp"
-					pos_hint:{"center_x":.5,"center_y":.80}
-				Label:
-					id: ghost4
-					size: self.texture_size
-					text: ""
-					font_size: "30sp"
-					pos_hint:{"center_x":.5,"center_y":.75}
-				Label:
-					id: ghost5
-					size: self.texture_size
-					text: ''
-					font_size: "30sp"
-					pos_hint: {"center_x":.5, "center_y":.70}
-
-				ScrollView:
-					size_hint_x: 0.9
-					size_hint_y: 0.48
-					pos_hint: {'center_x': .5, 'center_y': .41}
-					GridLayout:
-						id: ghost3
-						canvas:
-							Rectangle:
-								pos: self.pos
-								size: self.size
-								source: "cleanbl.png"
-						spacing: 2
-						cols: 4
-						size_hint_y: None
-						height: 0
-
-				Button:
-					border: 0,0,0,0
-					pos_hint: {'center_x': .8, 'center_y': .1}
-					size_hint: (.24, .15)
-					background_normal: "edit.png"
-					background_down: "butp.png"
-					on_release:
-						root.init_edit()
-
-				Button:
-					border: 0,0,0,0
-					pos_hint: {'center_x': .2, 'center_y': .1}
-					size_hint: (.24, .15)
-					background_normal: "arrow_previous.png"
-					background_down: "butp.png"
-					on_release: root.ids.mana.current = "database"
-
-
-		Screen:
-			name: 'edit'
-			FloatLayout:
-				id: canvas
-				canvas:
-					Color: 	
-						rgb: .886, .949, .671
-					Rectangle:
-						size: self.size
-						pos: self.pos
-						
-				Label:
-					size: self.texture_size
-					text: root.t_edit
-					font_size: "40sp"
-					pos_hint:{"center_x":.5,"center_y":.9}
-
-				TextInput:
-					id: name
-					text: "Обновите информацию"
-					multiline: False
-					size_hint: (.5, .05)
-					pos_hint:{"center_x":.3,"center_y":.8}
-
-				TextInput:
-					id: article
-					text: "Обновите информацию"
-					multiline: False
-					size_hint: (.5, .05)
-					pos_hint:{"center_x":.3,"center_y":.7}
-
-				TextInput:
-					id: standartdate
-					text: "Обновите информацию"
-					multiline: False
-					size_hint: (.5, .05)
-					pos_hint:{"center_x":.3,"center_y":.6}
-
-				Button:
-					border: 0,0,0,0
-					text: root.t_save
-					font_size: "22sp"
-					pos_hint: {'center_x': .75, 'center_y': .8}
-					size_hint: (.4, .10)
-					background_normal: "but.png"
-					background_down: "butp.png"
-					on_release:
-						root.change_popup_name(True)
-				Button:
-					border: 0,0,0,0
-					text: root.t_add_date
-					font_size: "16sp"
-					pos_hint: {'center_x': .75, 'center_y': .7}
-					size_hint: (.4, .10)
-					background_normal: "but.png"
-					background_down: "butp.png"
-					on_release:
-						root.add_entry()
-				Button:
-					border: 0,0,0,0
-					text: root.t_manage_ean
-					font_size: "16sp"
-					pos_hint: {'center_x': .75, 'center_y': .6}
-					size_hint: (.4, .10)
-					background_normal: "but.png"
-					background_down: "butp.png"
-					on_release:
-						root.manage_eans()
-
-				Button:
-					border: 0,0,0,0
-					text: root.t_delete_article
-					font_size: "18sp"
-					pos_hint: {'center_x': .75, 'center_y': .1}
-					size_hint: (.5, .12)
-					background_normal: "but.png"
-					background_down: "butp.png"
-					on_release:
-						root.del_ask()
-
-				ScrollView:
-					size_hint_x: .95
-					size_hint_y: .35
-					pos_hint: {'center_x': .5, 'center_y': .35}
-					GridLayout:
-						id: griddy2
-						canvas:
-							Rectangle:
-								pos: self.pos
-								size: self.size
-								source: "cleanbl.png"
-						spacing: 2
-						cols: 3
-						size_hint_y: None
-						height: 0
-
-				Button:
-					border: 0,0,0,0
-					pos_hint: {'center_x': .2, 'center_y': .1}
-					size_hint: (.24, .15)
-					background_normal: "arrow_previous.png"
-					background_down: "butp.png"
-					on_release:
-						root.start_one()
-						root.ids.mana.current = "information"
-
-
-		Screen:
-			name: 'settings'
-			FloatLayout:
-
-				id: canvas
-				canvas:
-					Color: 	
-						rgb: .886, .949, .671
-					Rectangle:
-						size: self.size
-						pos: self.pos
-
-				Label:		
-					halign: 'center'
-					valign: "middle"
-					text: 'Настройки'
-					text_size: self.size
-					size_hint: (.8, .07)
-					color: 0, 0, 0, 1
-					font_size: "28sp"
-					pos_hint: {'center_x': .5, 'center_y': .93}
-
-				Button:
-					border: 0,0,0,0
-					text: root.t_language
-					font_size: "22sp"
-					pos_hint: {'center_x': .5, 'center_y': .8}
-					size_hint: (.65, .12)
-					background_normal: "but.png"
-					background_down: "butp.png"
-					on_release: root.ids.mana.current = "language"
-
-				Button:
-					border: 0,0,0,0
-					text: root.t_sync
-					font_size: "22sp"
-					pos_hint: {'center_x': .5, 'center_y': .68}
-					size_hint: (.65, .12)
-					background_normal: "but.png"
-					background_down: "butp.png"
-					on_release:
-						root.is_user_already_logged()
-
-				Button:
-					border: 0,0,0,0
-					text: root.t_delete_database
-					font_size: "22sp"
-					pos_hint: {'center_x': .5, 'center_y': .56}
-					size_hint: (.65, .12)
-					background_normal: "but.png"
-					background_down: "butp.png"
-					on_release:
-						root.are_you_sure()
-
-				Button:
-					border: 0,0,0,0
-					text: root.t_delete_effects
-					font_size: "22sp"
-					pos_hint: {'center_x': .5, 'center_y': .44}
-					size_hint: (.65, .12)
-					background_normal: "but.png"
-					background_down: "butp.png"
-					on_release:
-						root.delete_effect()
-
-
-		Screen:
-			name: 'old_arts'
-			FloatLayout:
-
-				id: canvas
-				canvas:
-					Color: 	
-						rgb: .886, .949, .671
-					Rectangle:
-						size: self.size
-						pos: self.pos
-				Label:
-					halign: 'center'
-					valign: "middle"
-					text: 'Просроченные артикулы'
-					text_size: self.size
-					size_hint: (.8, .07)
-					color: 0, 0, 0, 1
-					font_size: "28sp"
-					pos_hint: {'center_x': .5, 'center_y': .97}
-
-				ScrollView:
-					size_hint_x: .95
-					size_hint_y: .8
-					pos_hint: {'center_x': .5, 'center_y': .55}
-
-					GridLayout:
-						orientation: "vertical"
-						id: griddy_trash
-						canvas:
-							Color: 	
-								rgb: .886, .949, .671
-							Rectangle:
-								pos: self.pos
-								size: self.size
-
-						row_default_height: root.height/10
-						spacing: 1
-						cols: 1
-						size_hint_y: None
-						height:0
-
-				Button:
-					pos_hint: {'center_x':.5, 'center_y': .1}
-					size_hint: (.5, .12)
-					on_release:
-						root.old_trash_out()
-
-		Screen:
-			name: 'sync_data'
-
-			FloatLayout:
-				id: canvas
-				canvas:
-					Color: 	
-						rgb: .886, .949, .671
-					Rectangle:
-						size: self.size
-						pos: self.pos
-						
-
-
-				TextInput:
-					font_size: "24sp"
-					id: group_name
-					hint_text: root.t_group_name
-					multiline: False
-					size_hint: (.8, .08)
-					pos_hint: {'center_x': .5, 'center_y': .75}
-
-				TextInput:
-					font_size: "24sp"
-					id: group_password
-					password: True
-					hint_text: root.t_password
-					multiline: False
-					size_hint: (.8, .08)
-					pos_hint: {'center_x': .5, 'center_y': .65}
-
-				Button:
-					border: 0,0,0,0
-					text: root.t_enter
-					font_size: "22sp"
-					pos_hint: {'center_x': .5, 'center_y': .5}
-					size_hint: (.65, .1)
-					background_normal: "but.png"
-					background_down: "butp.png"
-					on_release:
-						root.try_to_log_in(group_name.text, group_password.text)
-
-				Button:
-					border: 0,0,0,0
-					text: root.t_create_group
-					font_size: "22sp"
-					pos_hint: {'center_x': .5, 'center_y': .4}
-					size_hint: (.65, .1)
-					background_normal: "but.png"
-					background_down: "butp.png"
-					on_release:
-						root.create_new_group(group_name.text, group_password.text)
-
-		Screen:
-			name: 'new_group_nickname'
-
-			FloatLayout:
-				id: canvas
-				canvas:
-					Color: 	
-						rgb: .886, .949, .671
-					Rectangle:
-						size: self.size
-						pos: self.pos
-						
-
-			TextInput:
-
-				font_size: "24sp"
-				id: new_nickname
-				hint_text: root.t_create_user
-				multiline: False
-				size_hint: (.8, .08)
-				pos_hint: {'center_x': .5, 'center_y': .75}
-
-			Button:
-
-				text: root.t_create
-				border: 0,0,0,0
-				font_size: "22sp"
-				pos_hint: {'center_x': .5, 'center_y': .65}
-				size_hint: (.65, .1)
-				background_normal: "but.png"
-				background_down: "butp.png"
-				on_release:
-					root.new_group_new_user(new_nickname.text)
-
-		Screen:
-			name: 'ask_nickname'
-
-			FloatLayout:
-				id: canvas
-				canvas:
-					Color: 	
-						rgb: .886, .949, .671
-					Rectangle:
-						size: self.size
-						pos: self.pos
-						
-
-			TextInput:
-
-				font_size: "24sp"
-				id: nickname
-				hint_text: root.t_user_name
-				multiline: False
-				size_hint: (.8, .08)
-				pos_hint: {'center_x': .5, 'center_y': .75}
-
-			Button:
-
-				text: root.t_enter
-				border: 0,0,0,0
-				font_size: "22sp"
-				pos_hint: {'center_x': .5, 'center_y': .65}
-				size_hint: (.65, .1)
-				background_normal: "but.png"
-				background_down: "butp.png"
-				on_release:
-					root.is_user_here(nickname.text)
-
-			Button:
-
-				text: root.t_create
-				border: 0,0,0,0
-				font_size: "22sp"
-				pos_hint: {'center_x': .5, 'center_y': .55}
-				size_hint: (.65, .1)
-				background_normal: "but.png"
-				background_down: "butp.png"
-				on_release:
-					root.new_group_new_user(nickname.text)
-
-		Screen:
-			name: 'group_home'
-
-			FloatLayout:
-				id: float_group_home
-				canvas:
-					Color: 	
-						rgb: .886, .949, .671
-					Rectangle:
-						size: self.size
-						pos: self.pos
-						
-
-				Label:
-					id: nothing_to_show
-					canvas.before:
-						Color: 
-							rgba: root.group_home_nothing_color 
-						Rectangle:
-							pos: self.pos 
-							size: self.size
-
-					size_hint: (.95, .5)
-					pos_hint:{"center_x":.5,"center_y":.5}
-					font_size: "25sp"
-
-				Label:
-					canvas.before:
-						Color: 
-							rgba: .53, .70, .18, .3 
-						Rectangle:
-							pos: self.pos 
-							size: self.size
-
-					size_hint: (1, .15)
-					pos_hint:{"center_x":.5,"center_y":.9}
-
-
-				Label:
-					canvas.before:
-						Color: 
-							rgba: .53, .70, .18, .3 
-						Rectangle:
-							pos: self.pos 
-							size: self.size
-
-					size_hint: (1, .05)
-					pos_hint:{"center_x":.5,"center_y":.79}
-					text: root.t_your_sync
-					color: 1,0,1,1
-					font_size: "25sp"
-
-				ScrollView:
-					size_hint_x: .95
-					size_hint_y: .5
-					pos_hint: {'center_x': .5, 'center_y': .5}
-					BoxLayout:
-						orientation: "vertical"
-						id: grid_internet_change
-						canvas:
-							Color: 	
-								rgb: .886, .949, .671
-							Rectangle:
-								pos: self.pos
-								size: self.size
-								
-						spacing: 2
-						cols: 1
-						size_hint_y: None
-						height: 0
-
-				Label:
-					size: self.texture_size
-					text: root.current_group
-					font_size: "40sp"
-					pos_hint:{"center_x":.5,"center_y":.9}
-
-				Label:
-					size: self.texture_size
-					text: root.t_group
-					color: 1,0,1,1
-					font_size: "25sp"
-					pos_hint:{"center_x":.5,"center_y":.95}
-
-				Label:
-					size: self.texture_size
-					text: root.current_user
-					color: 1,0,1,1
-					font_size: "21sp"
-					pos_hint:{"center_x":.5,"center_y":.85}
-
-				Button:
-					text: root.t_sync
-					border: 0,0,0,0
-					font_size: "22sp"
-					pos_hint: {'center_x': .5, 'center_y': .19}
-					size_hint: (.65, .1)
-					background_normal: "but.png"
-					background_down: "butp.png"
-					on_release: root.prepare_to_internet_sync()
-					on_release: root.while_loading()
-
-				Button:
-					text: root.t_exit
-					border: 0,0,0,0
-					font_size: "22sp"
-					pos_hint: {'center_x': .32, 'center_y': .09}
-					size_hint: (.325, .1)
-					background_normal: "but.png"
-					background_down: "butp.png"
-					on_release: root.exit_group()
-
-				Button:
-					text: root.t_delete
-					border: 0,0,0,0
-					font_size: "22sp"
-					pos_hint: {'center_x': .68, 'center_y': .09}
-					size_hint: (.325, .1)
-					background_normal: "but_red.png"
-					background_down: "butp.png"
-					on_release: root.delete_user()
-
-		Screen:
-			name: 'language'
-
-			FloatLayout:
-				canvas:
-					Color: 	
-						rgb: .886, .949, .671
-					Rectangle:
-						size: self.size
-						pos: self.pos
-						
-
-				ToggleButton:
-					id: russian_button
-					allow_no_selection: False
-					group: 'lang_lang'
-					state: 'down'
-					text: 'Русский'
-					pos_hint: {'center_x': .5, 'center_y': .79}
-					size_hint: (.65, .1)
-					on_press: root.lang = 'ru'
-					on_press: root.change_lang('ru')
-					on_press: root.set_lang('ru')
-
-
-				ToggleButton:
-					id: english_button
-					allow_no_selection: False
-					group: 'lang_lang'
-					text: 'English'
-					pos_hint: {'center_x': .5, 'center_y': .89}
-					size_hint: (.65, .1)
-					on_press: root.lang = 'eng'
-					on_press: root.change_lang('eng')
-					on_press: root.set_lang('eng')
-
-
-
-	BoxLayout:
-		size_hint_y: 8
-		canvas.before:
-			Color: 
-				rgba: .733, .855, .463, .95
-			Rectangle:
-				pos: self.pos 
-				size: self.size
-
-		ToggleButton:
-			id: fi
-			border: 0,0,0,0
-			allow_no_selection: False
-			background_normal: 'work_1.png'
-			background_down: 'work_2.png'
-			group: 'test'
-			state: 'down'
-			on_press: root.ids.mana.current = "work"
-
-		ToggleButton:
-			id: se
-			border: 0,0,0,0
-			allow_no_selection: False
-			background_normal: 'DB_1.png'
-			background_down: 'DB_2.png'
-			group: 'test'
-			on_press: root.ids.mana.current = "database"
-
-		ToggleButton:
-			id: th
-			border: 0,0,0,0
-			allow_no_selection: False
-			background_normal: 'today_1.png'
-			background_down: 'today_2.png'
-			group: 'test'
-			on_press: root.show_rangers(False)
-			on_press: root.ids.bom_bom_bom.state = 'down'
-			on_press: root.ids.bom_bom_bom2.state = 'normal'
-			on_press: root.ids.bom_bom_bom3.state = 'normal'
-			on_press: root.show_el(False)
-			on_press: root.reshape_today_scroll('today')
-			on_press: root.define_today_art('today')
-
-		ToggleButton:
-			id: fo
-			border: 0,0,0,0
-			allow_no_selection: False
-			background_normal: 'settings_1.png'
-			background_down: 'settings_2.png'
-			group: 'test'
-			on_press: root.ids.mana.current = "settings"
-	""")
 
 art_bars = {}
 entries = []
