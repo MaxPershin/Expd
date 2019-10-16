@@ -1,6 +1,6 @@
 # Avocado
 
-Avocado is an App writen in Python3 using Kivy framework + ZBarCam functions + Firebase sync.
+<h1>Avocado is an App writen in Python3 using Kivy framework + ZBarCam functions + Firebase sync.</h1>
 
 App can track shops expiry dates and notify if any off them have to be removed from shelves.
 
