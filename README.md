@@ -10,3 +10,7 @@ Users can create a custom group to synchronize their database over internet (Fir
 Any article can be changed manually or deleted. Any info, including expiry dates can be manually managed.
 
 There is currently Russian and English language settings in app (Minor stuff could be not translated yet).
+
+You need to execute main.py in order to launch it on your PC (Python, Kivy and libs should be included)
+
+App is buildable via buildozer, so you can build an APK and try it by yourself.
