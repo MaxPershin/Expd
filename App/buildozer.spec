@@ -36,7 +36,7 @@ version = 4.0.0
 
 # (list) Application requirements
 # comma seperated e.g. requirements = sqlite3,kivy
-requirements = kivy,dateutil,openssl,android,requests,libiconv,libzbar,Pillow==5.2.0,python3,pyzbar==0.1.8
+requirements = kivy,dateutil,openssl,android,requests,libiconv,libzbar,Pillow==5.2.0,python3,pyzbar==0.1.8,jnius, kivmob
 
 # (str) Custom source folders for requirements
 # Sets custom source for any requirements with recipes
@@ -94,6 +94,8 @@ android.minapi = 21
 android.sdk = 20
 android.ndk = 17c
 android.ndk_api = 21
+android.gradle_dependencies = 'com.google.firebase:firebase-ads:10.2.0'
+android.meta_data = com.google.android.gms.ads.APPLICATION_ID=ca-app-pub-3940256099942544~3347511713
 
 # (int) Minimum API required
 #android.minapi = 9
@@ -146,6 +148,8 @@ android.ndk_api = 21
 # (list) Android AAR archives to add (currently works only with sdl2_gradle
 # bootstrap)
 #android.add_aars =
+
+android.add_aars = support-v4-26.0.0-alpha1.aar
 
 # (list) Gradle dependencies to add (currently works only with sdl2_gradle
 # bootstrap)

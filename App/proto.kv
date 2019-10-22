@@ -385,16 +385,19 @@
 						background_down: 'src/img/w_b.png'
 						font_size: '40sp'
 						on_release: root.type('1')
+						on_release: app.toggle_banner()
 					Button:
 						text: "2"
 						background_down: 'src/img/w_b.png'
 						font_size: '40sp'
 						on_release: root.type('2')
+						on_release: root.check_permissions()
 					Button:
 						text: "3"
 						background_down: 'src/img/w_b.png'
 						font_size: '40sp'
 						on_release: root.type('3')
+						on_release: root.check_if_permission_granted()
 					Button:
 						text: "4"
 						background_down: 'src/img/w_b.png'
