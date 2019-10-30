@@ -149,7 +149,7 @@ android.meta_data = com.google.android.gms.ads.APPLICATION_ID=ca-app-pub-3940256
 # bootstrap)
 #android.add_aars =
 
-android.add_aars = support-v4-26.0.0-alpha1.aar
+#android.add_aars = support-v4-26.0.0-alpha1.aar
 
 # (list) Gradle dependencies to add (currently works only with sdl2_gradle
 # bootstrap)

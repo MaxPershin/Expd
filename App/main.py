@@ -33,8 +33,6 @@ import threading
 import json
 import requests
 
-abs_path = os.path.dirname(os.path.realpath(__file__))
-
 if platform != 'android':
     Config.set('graphics', 'resizable', False)
     Config.set('graphics', 'width', '414')
@@ -403,7 +401,16 @@ class Core(BoxLayout):
             self.ids.inputer.text = ''
             self.show_cam_button('hide')
 
+    def go_cam_test(self):
+        if self.check_if_permission_granted():
+            self.go_cam()
+        else:
+            self.ask_permissions()
+
     def go_cam(self):
+
+        # add perms
+
         try:
             if self.r is None:
                 self.r = Reader()
@@ -456,7 +463,7 @@ class Core(BoxLayout):
             return
         else:
 
-            f = open(abs_path + "/src/data/saver.txt", "r+")
+            f = open("saver.txt", "r+")
             dawread = f.read()
             f.close()
             dawread = dawread.split("$")
@@ -498,7 +505,7 @@ class Core(BoxLayout):
                 soviet.append(first)
                 soviet.append(second)
 
-            with open(abs_path + "/src/data/saver.txt", "w") as f:
+            with open("saver.txt", "w") as f:
                 for each in soviet:
                     f.write(str(each + "$"))
 
@@ -970,7 +977,7 @@ class Core(BoxLayout):
 
             tommorow = '{}{}{}'.format(day, month, year)
 
-            f = open(abs_path + "/src/data/saver.txt", "r+")
+            f = open("saver.txt", "r+")
             dawread = f.read()
             f.close()
             dawread = dawread.split("$")
@@ -996,7 +1003,7 @@ class Core(BoxLayout):
 
                 del dawread[each]
 
-            with open(abs_path + "/src/data/saver.txt", "w") as f:
+            with open("saver.txt", "w") as f:
                 for each in dawread:
                     f.write(str(each + "$"))
 
@@ -1252,7 +1259,7 @@ class Core(BoxLayout):
 
         self.pos_day_month_visible(False)
 
-        f = open(abs_path + "/src/data/daysoflife.txt", "a")
+        f = open("daysoflife.txt", "a")
         f.write(str((self.cuart + "$" + self.standartdate + "$")))
         f.close()
 
@@ -1298,7 +1305,7 @@ class Core(BoxLayout):
 
     def save_ean(self, article):
         self.if_recreated(article, 'deleteEAN', self.new_barcode)
-        f = open(abs_path + "/src/data/barcode.txt", "a", newline='')
+        f = open("barcode.txt", "a", newline='')
         f.write(str((article + "$" + self.new_barcode + "$")))
         f.close()
         self.new_barcode = None
@@ -1501,12 +1508,13 @@ class Core(BoxLayout):
 
     def define_name(self):
 
-        f = open(abs_path + "/src/data/daysoflife.txt", "a")
+        f = open("daysoflife.txt", "a")
         f.write(str((self.cuart + "$" + self.standartdate + "$")))
         f.close()
 
-        f = open(abs_path + "/src/data/artname.txt", "a")
-        f.write(str((self.cuart + "$" + Core().convert_to_safe_sentence(self.standartname) + "$")))
+        f = open("artname.txt", "a")
+        f.write(
+            str((self.cuart + "$" + self.convert_to_safe_sentence(self.standartname) + "$")))  # CAUSES A LITTLE PAUSE
         f.close()
 
         sync()
@@ -1759,7 +1767,7 @@ class Core(BoxLayout):
             self.press = 0
             self.show_cam_button('show')
         else:
-            f = open(abs_path + "/src/data/saver.txt", "a")
+            f = open("saver.txt", "a")
             f.write(str((ent + "$" + article + "$")))
             f.close()
             sync()
@@ -1852,11 +1860,11 @@ class Core(BoxLayout):
 
                     self.if_recreated(self.inputi.text, 'deleteART', None)
 
-                    f = open(abs_path + "/src/data/artname.txt", "a")
-                    f.write(str((self.inputi.text + "$" + Core.convert_to_safe_sentence(self.inputi2.text) + "$")))
+                    f = open("artname.txt", "a")
+                    f.write(str((self.inputi.text + "$" + self.convert_to_safe_sentence(self.inputi2.text) + "$")))
                     f.close()
 
-                    f = open(abs_path + "/src/data/daysoflife.txt", "a")
+                    f = open("daysoflife.txt", "a")
                     f.write(str((self.inputi.text + "$" + self.inputi3.text + "$")))
                     f.close()
 
@@ -1996,7 +2004,7 @@ class Core(BoxLayout):
 
         self.if_recreated(inf_art, 'deleteEAN', n_ean)
 
-        f = open(abs_path + "/src/data/barcode.txt", "a", newline='')
+        f = open("barcode.txt", "a", newline='')
         f.write(str((inf_art + "$" + n_ean + "$")))
         f.close()
         sync()
@@ -2086,7 +2094,7 @@ class Core(BoxLayout):
             self.stop_list.append((inf_art, 'deleteEAN', self.current_button))
             self.set_stop_list()
 
-        f = open(abs_path + "/src/data/barcode.txt", "r+")
+        f = open("barcode.txt", "r+")
         dawread = f.read()
         f.close()
         global art_bars
@@ -2098,7 +2106,7 @@ class Core(BoxLayout):
             if templ[each + 1] == self.current_button:
                 templ[each + 1] = self.ean_input.text
 
-                with open(abs_path + "/src/data/barcode.txt", "w") as f:
+                with open("barcode.txt", "w") as f:
                     for each in templ:
                         f.write(str(each + "$"))
                 sync()
@@ -2113,7 +2121,7 @@ class Core(BoxLayout):
 
         self.if_recreated(article, 'deleteEAN', barcode)
 
-        f = open(abs_path + "/src/data/barcode.txt", "r+")
+        f = open("barcode.txt", "r+")
         dawread = f.read()
         f.close()
         global art_bars
@@ -2126,7 +2134,7 @@ class Core(BoxLayout):
                 del templ[each]
                 del templ[each]
 
-                with open(abs_path + "/src/data/barcode.txt", "w") as f:
+                with open("barcode.txt", "w") as f:
                     for each in templ:
                         f.write(str(each + "$"))
 
@@ -2428,7 +2436,7 @@ class Core(BoxLayout):
 
         # Lets delete from names
 
-        f = open(abs_path + "/src/data/artname.txt", "r+")
+        f = open("artname.txt", "r+")
         dawread = f.read()
         f.close()
         dawread = dawread.split("$")
@@ -2437,13 +2445,13 @@ class Core(BoxLayout):
         del dawread[worker]
         del dawread[worker]
 
-        with open(abs_path + "/src/data/artname.txt", "w") as f:
+        with open("artname.txt", "w") as f:
             for each in dawread:
-                f.write(str(Core().convert_to_safe_sentence(each) + "$"))
+                f.write(str(self.convert_to_safe_sentence(each) + "$"))
 
         # Lets delete from STANDART DATE
 
-        f = open(abs_path + "/src/data/daysoflife.txt", "r+")
+        f = open("daysoflife.txt", "r+")
         dawread = f.read()
         f.close()
         dawread = dawread.split("$")
@@ -2452,13 +2460,13 @@ class Core(BoxLayout):
         del dawread[worker]
         del dawread[worker]
 
-        with open(abs_path + "/src/data/daysoflife.txt", "w") as f:
+        with open("daysoflife.txt", "w") as f:
             for each in dawread:
                 f.write(str(each + "$"))
 
         # Finally lets delete all entries for it
 
-        f = open(abs_path + "/src/data/saver.txt", "r+")
+        f = open("saver.txt", "r+")
         dawread = f.read()
         f.close()
         dawread = dawread.split("$")
@@ -2475,13 +2483,13 @@ class Core(BoxLayout):
             del dawread[each]
             del dawread[each]
 
-        with open(abs_path + "/src/data/saver.txt", "w") as f:
+        with open("saver.txt", "w") as f:
             for each in dawread:
                 f.write(str(each + "$"))
 
         # lets delete all eans
 
-        f = open(abs_path + "/src/data/barcode.txt", "r+")
+        f = open("barcode.txt", "r+")
         dawread = f.read()
         f.close()
         dawread = dawread.split("$")
@@ -2498,7 +2506,7 @@ class Core(BoxLayout):
             del dawread[each - 1]
             del dawread[each - 1]
 
-        with open(abs_path + "/src/data/barcode.txt", "w") as f:
+        with open("barcode.txt", "w") as f:
             for each in dawread:
                 f.write(str(each + "$"))
 
@@ -2593,7 +2601,7 @@ class Core(BoxLayout):
         self.if_recreated(inf_art, 'deleteART', None)
         self.if_recreated(inf_art, 'deleteDate', boomb)
 
-        f = open(abs_path + "/src/data/saver.txt", "a")
+        f = open("saver.txt", "a")
         f.write(str((boomb + "$" + inf_art + "$")))
         f.close()
         sync()
@@ -2693,7 +2701,7 @@ class Core(BoxLayout):
 
                     self.if_recreated(inf_art, 'deleteDate', boomb)
 
-                    f = open(abs_path + "/src/data/saver.txt", "a")
+                    f = open("saver.txt", "a")
                     f.write(str((boomb + "$" + inf_art + "$")))
                     f.close()
                     sync()
@@ -2873,7 +2881,7 @@ class Core(BoxLayout):
     def do_clean_stuff(self, new_art):
 
         # Lets kill copies in NAMES if they are here
-        f = open(abs_path + "/src/data/artname.txt", "r+")
+        f = open("artname.txt", "r+")
         dawread = f.read()
         f.close()
         dawread = dawread.split("$")
@@ -2884,13 +2892,13 @@ class Core(BoxLayout):
             del dawread[worker[0]]
             del dawread[worker[0]]
 
-        with open(abs_path + "/src/data/artname.txt", "w") as f:
+        with open("artname.txt", "w") as f:
             for each in dawread:
-                f.write(str(Core().convert_to_safe_sentence(each) + "$"))
+                f.write(str(self.convert_to_safe_sentence(each) + "$"))
 
         # Lets kill copies in STANDARTDATES
 
-        f = open(abs_path + "/src/data/daysoflife.txt", "r+")
+        f = open("daysoflife.txt", "r+")
         dawread = f.read()
         f.close()
         dawread = dawread.split("$")
@@ -2908,7 +2916,7 @@ class Core(BoxLayout):
 
     def work_out_st_date(self, st_date, *args):
 
-        f = open(abs_path + "/src/data/daysoflife.txt", "r+")
+        f = open("daysoflife.txt", "r+")
         dawread = f.read()
         f.close()
         dawread = dawread.split("$")
@@ -2917,7 +2925,7 @@ class Core(BoxLayout):
         worker += 1
         dawread[worker] = st_date
 
-        with open(abs_path + "/src/data/daysoflife.txt", "w") as f:
+        with open("daysoflife.txt", "w") as f:
             for each in dawread:
                 f.write(str(each + "$"))
 
@@ -2929,7 +2937,7 @@ class Core(BoxLayout):
 
     def work_out_name(self, name):
 
-        f = open(abs_path + "/src/data/artname.txt", "r+")
+        f = open("artname.txt", "r+")
         dawread = f.read()
         f.close()
         dawread = dawread.split("$")
@@ -2938,9 +2946,9 @@ class Core(BoxLayout):
         worker += 1
         dawread[worker] = name
 
-        with open(abs_path + "/src/data/artname.txt", "w") as f:
+        with open("artname.txt", "w") as f:
             for each in dawread:
-                f.write(str(Core().convert_to_safe_sentence(each) + "$"))
+                f.write(str(self.convert_to_safe_sentence(each) + "$"))
 
         sync()
 
@@ -2999,11 +3007,11 @@ class Core(BoxLayout):
             for eaz in each:
                 entries_copy.append(eaz)
 
-        with open(abs_path + "/src/data/saver.txt", "w") as f:
+        with open("saver.txt", "w") as f:
             for each in entries_copy:
                 f.write(str(each + "$"))
 
-        f = open(abs_path + "/src/data/artname.txt", "r+")
+        f = open("artname.txt", "r+")
         dawread = f.read()
         f.close()
         dawread = dawread.split("$")
@@ -3012,11 +3020,11 @@ class Core(BoxLayout):
         del dawread[worker]
         del dawread[worker]
 
-        with open(abs_path + "/src/data/artname.txt", "w") as f:
+        with open("artname.txt", "w") as f:
             for each in dawread:
-                f.write(str(Core().convert_to_safe_sentence(each) + "$"))
+                f.write(str(self.convert_to_safe_sentence(each) + "$"))
 
-        f = open(abs_path + "/src/data/daysoflife.txt", "r+")
+        f = open("daysoflife.txt", "r+")
         dawread = f.read()
         f.close()
         dawread = dawread.split("$")
@@ -3025,7 +3033,7 @@ class Core(BoxLayout):
         del dawread[worker]
         del dawread[worker]
 
-        with open(abs_path + "/src/data/daysoflife.txt", "w") as f:
+        with open("daysoflife.txt", "w") as f:
             for each in dawread:
                 f.write(str(each + "$"))
 
@@ -3052,7 +3060,7 @@ class Core(BoxLayout):
     def work_out_article(self, article, *args):
         global inf_art
 
-        f = open(abs_path + "/src/data/artname.txt", "r+")
+        f = open("artname.txt", "r+")
         dawread = f.read()
         f.close()
         dawread = dawread.split("$")
@@ -3060,11 +3068,11 @@ class Core(BoxLayout):
         worker = dawread.index(inf_art)
         dawread[worker] = article
 
-        with open(abs_path + "/src/data/artname.txt", "w") as f:
+        with open("artname.txt", "w") as f:
             for each in dawread:
-                f.write(str(Core.convert_to_safe_sentence(each) + "$"))
+                f.write(str(self.convert_to_safe_sentence(each) + "$"))
 
-        f = open(abs_path + "/src/data/daysoflife.txt", "r+")
+        f = open("daysoflife.txt", "r+")
         dawread = f.read()
         f.close()
         dawread = dawread.split("$")
@@ -3072,11 +3080,11 @@ class Core(BoxLayout):
         worker = dawread.index(inf_art)
         dawread[worker] = article
 
-        with open(abs_path + "/src/data/daysoflife.txt", "w") as f:
+        with open("daysoflife.txt", "w") as f:
             for each in dawread:
                 f.write(str(each + "$"))
 
-        f = open(abs_path + "/src/data/saver.txt", "r+")
+        f = open("saver.txt", "r+")
         dawread = f.read()
         f.close()
         dawread = dawread.split("$")
@@ -3085,7 +3093,7 @@ class Core(BoxLayout):
         for each in worker:
             dawread[each] = article
 
-        with open(abs_path + "/src/data/saver.txt", "w") as f:
+        with open("saver.txt", "w") as f:
             for each in dawread:
                 f.write(str(each + "$"))
 
@@ -3097,13 +3105,11 @@ class Core(BoxLayout):
 
         inf_art = article
 
-    @staticmethod
-    def convert_to_safe_sentence(text):
+    def convert_to_safe_sentence(self, text):
         return text.replace("'", '#sq').replace('"', '#dq').replace('.', '#dot').replace(',', '#point').replace('$',
                                                                                                                 '#dol')
-
     @staticmethod
-    def convert_to_unsafe_sentence(text):
+    def convert_to_unsafe_sentence(self, text):
         return text.replace('#sq', "'").replace("#dq", '"').replace('#dot', '.').replace('#point', ',').replace('#dol',
                                                                                                                 "$")
 
@@ -3262,7 +3268,7 @@ class Core(BoxLayout):
     def delete_entry(self, *args):
         self.popup.dismiss()
 
-        f = open(abs_path + "/src/data/saver.txt", "r+")
+        f = open("saver.txt", "r+")
         dawread = f.read()
         f.close()
         dawread = dawread.split("$")
@@ -3275,7 +3281,7 @@ class Core(BoxLayout):
                 del dawread[each - 1]
                 break
 
-        with open(abs_path + "/src/data/saver.txt", "w") as f:
+        with open("saver.txt", "w") as f:
             for each in dawread:
                 f.write(str(each + "$"))
 
@@ -3291,7 +3297,7 @@ class Core(BoxLayout):
 
     #######################################################################################
     def save_anyway3(self, boomb):
-        f = open(abs_path + "/src/data/saver.txt", "r+")
+        f = open("saver.txt", "r+")
         dawread = f.read()
         f.close()
         dawread = dawread.split("$")
@@ -3305,7 +3311,7 @@ class Core(BoxLayout):
             if dawread[each - 1] == self.date:
                 dawread[each - 1] = boomb
 
-        with open(abs_path + "/src/data/saver.txt", "w") as f:
+        with open("saver.txt", "w") as f:
             for each in dawread:
                 f.write(str(each + "$"))
 
@@ -3388,7 +3394,7 @@ class Core(BoxLayout):
 
                 self.popup.dismiss()
 
-                f = open(abs_path + "/src/data/saver.txt", "r+")
+                f = open("saver.txt", "r+")
                 dawread = f.read()
                 f.close()
                 dawread = dawread.split("$")
@@ -3399,7 +3405,7 @@ class Core(BoxLayout):
                     if dawread[each - 1] == self.date:
                         dawread[each - 1] = boomb
 
-                with open(abs_path + "/src/data/saver.txt", "w") as f:
+                with open("saver.txt", "w") as f:
                     for each in dawread:
                         f.write(str(each + "$"))
 
@@ -3613,19 +3619,19 @@ class Core(BoxLayout):
 
         none = ""
 
-        f = open(abs_path + "/src/data/daysoflife.txt", "w")
+        f = open("daysoflife.txt", "w")
         f.write(none)
         f.close()
 
-        f = open(abs_path + "/src/data/artname.txt", "w")
+        f = open("artname.txt", "w")
         f.write(none)
         f.close()
 
-        f = open(abs_path + "/src/data/saver.txt", "w")
+        f = open("saver.txt", "w")
         f.write(none)
         f.close()
 
-        f = open(abs_path + "/src/data/barcode.txt", "w")
+        f = open("barcode.txt", "w")
         f.write(none)
         f.close()
 
@@ -3658,7 +3664,7 @@ class Core(BoxLayout):
 
         self.is_user_already_logged()
 
-        with open(abs_path + "/src/data/data.json", 'w') as outfile:
+        with open("data.json", 'w') as outfile:
             json.dump('', outfile)
 
     def load_group_home(self):
@@ -4102,25 +4108,25 @@ class Core(BoxLayout):
 
     def stop_my_data(self, mozzie):
 
-        f = open(abs_path + "/src/data/daysoflife.txt", "r+")
+        f = open("daysoflife.txt", "r+")
         rawread = f.read()
         f.close()
 
         days_to_stop = rawread.split('$')[:-1]
 
-        f = open(abs_path + "/src/data/artname.txt", "r+")
+        f = open("artname.txt", "r+")
         rawread = f.read()
         f.close()
 
         names_to_stop = rawread.split('$')[:-1]
 
-        f = open(abs_path + "/src/data/saver.txt", "r+")
+        f = open("saver.txt", "r+")
         rawread = f.read()
         f.close()
 
         saves_to_stop = rawread.split('$')[:-1]
 
-        f = open(abs_path + "/src/data/barcode.txt", "r+")
+        f = open("barcode.txt", "r+")
         rawread = f.read()
         f.close()
 
@@ -4173,19 +4179,19 @@ class Core(BoxLayout):
                             del eans_to_stop[eaz - 1]
                             del eans_to_stop[eaz - 1]
 
-        with open(abs_path + "/src/data/artname.txt", "w+") as f:
+        with open("artname.txt", "w+") as f:
             for x in names_to_stop:
-                f.write(str(Core().convert_to_safe_sentence(x) + "$"))
+                f.write(str(self.convert_to_safe_sentence(x) + "$"))
 
-        with open(abs_path + "/src/data/daysoflife.txt", "w+") as f:
+        with open("daysoflife.txt", "w+") as f:
             for x in days_to_stop:
                 f.write(str(x + "$"))
 
-        with open(abs_path + "/src/data/saver.txt", "w+") as f:
+        with open("saver.txt", "w+") as f:
             for x in saves_to_stop:
                 f.write(str(x + "$"))
 
-        with open(abs_path + "/src/data/barcode.txt", "w+") as f:
+        with open("barcode.txt", "w+") as f:
             for x in eans_to_stop:
                 f.write(str(x + "$"))
 
@@ -4211,7 +4217,7 @@ class Core(BoxLayout):
             self.stop_list_activity(days_of_life_from_server, names_from_server, saves_from_server, eans_from_server)
             self.send_stop_list(data)
 
-            f = open(abs_path + "/src/data/daysoflife.txt", "r+")
+            f = open("daysoflife.txt", "r+")
             rawread = f.read()
             f.close()
 
@@ -4237,7 +4243,7 @@ class Core(BoxLayout):
 
             # _______--We update names--_________________#
 
-            f = open(abs_path + "/src/data/artname.txt", "r+")
+            f = open("artname.txt", "r+")
             rawread = f.read()
             f.close()
 
@@ -4267,7 +4273,7 @@ class Core(BoxLayout):
 
             # ______--We update dates--________________#
 
-            f = open(abs_path + "/src/data/saver.txt", "r+")
+            f = open("saver.txt", "r+")
             rawread = f.read()
             f.close()
 
@@ -4319,7 +4325,7 @@ class Core(BoxLayout):
 
             # We update EANs
 
-            f = open(abs_path + "/src/data/barcode.txt", "r+")
+            f = open("barcode.txt", "r+")
             rawread = f.read()
             f.close()
 
@@ -4371,19 +4377,19 @@ class Core(BoxLayout):
             if len(updated_eans) == 0:
                 updated_eans = ''
 
-            with open(abs_path + "/src/data/barcode.txt", "w") as f:
+            with open("barcode.txt", "w") as f:
                 for each in updated_eans:
                     f.write(str(each + "$"))
 
-            with open(abs_path + "/src/data/artname.txt", "w") as f:
+            with open("artname.txt", "w") as f:
                 for each in updated_names_to_phone:
-                    f.write(str(Core().convert_to_safe_sentence(each) + "$"))
+                    f.write(str(self.convert_to_safe_sentence(each) + "$"))
 
-            with open(abs_path + "/src/data/daysoflife.txt", "w") as f:
+            with open("daysoflife.txt", "w") as f:
                 for each in updated_days_of_life:
                     f.write(str(each + "$"))
 
-            with open(abs_path + "/src/data/saver.txt", "w") as f:
+            with open("saver.txt", "w") as f:
                 for each in updated_saves:
                     f.write(str(each + "$"))
 
@@ -4486,13 +4492,13 @@ class Core(BoxLayout):
 
     def set_settings(self, data):
 
-        with open(abs_path + "/src/data/data.json", 'w') as outfile:
+        with open("data.json", 'w') as outfile:
             json.dump(data, outfile)
 
     def get_settings(self, *args):
 
         try:
-            with open(abs_path + "/src/data/data.json") as data_file:
+            with open("data.json") as data_file:
 
                 data = json.loads(data_file.read())
                 self.current_group = data['group']
@@ -4504,7 +4510,7 @@ class Core(BoxLayout):
 
     def get_stop_list(self):
         try:
-            with open(abs_path + "/src/data/stop_list.txt", 'r') as f:
+            with open("stop_list.txt", 'r') as f:
                 data = f.read()
                 data = data.split('$')
                 del data[-1]
@@ -4517,12 +4523,12 @@ class Core(BoxLayout):
 
 
         except:
-            f = open(abs_path + "/src/data/stop_list.txt", "w+")
+            f = open("stop_list.txt", "w+")
             f.close()
 
     def get_lang(self, *args):
         try:
-            with open(abs_path + "/src/data/lang.txt", 'r') as f:
+            with open("lang.txt", 'r') as f:
                 data = f.read()
 
                 self.lang = data
@@ -4538,18 +4544,18 @@ class Core(BoxLayout):
                     self.ids.russian_button.state = 'normal'
                     self.ids.english_button.state = 'down'
         except:
-            f = open(abs_path + "/src/data/lang.txt", "w+")
+            f = open("lang.txt", "w+")
             f.close()
 
             self.lang = 'ru'
             self.to_russian()
 
     def set_lang(self, data):
-        with open(abs_path + "/src/data/lang.txt", "w") as f:
+        with open("lang.txt", "w") as f:
             f.write(data)
 
     def set_stop_list(self):
-        with open(abs_path + "/src/data/stop_list.txt", "w") as f:
+        with open("stop_list.txt", "w") as f:
             for each in self.stop_list:
                 f.write(str(each[0]) + ',' + str(each[1]) + ',' + str(each[2]) + '$')
 
@@ -4573,7 +4579,7 @@ class Core(BoxLayout):
             self.step = 0
             self.to_english()
 
-    def check_permissions(self, *args):
+    def ask_permissions(self, *args):
         if platform == 'android':
             from android.permissions import request_permission, Permission
             request_permission(Permission.CAMERA)
@@ -4584,7 +4590,6 @@ class Core(BoxLayout):
         print(haveperms)
 
     def acquire_permissions(self, permissions, timeout=30):
-        import time
         import functools
         import jnius
 
@@ -4604,17 +4609,8 @@ class Core(BoxLayout):
         if haveperms:
             # we have the permission and are ready
             return True
-
-        # invoke the permissions dialog
-        currentActivity.requestPermissions(permissions, 0)
-
-        # now poll for the permission (UGLY but we cant use android Activity's onRequestPermissionsResult)
-        t0 = time.time()
-        while time.time() - t0 < timeout and not haveperms:
-            # in the poll loop we could add a short sleep for performance issues?
-            haveperms = allgranted(permissions)
-
-        return haveperms
+        else:
+            return False
 
 
 ###########################---App_Classes---##################################
@@ -4631,10 +4627,9 @@ class ProtoApp(App):
 
     def on_start(self):
         mine = ProtoApp.static_holder
-        Clock.schedule_once(mine.check_permissions, 0.5)
-        # Clock.schedule_once(mine.get_lang, 0.1)
-        # Clock.schedule_once(mine.alarm, 2)
-        # Clock.schedule_once(mine.get_settings, 1)
+        Clock.schedule_once(mine.get_lang, 0.1)
+        Clock.schedule_once(mine.alarm, 2)
+        Clock.schedule_once(mine.get_settings, 1)
 
     def build(self):
         self.ads = KivMob(MyIds.APP)
@@ -4668,7 +4663,7 @@ class ScreenManagement(ScreenManager):
 
 def sync():
     try:
-        f = open(abs_path + "/src/data/barcode.txt", "r+")
+        f = open("barcode.txt", "r+")
         dawread = f.read()
         f.close()
         global art_bars
@@ -4676,7 +4671,6 @@ def sync():
         templ = dawread.split("$")
         counter = 0
         while counter < (len(templ) - 1):
-
             if templ[counter] in art_bars:
                 art_bars[templ[counter]].append(templ[counter + 1])
             else:
@@ -4686,20 +4680,20 @@ def sync():
             counter += 2
 
     except:
-        f = open(abs_path + "/src/data/barcode.txt", "w+")
+        f = open("barcode.txt", "w+")
         f.close()
 
     try:
-        f = open(abs_path + "/src/data/saver.txt", "r+")
+        f = open("saver.txt", "r+")
         rawread = f.read()
         f.close()
         global entries
         entries = rawread.split("$")
     except:
-        f = open(abs_path + "/src/data/saver.txt", "w+")
+        f = open("saver.txt", "w+")
         f.close()
     try:
-        f = open(abs_path + "/src/data/artname.txt", "r+")
+        f = open("artname.txt", "r+")
         dawread = f.read()
         f.close()
         global art_names
@@ -4711,11 +4705,11 @@ def sync():
             art_names[templ[counter]] = Core.convert_to_unsafe_sentence(templ[counter + 1])
             counter += 2
     except:
-        f = open(abs_path + "/src/data/artname.txt", "w+")
+        f = open("artname.txt", "w+")
         f.close()
 
     try:
-        f = open(abs_path + "/src/data/daysoflife.txt", "r+")
+        f = open("daysoflife.txt", "r+")
         dawread = f.read()
         f.close()
         global days_of_life
@@ -4727,7 +4721,8 @@ def sync():
             days_of_life[templ[counter]] = templ[counter + 1]
             counter += 2
     except:
-        f = open(abs_path + "/src/data/daysoflife.txt", "w+")
+        print('SAVED SAVED SAVED')
+        f = open("daysoflife.txt", "w+")
         f.close()
 
 
@@ -4758,7 +4753,6 @@ def ch_closer():
         closer = True
 
 
-# sync()
-
+sync()
 if __name__ == "__main__":
     ProtoApp().run()

@@ -353,7 +353,7 @@
 					pos_hint: root.pos_init_cam
 					size_hint: (.23, .148)
 					on_release:
-						root.go_cam()
+						root.go_cam_test()
 				Button:
 					font_name: 'src/etc/mp.ttf'
 					text: '<'
@@ -391,13 +391,11 @@
 						background_down: 'src/img/w_b.png'
 						font_size: '40sp'
 						on_release: root.type('2')
-						on_release: root.check_permissions()
 					Button:
 						text: "3"
 						background_down: 'src/img/w_b.png'
 						font_size: '40sp'
 						on_release: root.type('3')
-						on_release: root.check_if_permission_granted()
 					Button:
 						text: "4"
 						background_down: 'src/img/w_b.png'
