@@ -1842,7 +1842,7 @@ class Core(BoxLayout):
 
                 return
 
-            if correct == False:
+            if not correct:
                 if self.lang == 'ru':
                     popup("Внимание!", "Срок годности должен быть числом\n дней, месяцев, или лет")
                 else:
@@ -3109,7 +3109,7 @@ class Core(BoxLayout):
         return text.replace("'", '#sq').replace('"', '#dq').replace('.', '#dot').replace(',', '#point').replace('$',
                                                                                                                 '#dol')
     @staticmethod
-    def convert_to_unsafe_sentence(self, text):
+    def convert_to_unsafe_sentence(text):
         return text.replace('#sq', "'").replace("#dq", '"').replace('#dot', '.').replace('#point', ',').replace('#dol',
                                                                                                                 "$")
 
@@ -4587,7 +4587,6 @@ class Core(BoxLayout):
     def check_if_permission_granted(self):
         perms = ["android.permission.CAMERA"]
         haveperms = self.acquire_permissions(perms)
-        print(haveperms)
 
     def acquire_permissions(self, permissions, timeout=30):
         import functools
@@ -4721,7 +4720,6 @@ def sync():
             days_of_life[templ[counter]] = templ[counter + 1]
             counter += 2
     except:
-        print('SAVED SAVED SAVED')
         f = open("daysoflife.txt", "w+")
         f.close()
 
