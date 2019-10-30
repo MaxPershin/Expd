@@ -409,8 +409,6 @@ class Core(BoxLayout):
 
     def go_cam(self):
 
-        # add perms
-
         try:
             if self.r is None:
                 self.r = Reader()
@@ -4587,6 +4585,7 @@ class Core(BoxLayout):
     def check_if_permission_granted(self):
         perms = ["android.permission.CAMERA"]
         haveperms = self.acquire_permissions(perms)
+        return haveperms
 
     def acquire_permissions(self, permissions, timeout=30):
         import functools
@@ -4606,7 +4605,6 @@ class Core(BoxLayout):
 
         haveperms = allgranted(permissions)
         if haveperms:
-            # we have the permission and are ready
             return True
         else:
             return False
